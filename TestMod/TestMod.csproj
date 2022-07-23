@@ -112,6 +112,8 @@
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <PropertyGroup>
-    <PostBuildEvent>copy "$(TargetPath)" "D:\Vidjagames\Steam\steamapps\common\ULTRAKILL\Bepinex\UKMM Mods\CustomArms.dll"</PostBuildEvent>
+    <PostBuildEvent>IF EXIST "D:\Vidjagames\Steam\steamapps\common\ULTRAKILL\" (
+copy "$(TargetPath)" "D:\Vidjagames\Steam\steamapps\common\ULTRAKILL\Bepinex\UKMM Mods\CustomArms.dll"
+)</PostBuildEvent>
   </PropertyGroup>
 </Project>
