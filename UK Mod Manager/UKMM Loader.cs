@@ -8,7 +8,6 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using BepInEx;
-using BepInEx.Bootstrap;
 
 namespace UKMM.Loader
 {
@@ -50,7 +49,7 @@ namespace UKMM.Loader
             }
         }
 
-        private static BepInPlugin GetBepinMetaData(Type t)
+        internal static BepInPlugin GetBepinMetaData(Type t)
         {
             object[] customAttributes = t.GetCustomAttributes(typeof(BaseUnityPlugin), true);
             if (customAttributes.Length == 0)
@@ -60,7 +59,7 @@ namespace UKMM.Loader
             return (BepInPlugin)customAttributes[0];
         }
 
-        private static UKPlugin GetUKMetaData(Type t)
+        internal static UKPlugin GetUKMetaData(Type t)
         {
             object[] customAttributes = t.GetCustomAttributes(typeof(UKPlugin), true);
             if (customAttributes.Length == 0)
@@ -93,50 +92,10 @@ namespace UKMM.Loader
             newMod.OnModLoaded();
         }
 
-        public static ModInformation[] GetAllModInformation()
-        {
-            Debug.Log("Got " + foundMods.Count + " mods in all information");
-            return foundMods.ToArray().Clone() as ModInformation[];
-        }
 
         public static ModInformation[] GetLoadedMods()
         {
             return allLoadedMods.ToArray().Clone() as ModInformation[];
-        }
-
-        public class ModInformation
-        {
-            public ModType modType;
-            public Type mod;
-            public string modName;
-
-            public ModInformation(Type mod, ModType modType)
-            {
-                this.modType = modType;
-                this.mod = mod;
-
-                // TODO: Read mod name from toml file
-                if (modType == ModType.BepInPlugin)
-                {
-                    //modName = GetBepinMetaData(mod).Name;
-                    modName = mod.Name;
-                }
-                else if (modType == ModType.UKMod)
-                {
-                    modName = GetUKMetaData(mod).name;
-                }
-            }
-
-            public void LoadThisMod()
-            {
-                LoadMod(mod);
-            }
-
-            public enum ModType
-            {
-                UKMod,
-                BepInPlugin
-            }
         }
     }
 }

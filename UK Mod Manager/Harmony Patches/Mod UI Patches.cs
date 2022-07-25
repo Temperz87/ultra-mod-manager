@@ -41,22 +41,22 @@ namespace UKMM.HarmonyPatches
                 template.SetActive(false);
 
 
-                UKModManager.ModInformation[] information = UKModManager.GetAllModInformation();
-                Debug.Log("Got " + information.Length + " mods to place.");
+                ModInformation[] information = UKAPI.GetAllModInformation();
                 for (int i = 0; i < information.Length; i++)
                 {
-                    UKModManager.ModInformation info = information[i];
+                    ModInformation info = information[i];
                     GameObject newInformation = GameObject.Instantiate(template, content);
                     GameObject.Destroy(newInformation.GetComponent<ColorBlindSetter>());
 
                     Button newButton = newInformation.AddComponent<Button>();
                     newButton.transition = Selectable.Transition.ColorTint;
                     newButton.targetGraphic = newInformation.GetComponent<Image>();
+                    newButton.targetGraphic.color = Color.red;
                     newButton.onClick = new Button.ButtonClickedEvent();
                     newButton.onClick.AddListener(delegate 
                     {
-                        info.LoadThisMod();
-                        newButton.targetGraphic.color = Color.green;
+                        info.Clicked();
+                        newButton.targetGraphic.color = info.loaded ? Color.green : Color.red;
                     });
 
                     newInformation.transform.Find("Red").gameObject.SetActive(false);
@@ -65,7 +65,21 @@ namespace UKMM.HarmonyPatches
                     newInformation.transform.Find("Image").gameObject.SetActive(false);
                     newInformation.transform.localScale = new Vector3(1.64415f, 1.64415f, 1.64415f);
                     newInformation.transform.localPosition = new Vector3(0f, -200f * i, 0f);
-                    newInformation.transform.Find("Text").GetComponent<Text>().text = info.modName;
+
+                    Text modText = newInformation.transform.Find("Text").GetComponent<Text>();
+                    modText.text = info.modName + " " + info.modVersion;
+                    modText.alignment = TextAnchor.UpperLeft;
+                    modText.transform.localPosition = new Vector3(-49.2f, 0f, 0f);
+                    modText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
+
+                    Text descriptionText = GameObject.Instantiate(modText.gameObject, modText.transform.parent).GetComponent<Text>();
+                    descriptionText.alignment = TextAnchor.UpperLeft;
+                    descriptionText.rectTransform.offsetMin = new Vector2(-73.58125f, -170f);
+                    descriptionText.rectTransform.offsetMax = new Vector2(73.58125f, -16.4f);
+                    descriptionText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
+                    descriptionText.fontSize = 16;
+                    descriptionText.text = info.modDescription;
+
                     newInformation.SetActive(true);
                 }
 
