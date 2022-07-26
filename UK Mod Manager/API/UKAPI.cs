@@ -46,6 +46,26 @@ namespace UKMM
         }
 
         /// <summary>
+        /// Disables CyberGrind submission
+        /// </summary>
+        public static void DisableCyberGrindSubmission()
+        {
+            UKModManager.AllowCyberGrindSubmission = false;
+        }
+
+        /// <summary>
+        /// Enables CyberGrind submission if no mods that disable it exist
+        /// </summary>
+        public static void EnableCyberGrindSubmission()
+        {
+            foreach (ModInformation mod in GetAllModInformation())
+                if (mod.modType == ModInformation.ModType.UKMod)
+                    if (UKModManager.GetUKMetaData(mod.mod).allowCyberGrindSubmission == false)
+                        return;
+            UKModManager.AllowCyberGrindSubmission = false;
+        }
+
+        /// <summary>
         /// Tries to create a Ultrakill asset load request from ULTRAKILL_Data/StreamingAssets/common, note that this request has to be awaited
         /// </summary>
         /// <param name="name">Name of the asset to load, you MUST include the extensions (e.g. prefab)</param>
@@ -109,6 +129,8 @@ namespace UKMM
                     using (StreamReader jFile = fInfo.OpenText())
                     {
                         savedData = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(jFile.ReadToEnd());
+                        if (savedData == null)
+                            savedData = new Dictionary<string, Dictionary<string, string>>();
                         jFile.Close();
                     }
                 }
@@ -122,12 +144,7 @@ namespace UKMM
             internal static void DumpFile()
             {
                 FileInfo fInfo = new FileInfo(path);
-                using (StreamReader jFile = fInfo.OpenText())
-                {
-                    Dictionary<string, Dictionary<string, string>> jValues = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(jFile.ReadToEnd());
-                    jFile.Close();
-                    File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(jValues));
-                }
+                File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(savedData));
             }
 
             /// <summary>
@@ -143,7 +160,6 @@ namespace UKMM
                     if (savedData[modName].ContainsKey(key))
                         return savedData[modName][key];
                 }
-                AddModData(modName, key, ""); 
                 return null;
             }
             /// <summary>
@@ -152,7 +168,7 @@ namespace UKMM
             /// <param name="modName">The name of the mod to add data to</param>
             /// <param name="key">The key for the data</param>
             /// <param name="value">The data you want as a string, note you can only add strings</param>
-            public static void AddModData(string modName, string key, string value)
+            public static void SetModData(string modName, string key, string value)
             {
                 if (!savedData.ContainsKey(modName))
                 {

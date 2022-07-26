@@ -39,34 +39,34 @@ namespace UKMM
         public virtual void OnModUnload() { }
 
         /// <summary>
-        /// Adds persistent mod data to a save file
+        /// Sets persistent mod data to a save file
         /// </summary>
         /// <param name="key">Name of value</param>
-        /// <param name="value">Value to add as a string</param>
-        public void AddPersistentModData(string key, string value)
+        /// <param name="value">Value to Set as a string</param>
+        public void SetPersistentModData(string key, string value)
         {
-            UKAPI.SaveFileHandler.AddModData(metaData.name, key, value);
+            UKAPI.SaveFileHandler.SetModData(metaData.name, key, value);
         }
 
         /// <summary>
-        /// Adds persistent mod data to a specific mod to a save file
+        /// Sets persistent mod data to a specific mod to a save file
         /// </summary>
         /// <param name="key">Name of value</param>
-        /// <param name="value">Value to add as a string</param>
+        /// <param name="value">Value to Set as a string</param>
         /// <param name="modName">Name of mod to get the data from</param>
-        public void AddPersistentModData(string key, string value, string modName)
+        public void SetPersistentModData(string key, string value, string modName)
         {
-            UKAPI.SaveFileHandler.AddModData(modName, key, value);
+            UKAPI.SaveFileHandler.SetModData(modName, key, value);
         }
 
         /// <summary>
-        /// Adds persistent mod data shared across all mods to a save file
+        /// Sets persistent mod data shared across all mods to a save file
         /// </summary>
         /// <param name="key">Name of value</param>
-        /// <param name="value">Value to add as a string</param>
-        public void AddPersistentUniversalModData(string key, string value)
+        /// <param name="value">Value to Set as a string</param>
+        public void SetPersistentUniversalModData(string key, string value)
         {
-            UKAPI.SaveFileHandler.AddModData("allPersistentModData", key, value);
+            UKAPI.SaveFileHandler.SetModData("allPersistentModData", key, value);
         }
 
         /// <summary>

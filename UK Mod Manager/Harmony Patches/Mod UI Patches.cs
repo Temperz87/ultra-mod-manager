@@ -51,7 +51,7 @@ namespace UKMM.HarmonyPatches
                     Button newButton = newInformation.AddComponent<Button>();
                     newButton.transition = Selectable.Transition.ColorTint;
                     newButton.targetGraphic = newInformation.GetComponent<Image>();
-                    newButton.targetGraphic.color = Color.red;
+                    newButton.targetGraphic.color = info.loaded ? Color.green : Color.red;
                     newButton.onClick = new Button.ButtonClickedEvent();
                     newButton.onClick.AddListener(delegate 
                     {
@@ -79,6 +79,19 @@ namespace UKMM.HarmonyPatches
                     descriptionText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
                     descriptionText.fontSize = 16;
                     descriptionText.text = info.modDescription;
+
+                    GameObject toggleObj = GameObject.Instantiate(__instance.variationMemory.gameObject, newInformation.transform);
+                    toggleObj.SetActive(true);
+                    toggleObj.transform.localPosition = new Vector3(247f, -9f, 0f);
+                    Toggle toggle = toggleObj.GetComponent<Toggle>();
+                    toggle.isOn = info.loadOnStart;
+                    toggle.onValueChanged = new Toggle.ToggleEvent();
+                    toggle.onValueChanged.AddListener(delegate
+                    {
+                        info.loadOnStart = !info.loadOnStart;
+                        toggle.isOn = info.loadOnStart;
+                        UKAPI.SaveFileHandler.SetModData(info.modName, "LoadOnStart", info.loadOnStart.ToString());
+                    });
 
                     newInformation.SetActive(true);
                 }

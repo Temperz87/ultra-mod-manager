@@ -22,5 +22,10 @@ namespace UKMM.Loader
                 initialized = true;
             }
         }
+
+        public void OnApplicationQuit()
+        {
+            UKAPI.SaveFileHandler.DumpFile();
+        }
     }
 }

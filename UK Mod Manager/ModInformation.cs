@@ -18,7 +18,10 @@ namespace UKMM
         public string modName;
         public string modDescription;
         public string modVersion;
+        public bool supportsUnloading;
+        public bool loadOnStart;
         public bool loaded;
+
 
         public ModInformation(Type mod, ModType modType)
         {
@@ -38,6 +41,7 @@ namespace UKMM
                 modName = metaData.name;
                 modDescription = metaData.description;
                 modVersion = metaData.version;
+                supportsUnloading = metaData.unloadingSupported;
             }
         }
 
@@ -45,15 +49,25 @@ namespace UKMM
         {
             if (!loaded)
                 LoadThisMod();
-
-            loaded = !loaded;
+            else
+                UnLoadThisMod();
         }
 
         public void LoadThisMod()
         {
             if (!loaded)
             {
-                UKModManager.LoadMod(mod);
+                UKModManager.LoadMod(this);
+                loaded = true;
+            }
+        }
+
+        public void UnLoadThisMod()
+        {
+            if (loaded && supportsUnloading)
+            {
+                UKModManager.UnloadMod(this);
+                loaded = false; 
             }
         }
 
