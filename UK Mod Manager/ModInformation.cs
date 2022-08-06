@@ -32,7 +32,7 @@ namespace UKMM
             if (modType == ModType.BepInPlugin)
             {
                 //modName = GetBepinMetaData(mod).Name;
-                modName = mod.Assembly.FullName;
+                modName = mod.Assembly.GetName().Name;
                 modDescription = "Mod descriptions are not supported by BepInEx plugins.";
             }
             else if (modType == ModType.UKMod)

@@ -37,6 +37,7 @@ namespace UKMM.HarmonyPatches
                 modHeaderText.text = "--MODS--";
 
                 Transform content = colorBlind.transform.Find("Scroll Rect").Find("Contents");
+                RectTransform cRect = content.GetComponent<RectTransform>();
                 content.Find("Enemies").gameObject.SetActive(false);
                 content.gameObject.SetActive(true);
                 GameObject template = content.Find("HUD").Find("Health").gameObject;
@@ -53,73 +54,85 @@ namespace UKMM.HarmonyPatches
                 hoverText.SetActive(false);
 
                 ModInformation[] information = UKAPI.GetAllModInformation();
-                for (int i = 0; i < information.Length; i++)
+                if (information.Length > 0)
                 {
-                    ModInformation info = information[i];
-                    GameObject newInformation = GameObject.Instantiate(template, content);
-                    GameObject.Destroy(newInformation.GetComponent<ColorBlindSetter>());
-
-                    Button newButton = newInformation.AddComponent<Button>();
-                    newButton.transition = Selectable.Transition.ColorTint;
-                    newButton.targetGraphic = newInformation.GetComponent<Image>();
-                    newButton.targetGraphic.color = info.loaded ? Color.green : Color.red;
-                    newButton.onClick = new Button.ButtonClickedEvent();
-                    newButton.onClick.AddListener(delegate 
+                    for (int i = 0; i < information.Length; i++)
                     {
-                        info.Clicked();
+                        ModInformation info = information[i];
+                        GameObject newInformation = GameObject.Instantiate(template, content);
+                        GameObject.Destroy(newInformation.GetComponent<ColorBlindSetter>());
+
+                        Button newButton = newInformation.AddComponent<Button>();
+                        newButton.transition = Selectable.Transition.ColorTint;
+                        newButton.targetGraphic = newInformation.GetComponent<Image>();
                         newButton.targetGraphic.color = info.loaded ? Color.green : Color.red;
-                    });
+                        newButton.onClick = new Button.ButtonClickedEvent();
+                        newButton.onClick.AddListener(delegate
+                        {
+                            info.Clicked();
+                            newButton.targetGraphic.color = info.loaded ? Color.green : Color.red;
+                        });
 
-                    newInformation.transform.Find("Red").gameObject.SetActive(false);
-                    newInformation.transform.Find("Green").gameObject.SetActive(false);
-                    newInformation.transform.Find("Blue").gameObject.SetActive(false);
-                    newInformation.transform.Find("Image").gameObject.SetActive(false);
-                    newInformation.transform.localScale = new Vector3(1.64415f, 1.64415f, 1.64415f);
-                    newInformation.transform.localPosition = new Vector3(0f, -200f * i, 0f);
+                        newInformation.transform.Find("Red").gameObject.SetActive(false);
+                        newInformation.transform.Find("Green").gameObject.SetActive(false);
+                        newInformation.transform.Find("Blue").gameObject.SetActive(false);
+                        newInformation.transform.Find("Image").gameObject.SetActive(false);
+                        newInformation.transform.localScale = new Vector3(1.64415f, 1.64415f, 1.64415f);
+                        newInformation.transform.localPosition = new Vector3(0f, -200f * i, 0f);
 
-                    Text modText = newInformation.transform.Find("Text").GetComponent<Text>();
-                    modText.text = info.modName + " " + info.modVersion;
-                    modText.alignment = TextAnchor.UpperLeft;
-                    modText.transform.localPosition = new Vector3(-49.2f, 0f, 0f);
-                    modText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
+                        Text modText = newInformation.transform.Find("Text").GetComponent<Text>();
+                        modText.text = info.modName + " " + info.modVersion;
+                        modText.alignment = TextAnchor.UpperLeft;
+                        modText.transform.localPosition = new Vector3(-49.2f, 0f, 0f);
+                        modText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
 
-                    Text descriptionText = GameObject.Instantiate(modText.gameObject, modText.transform.parent).GetComponent<Text>();
-                    descriptionText.alignment = TextAnchor.UpperLeft;
-                    descriptionText.rectTransform.offsetMin = new Vector2(-73.58125f, -170f);
-                    descriptionText.rectTransform.offsetMax = new Vector2(73.58125f, -16.4f);
-                    descriptionText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
-                    descriptionText.fontSize = 16;
-                    descriptionText.text = info.modDescription;
+                        Text descriptionText = GameObject.Instantiate(modText.gameObject, modText.transform.parent).GetComponent<Text>();
+                        descriptionText.alignment = TextAnchor.UpperLeft;
+                        descriptionText.rectTransform.offsetMin = new Vector2(-73.58125f, -170f);
+                        descriptionText.rectTransform.offsetMax = new Vector2(73.58125f, -16.4f);
+                        descriptionText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
+                        descriptionText.fontSize = 16;
+                        descriptionText.text = info.modDescription;
 
-                    GameObject toggleObj = GameObject.Instantiate(__instance.variationMemory.gameObject, newInformation.transform);
-                    toggleObj.transform.localPosition = new Vector3(247f, -9f, 0f);
-                    Toggle toggle = toggleObj.GetComponent<Toggle>();
-                    toggle.isOn = info.loadOnStart;
-                    toggle.onValueChanged = new Toggle.ToggleEvent();
-                    toggle.onValueChanged.AddListener(delegate
-                    {
-                        info.loadOnStart = !info.loadOnStart;
+                        GameObject toggleObj = GameObject.Instantiate(__instance.variationMemory.gameObject, newInformation.transform);
+                        toggleObj.transform.localPosition = new Vector3(247f, -9f, 0f);
+                        Toggle toggle = toggleObj.GetComponent<Toggle>();
                         toggle.isOn = info.loadOnStart;
-                        UKAPI.SaveFileHandler.SetModData(info.modName, "LoadOnStart", info.loadOnStart.ToString());
-                    });
-                    EventTrigger trigger = toggle.gameObject.AddComponent<EventTrigger>();
-                    EventTrigger.Entry hoverEntry = new EventTrigger.Entry();
-                    hoverEntry.eventID = EventTriggerType.PointerEnter;
-                    hoverEntry.callback.AddListener(delegate
-                    {
-                        hoverText.SetActive(true);
-                    });
-                    EventTrigger.Entry unHoverEntry = new EventTrigger.Entry();
-                    unHoverEntry.eventID = EventTriggerType.PointerExit;
-                    unHoverEntry.callback.AddListener(delegate
-                    {
-                        hoverText.SetActive(false);
-                    });
-                    trigger.triggers.Add(hoverEntry);
-                    trigger.triggers.Add(unHoverEntry);
+                        toggle.onValueChanged = new Toggle.ToggleEvent();
+                        toggle.onValueChanged.AddListener(delegate
+                        {
+                            info.loadOnStart = !info.loadOnStart;
+                            toggle.isOn = info.loadOnStart;
+                            UKAPI.SaveFileHandler.SetModData(info.modName, "LoadOnStart", info.loadOnStart.ToString());
+                        });
+                        EventTrigger trigger = toggle.gameObject.AddComponent<EventTrigger>();
+                        EventTrigger.Entry hoverEntry = new EventTrigger.Entry();
+                        hoverEntry.eventID = EventTriggerType.PointerEnter;
+                        hoverEntry.callback.AddListener(delegate
+                        {
+                            hoverText.SetActive(true);
+                        });
+                        EventTrigger.Entry unHoverEntry = new EventTrigger.Entry();
+                        unHoverEntry.eventID = EventTriggerType.PointerExit;
+                        unHoverEntry.callback.AddListener(delegate
+                        {
+                            hoverText.SetActive(false);
+                        });
+                        trigger.triggers.Add(hoverEntry);
+                        trigger.triggers.Add(unHoverEntry);
 
-                    toggleObj.SetActive(true);
-                    newInformation.SetActive(true);
+                        toggleObj.SetActive(true);
+                        newInformation.SetActive(true);
+                    }
+
+                    cRect.sizeDelta = new Vector2(600f, information.Length * 200); // setting the scrollbar fit all of the mods
+                }
+                else
+                {
+                    content.gameObject.SetActive(false);
+                    hoverText.SetActive(true);
+                    hoverText.transform.localPosition += new Vector3(0f, 260f, 0f);
+                    hoverText.GetComponentInChildren<Text>().text = "NO MODS FOUND";
                 }
 
                 __instance.variationMemory.gameObject.SetActive(true);

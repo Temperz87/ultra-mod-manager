@@ -32,8 +32,12 @@ namespace UKMM.Loader
 
         private static void CollectAssemblies()
         {
-            foreach (FileInfo info in new DirectoryInfo(Environment.CurrentDirectory + @"\BepInEx\UKMM Mods\").GetFiles("*.dll", SearchOption.AllDirectories))
-                LoadFromAssembly(info);
+            DirectoryInfo modsDirectory = new DirectoryInfo(Environment.CurrentDirectory + @"\BepInEx\UKMM Mods\");
+            if (modsDirectory.Exists)
+                foreach (FileInfo info in modsDirectory.GetFiles("*.dll", SearchOption.AllDirectories))
+                    LoadFromAssembly(info);
+            else
+                Directory.CreateDirectory(Environment.CurrentDirectory + @"\BepInEx\UKMM Mods\");
             Debug.Log("Found " + foundMods.Count + " mods that can be loaded.");
         }
 
@@ -48,7 +52,7 @@ namespace UKMM.Loader
                     loadedMods++;
                 }
             }
-            Debug.Log("Loaded " + loadedMods + " on start");
+            Debug.Log("Loaded " + loadedMods + " mods on start");
         }
 
         public static void LoadFromAssembly(FileInfo fInfo)
@@ -64,7 +68,7 @@ namespace UKMM.Loader
                 else
                     continue;
                 Debug.Log("Adding mod info " + fInfo.FullName + " " + type.Name);
-                foundMods.Add(info);   
+                foundMods.Add(info);
                 object retrievedData = UKAPI.SaveFileHandler.RetrieveModData(info.modName, "LoadOnStart");
                 if (retrievedData != null && bool.Parse(retrievedData.ToString()))
                     info.loadOnStart = true;
