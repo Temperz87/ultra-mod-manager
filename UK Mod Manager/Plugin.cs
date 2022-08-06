@@ -17,7 +17,8 @@ namespace UKMM.Loader
         {
             if (!initialized)
             {
-                new Harmony("tempy.ukmm").PatchAll();
+                Debug.Log("UKMM initialize!");
+                new Harmony("ukmm.mainManager").PatchAll();
                 StartCoroutine(UKAPI.InitializeAPI());
                 initialized = true;
             }

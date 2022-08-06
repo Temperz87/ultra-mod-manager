@@ -54,7 +54,7 @@ namespace UKMM
         /// <param name="key">Name of value</param>
         /// <param name="value">Value to Set as a string</param>
         /// <param name="modName">Name of mod to get the data from</param>
-        public void SetPersistentModData(string key, string value, string modName)
+        public static void SetPersistentModData(string key, string value, string modName)
         {
             UKAPI.SaveFileHandler.SetModData(modName, key, value);
         }
@@ -64,37 +64,124 @@ namespace UKMM
         /// </summary>
         /// <param name="key">Name of value</param>
         /// <param name="value">Value to Set as a string</param>
-        public void SetPersistentUniversalModData(string key, string value)
+        public static void SetPersistentUniversalModData(string key, string value)
         {
             UKAPI.SaveFileHandler.SetModData("allPersistentModData", key, value);
         }
 
         /// <summary>
-        /// Gets persistent mod data from a save file
+        /// Gets persistent mod data from a save file as a string
         /// </summary>
         /// <param name="key">Name of value</param>
-        public object RetrievePersistentModData(string key)
+        public string RetrieveStringPersistentModData(string key)
         {
             return UKAPI.SaveFileHandler.RetrieveModData(metaData.name, key);
         }
 
         /// <summary>
-        /// Gets persistent mod data from a specific mod from a save file
+        /// Gets persistent mod data from a save file as an int, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        public int RetrieveIntPersistentModData(string key)
+        {
+            return int.Parse(RetrieveStringPersistentModData(metaData.name, key));
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a save file as a boolean, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        public bool RetrieveBooleanPersistentModData(string key)
+        {
+            return bool.Parse(RetrieveStringPersistentModData(metaData.name, key));
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a save file as a float, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        public float RetrieveFloatPersistentModData(string key)
+        {
+            return float.Parse(RetrieveStringPersistentModData(metaData.name, key));
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a specific mod from a save file as a string
         /// </summary>
         /// <param name="key">Name of value</param>
         /// <param name="modName">Name of mod to get the data from</param>
-        public object RetrievePersistentModData(string key, string modName)
+        public static string RetrieveStringPersistentModData(string key, string modName)
         {
             return UKAPI.SaveFileHandler.RetrieveModData(modName, key);
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a specific mod from a save file as an int, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        /// <param name="modName">Name of mod to get the data from</param>
+        public static int RetrieveIntPersistentModData(string key, string modName)
+        {
+            return int.Parse(RetrieveStringPersistentModData(modName, key));
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a specific mod from a save file as a boolean, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        /// <param name="modName">Name of mod to get the data from</param>
+        public static bool RetrieveBooleanPersistentModData(string key, string modName)
+        {
+            return bool.Parse(RetrieveStringPersistentModData(modName, key));
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a specific mod from a save file as a float, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        /// <param name="modName">Name of mod to get the data from</param>
+        public static float RetrieveFloatPersistentModData(string key, string modName)
+        {
+            return float.Parse(RetrieveStringPersistentModData(modName, key));
         }
 
         /// <summary>
         /// Gets persistent mod data shared across all mods from a save file
         /// </summary>
         /// <param name="key">Name of value</param>
-        public object RetrievePersistentUniversalModData(string key)
+        public static string RetrieveStringPersistentUniversalModData(string key)
         {
             return UKAPI.SaveFileHandler.RetrieveModData("allPersistentModData", key);
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a specific mod from a save file as an int, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        /// <param name="modName">Name of mod to get the data from</param>
+        public static int RetrieveIntPersistentUniversalModData(string key)
+        {
+            return int.Parse(RetrieveStringPersistentUniversalModData(key));
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a specific mod from a save file as a boolean, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        /// <param name="modName">Name of mod to get the data from</param>
+        public static bool RetrieveBooleanPersistentUniversalModData(string key)
+        {
+            return bool.Parse(RetrieveStringPersistentUniversalModData(key));
+        }
+
+        /// <summary>
+        /// Gets persistent mod data from a specific mod from a save file as a float, note that this method just parses a string
+        /// </summary>
+        /// <param name="key">Name of value</param>
+        /// <param name="modName">Name of mod to get the data from</param>
+        public static float RetrieveFloatPersistentUniversalModData(string key)
+        {
+            return float.Parse(RetrieveStringPersistentUniversalModData(key));
         }
     }
 }

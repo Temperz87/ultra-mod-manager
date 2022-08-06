@@ -34,13 +34,21 @@ namespace UKMM.Loader
         {
             foreach (FileInfo info in new DirectoryInfo(Environment.CurrentDirectory + @"\BepInEx\UKMM Mods\").GetFiles("*.dll", SearchOption.AllDirectories))
                 LoadFromAssembly(info);
+            Debug.Log("Found " + foundMods.Count + " mods that can be loaded.");
         }
 
         private static void LoadOnStart()
         {
+            int loadedMods = 0;
             foreach (ModInformation info in foundMods)
+            {
                 if (info.loadOnStart)
+                {
                     info.LoadThisMod();
+                    loadedMods++;
+                }
+            }
+            Debug.Log("Loaded " + loadedMods + " on start");
         }
 
         public static void LoadFromAssembly(FileInfo fInfo)
@@ -55,7 +63,7 @@ namespace UKMM.Loader
                     info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
                 else
                     continue;
-                Debug.Log("Adding info " + fInfo.FullName + " " + type.Name);
+                Debug.Log("Adding mod info " + fInfo.FullName + " " + type.Name);
                 foundMods.Add(info);   
                 object retrievedData = UKAPI.SaveFileHandler.RetrieveModData(info.modName, "LoadOnStart");
                 if (retrievedData != null && bool.Parse(retrievedData.ToString()))
@@ -63,6 +71,7 @@ namespace UKMM.Loader
             }
         }
 
+        /* For whatever reason, this function does not work
         internal static BepInPlugin GetBepinMetaData(Type t)
         {
             object[] customAttributes = t.GetCustomAttributes(typeof(BaseUnityPlugin), true);
@@ -72,6 +81,7 @@ namespace UKMM.Loader
             }
             return (BepInPlugin)customAttributes[0];
         }
+        */
 
         internal static UKPlugin GetUKMetaData(Type t)
         {
@@ -85,37 +95,53 @@ namespace UKMM.Loader
 
         public static void LoadMod(ModInformation info)
         {
-            if (info.mod.IsSubclassOf(typeof(BaseUnityPlugin)))
+            GameObject modObject = GameObject.Instantiate(new GameObject());
+            UKMod newMod = null;
+            try
             {
-                GameObject newBepinModObject = GameObject.Instantiate(new GameObject());
-                GameObject.DontDestroyOnLoad(newBepinModObject);
-                newBepinModObject.SetActive(false);
-                newBepinModObject.AddComponent(info.mod);
+                Debug.Log("Trying to load mod " + info.modName);
+                if (info.mod.IsSubclassOf(typeof(BaseUnityPlugin)))
+                {
+                    GameObject.DontDestroyOnLoad(modObject);
+                    modObject.SetActive(false);
+                    modObject.AddComponent(info.mod);
+                    allLoadedMods.Add(info);
+                    modObject.SetActive(true);
+                    Debug.Log("Loaded mod " + info.modName);
+                    return;
+                }
+                if (!info.mod.IsSubclassOf(typeof(UKMod)))
+                    throw new ArgumentException("LoadMod(Type mod) was called using a type that did not inherit from UKMod or BaseUnityPlugin, type name is " + info.mod.Name);
+                GameObject.DontDestroyOnLoad(modObject);
+                modObject.SetActive(false);
+                newMod = modObject.AddComponent(info.mod) as UKMod;
                 allLoadedMods.Add(info);
-                //modObjects.Add(bInfo, newBepinModObject);
-                newBepinModObject.SetActive(true);
-                return;
+                modObjects.Add(info, modObject);
+                UKPlugin metaData = UKModManager.GetUKMetaData(info.mod);
+                if (!metaData.allowCyberGrindSubmission)
+                    AllowCyberGrindSubmission = false;
+                modObject.SetActive(true);
+                newMod.OnModLoaded();
+                Debug.Log("Loaded mod " + info.modName);
             }
-            if (!info.mod.IsSubclassOf(typeof(UKMod)))
-                throw new ArgumentException("LoadMod(Type mod) was called using a type that did not inherit from UKMod or BaseUnityPlugin, type name is " + info.mod.Name);
-            GameObject newModObject = GameObject.Instantiate(new GameObject());
-            GameObject.DontDestroyOnLoad(newModObject);
-            newModObject.SetActive(false);
-            UKMod newMod = newModObject.AddComponent(info.mod) as UKMod;
-            allLoadedMods.Add(info);
-            modObjects.Add(info, newModObject);
-            UKPlugin metaData = UKModManager.GetUKMetaData(info.mod);
-            if (!metaData.allowCyberGrindSubmission)
-                AllowCyberGrindSubmission = false;
-            newModObject.SetActive(true);
-            newMod.OnModLoaded();
+            catch (Exception e)
+            {
+                Debug.LogError("Caught exception while trying to load modinformation " + info.modName);
+                Debug.LogException(e);
+                if (modObject != null)
+                {
+                    if (newMod != null)
+                        newMod.OnModUnload();
+                    GameObject.Destroy(modObject); // I don't know if this is a good thing to do, if not please scream at me to remove it
+                }
+            }
         }
 
         public static void UnloadMod(ModInformation information)
         {
-            Debug.Log("information is " + information.modName + " and unloading supported is " + information.supportsUnloading);
             if (modObjects.ContainsKey(information) && information.supportsUnloading)
             {
+                Debug.Log("trying to unload mod " + information.modName + " and unloading supported is " + information.supportsUnloading);
                 GameObject modObject = modObjects[information];
                 UKMod mod = modObject.GetComponent<UKMod>();
                 mod.OnModUnloaded.Invoke();
@@ -123,8 +149,6 @@ namespace UKMM.Loader
                 modObjects.Remove(information);
                 allLoadedMods.Remove(information);
                 GameObject.Destroy(modObject);
-
-                UKAPI.EnableCyberGrindSubmission(); // This call will only enbale cyber grind submissions if no other loaded mods do
             }
         }
 

@@ -7,6 +7,7 @@ using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 using UKMM.Loader;
+using UnityEngine.EventSystems;
 
 namespace UKMM.HarmonyPatches
 {
@@ -15,8 +16,9 @@ namespace UKMM.HarmonyPatches
     {
         public static void Prefix(OptionsMenuToManager __instance)
         {
-            if (__instance.pauseMenu.name == "Main Menu (1)") // sanity check
+            if (__instance.pauseMenu.name == "Main Menu (1)") // check to see that we're patching out the main menu's menu, not like an in game menu one
             {
+                bool wasOn = MonoSingleton<PrefsManager>.Instance.GetBool("variationMemory", false);
                 __instance.pauseMenu.transform.Find("Panel").localPosition = new Vector3(0, 325, 0);
                 GameObject newModsButton = GameObject.Instantiate(__instance.pauseMenu.transform.Find("Continue").gameObject, __instance.pauseMenu.transform);
                 newModsButton.SetActive(false);
@@ -31,15 +33,24 @@ namespace UKMM.HarmonyPatches
                 Transform colorBlind = modsMenu.transform.Find("ColorBlindness Options");
                 colorBlind.gameObject.SetActive(true);
                 GameObject.Destroy(colorBlind.GetComponent<GamepadObjectSelector>()); // sorry gamepad players, but without this the mod manager breaks
-                colorBlind.transform.Find("Text (1)").GetComponent<Text>().text = "--MODS--";
+                Text modHeaderText = colorBlind.transform.Find("Text (1)").GetComponent<Text>();
+                modHeaderText.text = "--MODS--";
+
                 Transform content = colorBlind.transform.Find("Scroll Rect").Find("Contents");
-                content.Find("Default").gameObject.SetActive(false);
                 content.Find("Enemies").gameObject.SetActive(false);
                 content.gameObject.SetActive(true);
                 GameObject template = content.Find("HUD").Find("Health").gameObject;
                 content.Find("HUD").gameObject.SetActive(false);
                 template.SetActive(false);
+                __instance.variationMemory.gameObject.SetActive(false);
 
+                GameObject hoverText = content.Find("Default").gameObject;
+                hoverText.transform.parent = modsMenu.transform;
+                hoverText.GetComponentInChildren<Text>().text = "Toggle auto loading on start";
+                hoverText.transform.localPosition -= new Vector3(0f, 520f, 0f);
+                GameObject.Destroy(hoverText.GetComponent<BackSelectOverride>());
+                GameObject.Destroy(hoverText.GetComponent<Button>());
+                hoverText.SetActive(false);
 
                 ModInformation[] information = UKAPI.GetAllModInformation();
                 for (int i = 0; i < information.Length; i++)
@@ -81,7 +92,6 @@ namespace UKMM.HarmonyPatches
                     descriptionText.text = info.modDescription;
 
                     GameObject toggleObj = GameObject.Instantiate(__instance.variationMemory.gameObject, newInformation.transform);
-                    toggleObj.SetActive(true);
                     toggleObj.transform.localPosition = new Vector3(247f, -9f, 0f);
                     Toggle toggle = toggleObj.GetComponent<Toggle>();
                     toggle.isOn = info.loadOnStart;
@@ -92,9 +102,28 @@ namespace UKMM.HarmonyPatches
                         toggle.isOn = info.loadOnStart;
                         UKAPI.SaveFileHandler.SetModData(info.modName, "LoadOnStart", info.loadOnStart.ToString());
                     });
+                    EventTrigger trigger = toggle.gameObject.AddComponent<EventTrigger>();
+                    EventTrigger.Entry hoverEntry = new EventTrigger.Entry();
+                    hoverEntry.eventID = EventTriggerType.PointerEnter;
+                    hoverEntry.callback.AddListener(delegate
+                    {
+                        hoverText.SetActive(true);
+                    });
+                    EventTrigger.Entry unHoverEntry = new EventTrigger.Entry();
+                    unHoverEntry.eventID = EventTriggerType.PointerExit;
+                    unHoverEntry.callback.AddListener(delegate
+                    {
+                        hoverText.SetActive(false);
+                    });
+                    trigger.triggers.Add(hoverEntry);
+                    trigger.triggers.Add(unHoverEntry);
 
+                    toggleObj.SetActive(true);
                     newInformation.SetActive(true);
                 }
+
+                __instance.variationMemory.gameObject.SetActive(true);
+                MonoSingleton<PrefsManager>.Instance.SetBool("variationMemory", wasOn); // there's a bug where this patch sets variation memory to always be on once you get to the menu fo romse reason, this fixes that
 
                 Button.ButtonClickedEvent modsButton = newModsButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
                 modsButton.AddListener(delegate

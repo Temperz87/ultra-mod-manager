@@ -23,12 +23,13 @@ namespace UKMM
             if (triedLoadingBundle)
                 yield break;
             SaveFileHandler.LoadData();
-            Debug.Log("UKMM: Trying to load common bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
+            Debug.Log("UKMM: Trying to load common asset bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
             yield return request;
             int attempts = 1;
             while (request.assetBundle == null)
             {
+                yield return new WaitForSeconds(0.2f); // why 0.2? I dunno I just chose it man
                 if (attempts >= 5)
                 {
                     Debug.Log("UKMM: Could not load common asset bundle");
@@ -36,32 +37,21 @@ namespace UKMM
                     yield break;
                 }
                 request = AssetBundle.LoadFromFileAsync(Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
+                yield return request;
                 attempts++;
             }
 
-            Debug.Log("Loaded common bundle");
+            Debug.Log("Loaded common asset bundle");
             commonBundle = request.assetBundle;
             triedLoadingBundle = true;
             UKModManager.InitializeManager();
         }
 
         /// <summary>
-        /// Disables CyberGrind submission
+        /// Disables CyberGrind submission, cybergrind submissions can only be enabled on a restart of the loader
         /// </summary>
         public static void DisableCyberGrindSubmission()
         {
-            UKModManager.AllowCyberGrindSubmission = false;
-        }
-
-        /// <summary>
-        /// Enables CyberGrind submission if no mods that disable it exist
-        /// </summary>
-        public static void EnableCyberGrindSubmission()
-        {
-            foreach (ModInformation mod in GetAllModInformation())
-                if (mod.modType == ModInformation.ModType.UKMod)
-                    if (UKModManager.GetUKMetaData(mod.mod).allowCyberGrindSubmission == false)
-                        return;
             UKModManager.AllowCyberGrindSubmission = false;
         }
 
@@ -84,7 +74,7 @@ namespace UKMM
         /// Tries to load an Ultrakill asset from ULTRAKILL_Data/StreamingAssets/common
         /// </summary>
         /// <param name="name">Name of the asset to load, you MUST include the extensions (e.g. prefab)</param>
-        /// <returns>The asset as an object if found, otherwise returns null</returns>
+        /// <returns>The asset from the bundle as an object if found, otherwise returns null</returns>
         public static object LoadCommonAsset(string name)
         {
             if (commonBundle == null)
@@ -122,7 +112,7 @@ namespace UKMM
             {
                 path = Assembly.GetExecutingAssembly().Location;
                 path = path.Substring(0, path.LastIndexOf("\\")) + "\\persistent mod data.json";
-                Debug.Log("Trying to load save file from " + path);
+                Debug.Log("Trying to mod persistent data file from " + path);
                 FileInfo fInfo = new FileInfo(path);
                 if (fInfo.Exists)
                 {
@@ -144,6 +134,7 @@ namespace UKMM
             internal static void DumpFile()
             {
                 FileInfo fInfo = new FileInfo(path);
+                Debug.Log("Dumping mod persistent data file to " + path);
                 File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(savedData));
             }
 
@@ -153,7 +144,7 @@ namespace UKMM
             /// <param name="modName">The name of the mod to retrieve data from</param>
             /// <param name="key">The value you want</param>
             /// <returns>The mod data if found, otherwise null</returns>
-            public static object RetrieveModData(string modName, string key)
+            public static string RetrieveModData(string modName, string key)
             {
                 if (savedData.ContainsKey(modName))
                 {
@@ -162,6 +153,7 @@ namespace UKMM
                 }
                 return null;
             }
+
             /// <summary>
             /// Adds persistent mod data from a key and mod name
             /// </summary>
