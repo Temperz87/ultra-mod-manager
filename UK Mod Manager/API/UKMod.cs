@@ -13,13 +13,14 @@ namespace UKMM
     public abstract class UKMod : MonoBehaviour
     {
         public UnityEvent OnModUnloaded = new UnityEvent();
+        public string modFolder;
         public UKPlugin metaData;
         // maybe include logo???
 
         public UKMod()
         {
             Type type = this.GetType();
-            Debug.Log("Mod found, type is " + type.Name);
+            modFolder = new FileInfo(type.Assembly.Location).DirectoryName; // There has to be a better way to do this, right?
             object[] customAttributes = type.GetCustomAttributes(typeof(UKPlugin), false);
             if (customAttributes.Length == 0)
             {
