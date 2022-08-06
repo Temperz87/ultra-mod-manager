@@ -46,7 +46,7 @@ namespace UKMM.HarmonyPatches
 
                 GameObject hoverText = content.Find("Default").gameObject;
                 hoverText.transform.parent = modsMenu.transform;
-                hoverText.GetComponentInChildren<Text>().text = "Toggle auto loading on start";
+                hoverText.GetComponentInChildren<Text>().text = "Toggles auto loading on game start";
                 hoverText.transform.localPosition -= new Vector3(0f, 520f, 0f);
                 GameObject.Destroy(hoverText.GetComponent<BackSelectOverride>());
                 GameObject.Destroy(hoverText.GetComponent<Button>());
