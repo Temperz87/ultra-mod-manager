@@ -56,6 +56,12 @@ namespace UKMM.Loader
 
         public static void LoadFromAssembly(FileInfo fInfo)
         {
+            DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + "\\dependencies");
+            if (dInfo.Exists) // this solution is a hack i am well aware
+            {
+                foreach (FileInfo info in dInfo.GetFiles("*.dll", SearchOption.AllDirectories))
+                    Assembly.LoadFile(info.FullName);
+            }
             Assembly ass = Assembly.LoadFile(fInfo.FullName);
             foreach (Type type in ass.GetTypes())
             {
@@ -110,7 +116,7 @@ namespace UKMM.Loader
                     modObject.AddComponent(info.mod);
                     allLoadedMods.Add(info);
                     modObject.SetActive(true);
-                    Debug.Log("Loaded mod " + info.modName);
+                    Debug.Log("Loaded BepInExPlugin " + info.modName);
                     return;
                 }
                 if (!info.mod.IsSubclassOf(typeof(UKMod)))
@@ -125,7 +131,7 @@ namespace UKMM.Loader
                     UKAPI.DisableCyberGrindSubmission(info.mod.Name);
                 modObject.SetActive(true);
                 newMod.OnModLoaded();
-                Debug.Log("Loaded mod " + info.modName);
+                Debug.Log("Loaded UKMod " + info.modName);
             }
             catch (Exception e)
             {
@@ -144,7 +150,7 @@ namespace UKMM.Loader
         {
             if (modObjects.ContainsKey(info) && info.supportsUnloading)
             {
-                Debug.Log("trying to unload mod " + info.modName + " and unloading supported is " + info.supportsUnloading);
+                Debug.Log("trying to unload mod " + info.modName);
                 GameObject modObject = modObjects[info];
                 UKMod mod = modObject.GetComponent<UKMod>();
                 mod.OnModUnloaded.Invoke();
@@ -154,12 +160,8 @@ namespace UKMM.Loader
                 GameObject.Destroy(modObject);
                 if (!UKModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
                     UKAPI.RemoveDisableCyberGrindReason(info.modName);
+                Debug.Log("successfully unloaded mod " + info.modName);
             }
-        }
-
-        public static ModInformation[] GetLoadedMods()
-        {
-            return allLoadedMods.ToArray().Clone() as ModInformation[];
         }
     }
 }

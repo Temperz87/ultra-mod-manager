@@ -53,7 +53,7 @@ namespace UKMM
         }
 
         /// <summary>
-        /// Disables CyberGrind submission, cybergrind submissions can only be enabled if nothing else disables it
+        /// Disables CyberGrind submission, CyberGrind submissions can only be enabled if nothing else disables it
         /// </summary>
         /// <param name="reason">Why you CyberGrind is disabled, if you want to reenable it later you can do so by removing the reason</param>
         public static void DisableCyberGrindSubmission(string reason)
@@ -121,7 +121,7 @@ namespace UKMM
         }
 
         /// <summary>
-        /// Gets all mod loaded mod information
+        /// Gets all loaded mod information
         /// </summary>
         /// <returns>Returns an array of all loaded mods</returns>
         public static ModInformation[] GetAllLoadedModInformation()

@@ -28,7 +28,7 @@ namespace UKMM
             this.modType = modType;
             this.mod = mod;
 
-            // TODO: Read mod name from toml file
+            // TODO: Read mod name from a manifest file
             if (modType == ModType.BepInPlugin)
             {
                 //modName = GetBepinMetaData(mod).Name;
