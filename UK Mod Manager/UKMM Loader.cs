@@ -15,7 +15,6 @@ namespace UKMM.Loader
     {
         public static List<ModInformation> foundMods = new List<ModInformation>();
         public static List<ModInformation> allLoadedMods = new List<ModInformation>();
-        internal static bool AllowCyberGrindSubmission = true;
         private static bool initialized = false;
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
 
@@ -123,7 +122,7 @@ namespace UKMM.Loader
                 modObjects.Add(info, modObject);
                 UKPlugin metaData = UKModManager.GetUKMetaData(info.mod);
                 if (!metaData.allowCyberGrindSubmission)
-                    AllowCyberGrindSubmission = false;
+                    UKAPI.DisableCyberGrindSubmission(info.mod.Name);
                 modObject.SetActive(true);
                 newMod.OnModLoaded();
                 Debug.Log("Loaded mod " + info.modName);
@@ -141,18 +140,20 @@ namespace UKMM.Loader
             }
         }
 
-        public static void UnloadMod(ModInformation information)
+        public static void UnloadMod(ModInformation info)
         {
-            if (modObjects.ContainsKey(information) && information.supportsUnloading)
+            if (modObjects.ContainsKey(info) && info.supportsUnloading)
             {
-                Debug.Log("trying to unload mod " + information.modName + " and unloading supported is " + information.supportsUnloading);
-                GameObject modObject = modObjects[information];
+                Debug.Log("trying to unload mod " + info.modName + " and unloading supported is " + info.supportsUnloading);
+                GameObject modObject = modObjects[info];
                 UKMod mod = modObject.GetComponent<UKMod>();
                 mod.OnModUnloaded.Invoke();
                 mod.OnModUnload();
-                modObjects.Remove(information);
-                allLoadedMods.Remove(information);
+                modObjects.Remove(info);
+                allLoadedMods.Remove(info);
                 GameObject.Destroy(modObject);
+                if (!UKModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
+                    UKAPI.RemoveDisableCyberGrindReason(info.modName);
             }
         }
 

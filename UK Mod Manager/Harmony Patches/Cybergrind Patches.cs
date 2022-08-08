@@ -16,7 +16,7 @@ namespace UKMM.HarmonyPatches
         public static bool Prefix()
         {
             majorWasUsed = StatsManager.Instance.majorUsed;
-            StatsManager.Instance.majorUsed = !UKModManager.AllowCyberGrindSubmission || majorWasUsed;
+            StatsManager.Instance.majorUsed = !UKAPI.ShouldSubmitCyberGrindScore() || majorWasUsed;
             return true;
         }
         public static void Postfix()
@@ -31,7 +31,7 @@ namespace UKMM.HarmonyPatches
     {
         public static bool Prefix()
         {
-            return UKModManager.AllowCyberGrindSubmission;
+            return UKAPI.ShouldSubmitCyberGrindScore();
         }
     }
 }
