@@ -58,7 +58,8 @@ namespace UKMM
         /// <param name="reason">Why you CyberGrind is disabled, if you want to reenable it later you can do so by removing the reason</param>
         public static void DisableCyberGrindSubmission(string reason)
         {
-            disableCybergrindReasons.Add(reason);
+            if (!disableCybergrindReasons.Contains(reason))
+                disableCybergrindReasons.Add(reason);
         }
 
         /// <summary>
@@ -78,7 +79,10 @@ namespace UKMM
         /// </summary>
         public static bool ShouldSubmitCyberGrindScore()
         {
-            return disableCybergrindReasons.Count > 0;
+            Debug.Log("Not submitting cybergrind" );
+            foreach (string reason in disableCybergrindReasons)
+                Debug.Log(" reason: " + reason);
+            return disableCybergrindReasons.Count == 0;
         }
 
         /// <summary>
