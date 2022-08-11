@@ -203,6 +203,20 @@ namespace UKMM
                 else
                     savedData[modName][key] = value;
             }
+
+            /// <summary>
+            /// Removes persistent mod data from a key and a mod name
+            /// </summary>
+            /// <param name="modName">The name of the mod to remove data from</param>
+            /// <param name="key">The key for the data</param>
+            public static void RemoveModData(string modName, string key)
+            {
+                if (savedData.ContainsKey(modName))
+                {
+                    if (savedData[modName].ContainsKey(key))
+                        savedData[modName].Remove(key);
+                }
+            }
         }
 
 

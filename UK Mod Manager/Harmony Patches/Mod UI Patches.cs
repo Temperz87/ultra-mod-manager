@@ -40,7 +40,7 @@ namespace UKMM.HarmonyPatches
 
                 GameObject moreModsButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
                 moreModsButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -405.5f);
-                moreModsButton.GetComponentInChildren<Text>().text = "MORE MODS";
+                moreModsButton.GetComponentInChildren<Text>().text = "BROWSE MODS";
                 moreModsButton.GetComponentInChildren<Image>().color = new Color32(211, 218, 114, 255);
                 moreModsButton.GetComponentInChildren<WebButton>().url = "https://docs.google.com/spreadsheets/d/1x8P3GcdfWraZX1kz3bbHJIiY4hozxe8k1oieOm_fuL0/edit?usp=sharing";
 

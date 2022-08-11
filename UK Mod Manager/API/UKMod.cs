@@ -156,7 +156,7 @@ namespace UKMM
         }
 
         /// <summary>
-        /// Gets persistent mod data from a specific mod from a save file as an int, note that this method just parses a string
+        /// Gets persistent mod data shared across all mods from a save file as an int, note that this method just parses a string
         /// </summary>
         /// <param name="key">Name of value</param>
         /// <param name="modName">Name of mod to get the data from</param>
@@ -166,7 +166,7 @@ namespace UKMM
         }
 
         /// <summary>
-        /// Gets persistent mod data from a specific mod from a save file as a boolean, note that this method just parses a string
+        /// Gets persistent mod data shared across all mods from a save file as a boolean, note that this method just parses a string
         /// </summary>
         /// <param name="key">Name of value</param>
         /// <param name="modName">Name of mod to get the data from</param>
@@ -176,13 +176,40 @@ namespace UKMM
         }
 
         /// <summary>
-        /// Gets persistent mod data from a specific mod from a save file as a float, note that this method just parses a string
+        /// Gets persistent mod data shared across all mods from a save file as a float, note that this method just parses a string
         /// </summary>
         /// <param name="key">Name of value</param>
-        /// <param name="modName">Name of mod to get the data from</param>
         public static float RetrieveFloatPersistentUniversalModData(string key)
         {
             return float.Parse(RetrieveStringPersistentUniversalModData(key));
+        }
+
+        /// <summary>
+        /// Removes persistent mod data from given a key
+        /// </summary>
+        /// <param name="key">The name of the value you want to remove</param>
+        public void RemovePersistentModData(string key)
+        {
+            UKAPI.SaveFileHandler.RemoveModData(metaData.name, key);
+        }
+
+        /// <summary>
+        /// Removes persistent mod data from a specified mod given a key
+        /// </summary>
+        /// <param name="key">The name of the value you want to remove</param>
+        /// <param name="modName">Name of mod to remove data from</param>
+        public void RemovePersistentModData(string key, string modName)
+        {
+            UKAPI.SaveFileHandler.RemoveModData(modName, key);
+        }
+
+        /// <summary>
+        /// Removes persistent mod data shared across all mods from a given key
+        /// </summary>
+        /// <param name="key">The name of the value you want to remove</param>
+        public static void RemoveUniversalModData(string key)
+        {
+            UKAPI.SaveFileHandler.RemoveModData("allPersistentModData", key);
         }
     }
 }
