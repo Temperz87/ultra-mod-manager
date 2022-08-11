@@ -128,7 +128,7 @@ namespace UKMM.Loader
                 modObjects.Add(info, modObject);
                 UKPlugin metaData = UKModManager.GetUKMetaData(info.mod);
                 if (!metaData.allowCyberGrindSubmission)
-                    UKAPI.DisableCyberGrindSubmission(info.mod.Name);
+                    UKAPI.DisableCyberGrindSubmission(info.modName);
                 modObject.SetActive(true);
                 newMod.OnModLoaded();
                 Debug.Log("Loaded UKMod " + info.modName);
