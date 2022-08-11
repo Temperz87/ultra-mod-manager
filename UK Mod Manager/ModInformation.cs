@@ -11,7 +11,7 @@ using UKMM.Loader;
 
 namespace UKMM
 {
-    public class ModInformation
+    public class ModInformation : IComparable<ModInformation>
     {
         public ModType modType;
         public Type mod;
@@ -21,7 +21,6 @@ namespace UKMM
         public bool supportsUnloading;
         public bool loadOnStart;
         public bool loaded;
-
 
         public ModInformation(Type mod, ModType modType)
         {
@@ -51,6 +50,11 @@ namespace UKMM
                 LoadThisMod();
             else
                 UnLoadThisMod();
+        }
+
+        public int CompareTo(ModInformation other)
+        {
+            return String.Compare(modName, other.modName);
         }
 
         public void LoadThisMod()

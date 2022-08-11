@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.UI;
 using UKMM.Loader;
 using UnityEngine.EventSystems;
+using System.Collections;
 
 namespace UKMM.HarmonyPatches
 {
@@ -24,6 +25,24 @@ namespace UKMM.HarmonyPatches
                 newModsButton.SetActive(false);
                 newModsButton.transform.localPosition = new Vector3(0, -280, 0);
                 newModsButton.GetComponentInChildren<Text>(true).text = "MODS";
+
+                Transform panel = __instance.pauseMenu.transform.Find("Panel");
+                GameObject discordButton = panel.Find("Discord").gameObject;
+                discordButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-164f, -350f);
+                discordButton.transform.parent.Find("Twitter").GetComponent<RectTransform>().anchoredPosition = new Vector2(-329f, -405.5f);
+                discordButton.transform.parent.Find("Youtube").GetComponent<RectTransform>().anchoredPosition = new Vector2(-494f, -461f);
+
+                GameObject gitButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
+                gitButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -350f);
+                gitButton.GetComponentInChildren<Text>().text = "UKMM SOURCE";
+                gitButton.GetComponentInChildren<Image>().color = new Color32(191, 191, 191, 255);
+                gitButton.GetComponentInChildren<WebButton>().url = "https://github.com/Temperz87/UK-Mod-Manager";
+
+                GameObject moreModsButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
+                moreModsButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -405.5f);
+                moreModsButton.GetComponentInChildren<Text>().text = "MORE MODS";
+                moreModsButton.GetComponentInChildren<Image>().color = new Color32(211, 218, 114, 255);
+                moreModsButton.GetComponentInChildren<WebButton>().url = "https://docs.google.com/spreadsheets/d/1x8P3GcdfWraZX1kz3bbHJIiY4hozxe8k1oieOm_fuL0/edit?usp=sharing";
 
                 GameObject modsMenu = GameObject.Instantiate(__instance.optionsMenu, __instance.transform);
                 modsMenu.SetActive(false);
@@ -56,6 +75,7 @@ namespace UKMM.HarmonyPatches
                 ModInformation[] information = UKAPI.GetAllModInformation();
                 if (information.Length > 0)
                 {
+                    Array.Sort(information);
                     for (int i = 0; i < information.Length; i++)
                     {
                         ModInformation info = information[i];
