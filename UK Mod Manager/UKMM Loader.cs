@@ -15,7 +15,6 @@ namespace UKMM.Loader
     {
         public static List<ModInformation> foundMods = new List<ModInformation>();
         public static List<ModInformation> allLoadedMods = new List<ModInformation>();
-        internal static bool AllowCyberGrindSubmission = true;
         private static bool initialized = false;
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
 
@@ -57,6 +56,12 @@ namespace UKMM.Loader
 
         public static void LoadFromAssembly(FileInfo fInfo)
         {
+            DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + "\\dependencies");
+            if (dInfo.Exists) // this solution is a hack i am well aware
+            {
+                foreach (FileInfo info in dInfo.GetFiles("*.dll", SearchOption.AllDirectories))
+                    Assembly.LoadFile(info.FullName);
+            }
             Assembly ass = Assembly.LoadFile(fInfo.FullName);
             foreach (Type type in ass.GetTypes())
             {
@@ -111,7 +116,7 @@ namespace UKMM.Loader
                     modObject.AddComponent(info.mod);
                     allLoadedMods.Add(info);
                     modObject.SetActive(true);
-                    Debug.Log("Loaded mod " + info.modName);
+                    Debug.Log("Loaded BepInExPlugin " + info.modName);
                     return;
                 }
                 if (!info.mod.IsSubclassOf(typeof(UKMod)))
@@ -123,10 +128,10 @@ namespace UKMM.Loader
                 modObjects.Add(info, modObject);
                 UKPlugin metaData = UKModManager.GetUKMetaData(info.mod);
                 if (!metaData.allowCyberGrindSubmission)
-                    AllowCyberGrindSubmission = false;
+                    UKAPI.DisableCyberGrindSubmission(info.mod.Name);
                 modObject.SetActive(true);
                 newMod.OnModLoaded();
-                Debug.Log("Loaded mod " + info.modName);
+                Debug.Log("Loaded UKMod " + info.modName);
             }
             catch (Exception e)
             {
@@ -141,24 +146,22 @@ namespace UKMM.Loader
             }
         }
 
-        public static void UnloadMod(ModInformation information)
+        public static void UnloadMod(ModInformation info)
         {
-            if (modObjects.ContainsKey(information) && information.supportsUnloading)
+            if (modObjects.ContainsKey(info) && info.supportsUnloading)
             {
-                Debug.Log("trying to unload mod " + information.modName + " and unloading supported is " + information.supportsUnloading);
-                GameObject modObject = modObjects[information];
+                Debug.Log("trying to unload mod " + info.modName);
+                GameObject modObject = modObjects[info];
                 UKMod mod = modObject.GetComponent<UKMod>();
                 mod.OnModUnloaded.Invoke();
                 mod.OnModUnload();
-                modObjects.Remove(information);
-                allLoadedMods.Remove(information);
+                modObjects.Remove(info);
+                allLoadedMods.Remove(info);
                 GameObject.Destroy(modObject);
+                if (!UKModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
+                    UKAPI.RemoveDisableCyberGrindReason(info.modName);
+                Debug.Log("successfully unloaded mod " + info.modName);
             }
-        }
-
-        public static ModInformation[] GetLoadedMods()
-        {
-            return allLoadedMods.ToArray().Clone() as ModInformation[];
         }
     }
 }

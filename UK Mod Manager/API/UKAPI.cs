@@ -16,8 +16,13 @@ namespace UKMM
     public static class UKAPI
     {
         public static bool triedLoadingBundle = false;
+        //public static Dictionary<string, Dictionary<string, WeaponInformation>> allCustomWeapons = new Dictionary<string, Dictionary<string, WeaponInformation>>();
         private static AssetBundle commonBundle;
+        private static List<string> disableCybergrindReasons = new List<string>();
 
+        /// <summary>
+        /// Initializes the API by loading the save file and common asset bundle
+        /// </summary>
         internal static IEnumerator InitializeAPI()
         {
             if (triedLoadingBundle)
@@ -48,11 +53,36 @@ namespace UKMM
         }
 
         /// <summary>
-        /// Disables CyberGrind submission, cybergrind submissions can only be enabled on a restart of the loader
+        /// Disables CyberGrind submission, CyberGrind submissions can only be enabled if nothing else disables it
         /// </summary>
-        public static void DisableCyberGrindSubmission()
+        /// <param name="reason">Why you CyberGrind is disabled, if you want to reenable it later you can do so by removing the reason</param>
+        public static void DisableCyberGrindSubmission(string reason)
         {
-            UKModManager.AllowCyberGrindSubmission = false;
+            if (!disableCybergrindReasons.Contains(reason))
+                disableCybergrindReasons.Add(reason);
+        }
+
+        /// <summary>
+        /// Disables CyberGrind submission, cybergrind submissions can only be enabled if nothing else disables it
+        /// </summary>
+        /// <param name="reason">The reason to remove</param>
+        public static void RemoveDisableCyberGrindReason(string reason)
+        {
+            if (disableCybergrindReasons.Contains(reason))
+                disableCybergrindReasons.Remove(reason);
+            else
+                Debug.Log("Tried to remove cg reason " + reason + " but could not find it!");
+        }
+
+        /// <summary>
+        /// Gets whether or not CyberGrind submissions are allowed
+        /// </summary>
+        public static bool ShouldSubmitCyberGrindScore()
+        {
+            Debug.Log("Not submitting cybergrind" );
+            foreach (string reason in disableCybergrindReasons)
+                Debug.Log(" reason: " + reason);
+            return disableCybergrindReasons.Count == 0;
         }
 
         /// <summary>
@@ -95,7 +125,7 @@ namespace UKMM
         }
 
         /// <summary>
-        /// Gets all mod loaded mod information
+        /// Gets all loaded mod information
         /// </summary>
         /// <returns>Returns an array of all loaded mods</returns>
         public static ModInformation[] GetAllLoadedModInformation()
@@ -174,5 +204,83 @@ namespace UKMM
                     savedData[modName][key] = value;
             }
         }
+
+
+        #region CustomWeapons
+        /* Shelved for now due to not being worth implementing over other features, will do later if the need arrises
+        /// <summary>
+        /// Adds a new custom weapon to UKAPI
+        /// </summary>
+        /// <param name="prefab">The prefab of the custom weapon that will be instantiated when loaded</param>
+        /// <param name="weaponName">The name of the weapon to show in the menu</param>
+        /// <param name="category">The name of the category to add the weapon to</param>
+        public static void AddNewWeapon(GameObject prefab, string weaponName, string category, int slot = 5)
+        {
+            if (prefab == null)
+            {
+                Debug.Log("Tried to add a null prefab of name " + weaponName + " and category " + category);
+                return;
+            }
+            if (!allCustomWeapons.ContainsKey(category))
+            {
+                Dictionary<string, WeaponInformation> toAdd = new Dictionary<string, WeaponInformation>();
+                toAdd.Add(weaponName, new WeaponInformation(prefab, slot));
+                allCustomWeapons.Add(category, toAdd);
+            }
+            else if (!allCustomWeapons[category].ContainsKey(weaponName))
+                allCustomWeapons[category].Add(weaponName, new WeaponInformation(prefab, slot));
+            else
+                Debug.Log("Tried to add duplicate weapon name " + weaponName + " of category " + category + " with a prefab name of " + prefab.name);
+        }
+
+        /// <summary>
+        /// Retrieves new custom weapon from UKAPI
+        /// </summary>
+        /// <param name="weaponName">The name of the weapon</param>
+        /// <param name="category">The name of the category the weapon is in </param>
+        /// <returns>The custom weapon if null, otherwise null</returns>
+        public static WeaponInformation RetrieveWeapon(string category, string weaponName)
+        {
+            if (allCustomWeapons.ContainsKey(category) && allCustomWeapons[category].ContainsKey(weaponName))
+            {
+                if (allCustomWeapons[category][weaponName] == null)
+                {
+                    Debug.Log("Weapon of category " + category + " and weapon name " + weaponName + " was null!");
+                    return null;
+                }
+                return allCustomWeapons[category][weaponName];
+            }
+            Debug.Log("Weapon of category " + category + " and weapon name " + weaponName + " was not found!");
+            return null;
+        }
+
+        /// <summary>
+        /// Retrieves new custom weapon from UKAPI
+        /// </summary>
+        /// <returns>An array of all custom weapons</returns>
+        public static WeaponInformation[] RetrieveAllWeapons()
+        {
+            List<WeaponInformation> allWeapons = new List<WeaponInformation>();
+            foreach (string category in allCustomWeapons.Keys)
+                foreach (string weaponName in allCustomWeapons[category].Keys)
+                    allWeapons.Add(allCustomWeapons[category][weaponName]);
+            return allWeapons.ToArray();
+        }
+
+        public class WeaponInformation
+        {
+            public GameObject weaponPrefab;
+            public WeaponIcon icon;
+            public int slot;
+
+            public WeaponInformation(GameObject weaponPrefab, int slot = 5)
+            {
+                this.weaponPrefab = weaponPrefab;
+                this.icon = weaponPrefab.GetComponent<WeaponIcon>();
+                this.slot = slot;
+            }
+        }
+        */
+        #endregion
     }
 }

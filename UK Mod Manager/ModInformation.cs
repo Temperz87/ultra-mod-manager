@@ -11,7 +11,7 @@ using UKMM.Loader;
 
 namespace UKMM
 {
-    public class ModInformation
+    public class ModInformation : IComparable<ModInformation>
     {
         public ModType modType;
         public Type mod;
@@ -22,13 +22,12 @@ namespace UKMM
         public bool loadOnStart;
         public bool loaded;
 
-
         public ModInformation(Type mod, ModType modType)
         {
             this.modType = modType;
             this.mod = mod;
 
-            // TODO: Read mod name from toml file
+            // TODO: Read mod name from a manifest file
             if (modType == ModType.BepInPlugin)
             {
                 //modName = GetBepinMetaData(mod).Name;
@@ -51,6 +50,11 @@ namespace UKMM
                 LoadThisMod();
             else
                 UnLoadThisMod();
+        }
+
+        public int CompareTo(ModInformation other)
+        {
+            return String.Compare(modName, other.modName);
         }
 
         public void LoadThisMod()

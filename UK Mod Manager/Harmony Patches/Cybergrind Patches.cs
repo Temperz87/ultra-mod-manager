@@ -15,15 +15,12 @@ namespace UKMM.HarmonyPatches
     {
         public static bool Prefix()
         {
-            majorWasUsed = StatsManager.Instance.majorUsed;
-            StatsManager.Instance.majorUsed = !UKModManager.AllowCyberGrindSubmission || majorWasUsed;
+            bool flag = UKAPI.ShouldSubmitCyberGrindScore();
+            if (!flag)
+                StatsManager.Instance.majorUsed = true;
+            Debug.Log("Flag is " + flag);
             return true;
         }
-        public static void Postfix()
-        {
-            StatsManager.Instance.majorUsed = majorWasUsed;
-        }
-        private static bool majorWasUsed = false;
     }
 
     [HarmonyPatch(typeof(SteamController), "SubmitCyberGrindScore")]
@@ -31,7 +28,9 @@ namespace UKMM.HarmonyPatches
     {
         public static bool Prefix()
         {
-            return UKModManager.AllowCyberGrindSubmission;
+            bool flag = UKAPI.ShouldSubmitCyberGrindScore();
+            Debug.Log("Flag is in submit " + flag);
+            return flag;
         }
     }
 }
