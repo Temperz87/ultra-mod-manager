@@ -8,6 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 using UKMM.Loader;
+using BepInEx;
 
 namespace UKMM
 {
@@ -30,9 +31,10 @@ namespace UKMM
             // TODO: Read mod name from a manifest file
             if (modType == ModType.BepInPlugin)
             {
-                //modName = GetBepinMetaData(mod).Name;
-                modName = mod.Assembly.GetName().Name;
-                modDescription = "Mod descriptions are not supported by BepInEx plugins.";
+                BepInPlugin metaData = UKModManager.GetBepinMetaData(mod);
+                modName = metaData.Name;
+                modVersion = metaData.Version.ToString();
+                modDescription = "Mod unloading and descriptions are not supported by BepInEx plugins.";
             }
             else if (modType == ModType.UKMod)
             {

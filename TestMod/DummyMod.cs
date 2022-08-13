@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UKMM;
 
-[UKPlugin("Custom Arms", "1.0.0", "Custom arms!", false, false)]
+[UKPlugin("Custom Arms", "1.0.0", "Custom arms!", false, true)]
 public class CustomArmMod : UKMod
 {
     private static Harmony harmony;
@@ -507,6 +507,7 @@ public static class CustomArmController
         allArms = new Dictionary<int, CustomArmInfo>();
         allBlueArms = new Dictionary<int, CustomArmInfo>();
         allRedArms = new Dictionary<int, CustomArmInfo>();
+        currentVariation = -1;
     }
 
     public static void AddArmInfo(CustomArmInfo info)

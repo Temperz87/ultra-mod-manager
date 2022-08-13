@@ -80,17 +80,15 @@ namespace UKMM.Loader
             }
         }
 
-        /* For whatever reason, this function does not work
         internal static BepInPlugin GetBepinMetaData(Type t)
         {
-            object[] customAttributes = t.GetCustomAttributes(typeof(BaseUnityPlugin), true);
+            object[] customAttributes = t.GetCustomAttributes(typeof(BepInPlugin), true);
             if (customAttributes.Length == 0)
             {
                 throw new NullReferenceException("Could not find the metadata (BepInPlugin) to BaseUnityPlugin " + t.FullName);
             }
             return (BepInPlugin)customAttributes[0];
         }
-        */
 
         internal static UKPlugin GetUKMetaData(Type t)
         {
