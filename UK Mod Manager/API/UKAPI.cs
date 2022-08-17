@@ -50,6 +50,15 @@ namespace UKMM
             commonBundle = request.assetBundle;
             triedLoadingBundle = true;
             UKModManager.InitializeManager();
+            
+            while (MapLoader.Instance == null)
+                yield return null;
+            Dictionary<string, AssetBundle> bundles = Traverse.Create(MapLoader.Instance).Field("loadedBundles").GetValue() as Dictionary<string, AssetBundle>;
+            if (bundles == null)
+                bundles = new Dictionary<string, AssetBundle>();
+            bundles.Add("common", commonBundle);
+            Traverse.Create(MapLoader.Instance).Field("loadedBundles").SetValue(bundles);
+            MapLoader.Instance.isCommonLoaded = true;
         }
 
         /// <summary>
