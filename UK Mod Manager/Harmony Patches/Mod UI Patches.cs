@@ -20,12 +20,16 @@ namespace UKMM.HarmonyPatches
             if (__instance.pauseMenu.name == "Main Menu (1)") // check to see that we're patching out the main menu's menu, not like an in game menu one
             {
                 bool wasOn = MonoSingleton<PrefsManager>.Instance.GetBool("variationMemory", false);
-                __instance.pauseMenu.transform.Find("Panel").localPosition = new Vector3(0, 325, 0);
-                GameObject newModsButton = GameObject.Instantiate(__instance.pauseMenu.transform.Find("Continue").gameObject, __instance.pauseMenu.transform);
+                __instance.pauseMenu.transform.Find("Panel").localPosition = new Vector3(0, 325, 0); 
+                GameObject newModsButton = GameObject.Instantiate(__instance.pauseMenu.transform.Find("Continue").gameObject, __instance.pauseMenu.transform, true);
                 newModsButton.SetActive(false);
-                newModsButton.transform.localPosition = new Vector3(0, -280, 0);
+                newModsButton.transform.localPosition = new Vector3(0, -260, 0);
                 newModsButton.GetComponentInChildren<Text>(true).text = "MODS";
 
+                Traverse effect = Traverse.Create(newModsButton.GetComponent<HudOpenEffect>());
+                effect.Field("originalWidth").SetValue(1f);
+                effect.Field("originalHeight").SetValue(1f);
+                
                 Transform panel = __instance.pauseMenu.transform.Find("Panel");
                 GameObject discordButton = panel.Find("Discord").gameObject;
                 discordButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-164f, -350f);

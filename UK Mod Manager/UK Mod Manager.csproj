@@ -123,6 +123,9 @@
   <PropertyGroup>
     <PostBuildEvent>IF EXIST "D:\Vidjagames\Steam\steamapps\common\ULTRAKILL\" (
 copy "$(TargetPath)" "D:\Vidjagames\Steam\steamapps\common\ULTRAKILL\Bepinex\plugins\UKMM\UKMM.dll"
+)
+IF EXIST "C:\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\BepInEx\plugins\UKMM\" (
+copy "$(TargetPath)" "C:\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\BepInEx\plugins\UKMM\UKMM.dll"
 )</PostBuildEvent>
   </PropertyGroup>
 </Project>
