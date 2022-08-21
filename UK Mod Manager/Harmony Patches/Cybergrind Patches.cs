@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
-using UKMM.Loader;
+using UMM.Loader;
 
-namespace UKMM.HarmonyPatches
+namespace UMM.HarmonyPatches
 {
     [HarmonyPatch(typeof(FinalCyberRank), "GameOver")]
     public static class Ensure_NoSubmitBadScore

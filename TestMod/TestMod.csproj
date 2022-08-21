@@ -105,9 +105,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\UK Mod Manager\UK Mod Manager.csproj">
+    <ProjectReference Include="..\UK Mod Manager\UltraModManager.csproj">
       <Project>{ddebe751-4b58-4efe-9e8b-a9f8baa98f33}</Project>
-      <Name>UK Mod Manager</Name>
+      <Name>UltraModManager</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

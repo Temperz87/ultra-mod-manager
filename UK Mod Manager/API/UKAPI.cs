@@ -8,10 +8,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using UKMM.Loader;
+using UMM.Loader;
 using Newtonsoft.Json;
 
-namespace UKMM
+namespace UMM
 {
     public static class UKAPI
     {
@@ -28,7 +28,7 @@ namespace UKMM
             if (triedLoadingBundle)
                 yield break;
             SaveFileHandler.LoadData();
-            Debug.Log("UKMM: Trying to load common asset bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
+            Debug.Log("UMM: Trying to load common asset bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
             yield return request;
             int attempts = 1;
@@ -37,7 +37,7 @@ namespace UKMM
                 yield return new WaitForSeconds(0.2f); // why 0.2? I dunno I just chose it man
                 if (attempts >= 5)
                 {
-                    Debug.Log("UKMM: Could not load common asset bundle");
+                    Debug.Log("UMM: Could not load common asset bundle");
                     triedLoadingBundle = true;
                     yield break;
                 }
@@ -49,7 +49,7 @@ namespace UKMM
             Debug.Log("Loaded common asset bundle");
             commonBundle = request.assetBundle;
             triedLoadingBundle = true;
-            UKModManager.InitializeManager();
+            UltraModManager.InitializeManager();
             
             while (MapLoader.Instance == null)
                 yield return null;
@@ -103,7 +103,7 @@ namespace UKMM
         {
             if (commonBundle == null)
             {
-                Debug.LogError("UKMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
+                Debug.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
                 return null;
             }
             return commonBundle.LoadAssetAsync(name);
@@ -118,7 +118,7 @@ namespace UKMM
         {
             if (commonBundle == null)
             {
-                Debug.LogError("UKMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
+                Debug.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
                 return null;
             }
             return commonBundle.LoadAsset(name);
@@ -130,7 +130,7 @@ namespace UKMM
         /// <returns>Returns an array of all found mods</returns>
         public static ModInformation[] GetAllModInformation()
         {
-            return UKModManager.foundMods.ToArray().Clone() as ModInformation[];
+            return UltraModManager.foundMods.ToArray().Clone() as ModInformation[];
         }
 
         /// <summary>
@@ -139,7 +139,20 @@ namespace UKMM
         /// <returns>Returns an array of all loaded mods</returns>
         public static ModInformation[] GetAllLoadedModInformation()
         {
-            return UKModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
+            return UltraModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
+        }
+        
+        public static void Restart() // thanks https://gitlab.com/vtolvr-mods/ModLoader/-/blob/release/Launcher/Program.cs
+        {
+            Application.Quit();
+            Debug.Log("Restarting Ultrakill!");
+            var psi = new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = @"steam://run/1229490",
+                UseShellExecute = true,
+                WindowStyle = System.Diagnostics.ProcessWindowStyle.Minimized
+            };
+            System.Diagnostics.Process.Start(psi);
         }
 
         internal static class SaveFileHandler

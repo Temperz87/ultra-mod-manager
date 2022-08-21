@@ -6,9 +6,9 @@ using UnityEngine;
 using BepInEx;
 using HarmonyLib;
 
-namespace UKMM.Loader
+namespace UMM.Loader
 {
-    [BepInPlugin("UKMM", "UKMM", "1.0.0")]
+    [BepInPlugin("UMM", "UMM", "1.0.0")]
     public class Plugin : BaseUnityPlugin
     {
         private static bool initialized = false;
@@ -17,8 +17,8 @@ namespace UKMM.Loader
         {
             if (!initialized)
             {
-                Debug.Log("UKMM initialize!");
-                new Harmony("ukmm.mainManager").PatchAll();
+                Debug.Log("UMM initializing!");
+                new Harmony("umm.mainManager").PatchAll();
                 StartCoroutine(UKAPI.InitializeAPI());
                 initialized = true;
             }

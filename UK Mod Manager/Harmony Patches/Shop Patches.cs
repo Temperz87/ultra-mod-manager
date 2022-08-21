@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-namespace UKMM.HarmonyPatches
+namespace UMM.HarmonyPatches
 {
     [HarmonyPatch(typeof(ShopZone), "Start")]
     public static class Inject_SoundPackShops

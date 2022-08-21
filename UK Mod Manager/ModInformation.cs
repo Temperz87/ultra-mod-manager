@@ -7,10 +7,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
-using UKMM.Loader;
+using UMM.Loader;
 using BepInEx;
 
-namespace UKMM
+namespace UMM
 {
     public class ModInformation : IComparable<ModInformation>
     {
@@ -31,14 +31,14 @@ namespace UKMM
             // TODO: Read mod name from a manifest file
             if (modType == ModType.BepInPlugin)
             {
-                BepInPlugin metaData = UKModManager.GetBepinMetaData(mod);
+                BepInPlugin metaData = UltraModManager.GetBepinMetaData(mod);
                 modName = metaData.Name;
                 modVersion = metaData.Version.ToString();
                 modDescription = "Mod unloading and descriptions are not supported by BepInEx plugins.";
             }
             else if (modType == ModType.UKMod)
             {
-                UKPlugin metaData = UKModManager.GetUKMetaData(mod);
+                UKPlugin metaData = UltraModManager.GetUKMetaData(mod);
                 modName = metaData.name;
                 modDescription = metaData.description;
                 modVersion = metaData.version;
@@ -63,7 +63,7 @@ namespace UKMM
         {
             if (!loaded)
             {
-                UKModManager.LoadMod(this);
+                UltraModManager.LoadMod(this);
                 loaded = true;
             }
         }
@@ -72,7 +72,7 @@ namespace UKMM
         {
             if (loaded && supportsUnloading)
             {
-                UKModManager.UnloadMod(this);
+                UltraModManager.UnloadMod(this);
                 loaded = false; 
             }
         }

@@ -4,7 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
-using UKMM;
+using UMM;
 
 [UKPlugin("Custom Arms", "1.0.0", "Custom arms!", false, true)]
 public class CustomArmMod : UKMod

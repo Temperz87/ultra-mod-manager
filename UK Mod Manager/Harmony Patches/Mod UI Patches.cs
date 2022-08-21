@@ -6,11 +6,11 @@ using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
-using UKMM.Loader;
+using UMM.Loader;
 using UnityEngine.EventSystems;
 using System.Collections;
 
-namespace UKMM.HarmonyPatches
+namespace UMM.HarmonyPatches
 {
     [HarmonyPatch(typeof(OptionsMenuToManager), "Start")]
     public static class Inject_ModsButton
@@ -21,14 +21,32 @@ namespace UKMM.HarmonyPatches
             {
                 bool wasOn = MonoSingleton<PrefsManager>.Instance.GetBool("variationMemory", false);
                 __instance.pauseMenu.transform.Find("Panel").localPosition = new Vector3(0, 325, 0); 
+
+                void Halve(Transform tf, bool left)
+                {
+                    bool wasActive = tf.gameObject.activeSelf;
+                    tf.gameObject.SetActive(false);
+                    //tf.localScale = new Vector3(.5f, 1f, 1f);
+                    tf.GetComponent<RectTransform>().sizeDelta = new Vector2(480, 80);
+                    tf.Find("Text").localScale = new Vector3(2f, 1f, 1f);
+                    if (left)
+                        tf.localPosition -= new Vector3(120f, 0, 0);
+                    else
+                        tf.localPosition += new Vector3(120f, 0, 0);
+                    Traverse hudEffect = Traverse.Create(tf.gameObject.GetComponent<HudOpenEffect>());
+                    hudEffect.Field("originalWidth").SetValue(.5f);
+                    hudEffect.Field("originalHeight").SetValue(1f);
+                    tf.gameObject.SetActive(wasActive);
+                }
+
+                Transform options = __instance.pauseMenu.transform.Find("Options");
+                Halve(options, true);
+
                 GameObject newModsButton = GameObject.Instantiate(__instance.pauseMenu.transform.Find("Continue").gameObject, __instance.pauseMenu.transform, true);
                 newModsButton.SetActive(false);
-                newModsButton.transform.localPosition = new Vector3(0, -260, 0);
+                newModsButton.transform.localPosition = new Vector3(0, options.localPosition.y, 0);
+                Halve(newModsButton.transform, false);
                 newModsButton.GetComponentInChildren<Text>(true).text = "MODS";
-
-                Traverse effect = Traverse.Create(newModsButton.GetComponent<HudOpenEffect>());
-                effect.Field("originalWidth").SetValue(1f);
-                effect.Field("originalHeight").SetValue(1f);
                 
                 Transform panel = __instance.pauseMenu.transform.Find("Panel");
                 GameObject discordButton = panel.Find("Discord").gameObject;
@@ -38,7 +56,7 @@ namespace UKMM.HarmonyPatches
 
                 GameObject gitButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
                 gitButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -350f);
-                gitButton.GetComponentInChildren<Text>().text = "UKMM SOURCE";
+                gitButton.GetComponentInChildren<Text>().text = "UMM SOURCE";
                 gitButton.GetComponentInChildren<Image>().color = new Color32(191, 191, 191, 255);
                 gitButton.GetComponentInChildren<WebButton>().url = "https://github.com/Temperz87/UK-Mod-Manager";
 
@@ -171,6 +189,21 @@ namespace UKMM.HarmonyPatches
                 });
 
                 newModsButton.SetActive(true);
+
+                Transform quitButton = __instance.pauseMenu.transform.Find("Quit");
+                Halve(quitButton, true);
+
+                GameObject restartButton = GameObject.Instantiate(__instance.pauseMenu.transform.Find("Continue").gameObject, __instance.pauseMenu.transform, true);
+                restartButton.SetActive(false);
+                Button.ButtonClickedEvent restartButtonEvent = restartButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
+                restartButtonEvent.AddListener(delegate
+                {
+                    UKAPI.Restart();
+                });
+                restartButton.transform.localPosition = new Vector3(0, quitButton.localPosition.y, 0);
+                restartButton.GetComponentInChildren<Text>(true).text = "RESTART";
+                restartButton.SetActive(true);
+                Halve(restartButton.transform, false);
             }
         }
     }

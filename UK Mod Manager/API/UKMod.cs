@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 using UnityEngine;
 using UnityEngine.Events;
 
-namespace UKMM
+namespace UMM
 {
     public abstract class UKMod : MonoBehaviour
     {

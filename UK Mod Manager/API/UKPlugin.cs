@@ -7,7 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UnityEngine;
 
-namespace UKMM
+namespace UMM
 {
     public class UKPlugin : Attribute
     {

@@ -9,9 +9,9 @@ using UnityEngine;
 using UnityEngine.Events;
 using BepInEx;
 
-namespace UKMM.Loader
+namespace UMM.Loader
 {
-    public static class UKModManager
+    public static class UltraModManager
     {
         public static List<ModInformation> foundMods = new List<ModInformation>();
         public static List<ModInformation> allLoadedMods = new List<ModInformation>();
@@ -22,7 +22,7 @@ namespace UKMM.Loader
         {
             if (!initialized)
             {
-                Debug.Log("Beginning UKModManager");
+                Debug.Log("Beginning UltraModManager");
                 initialized = true;
                 CollectAssemblies();
                 LoadOnStart();
@@ -31,12 +31,12 @@ namespace UKMM.Loader
 
         private static void CollectAssemblies()
         {
-            DirectoryInfo modsDirectory = new DirectoryInfo(Environment.CurrentDirectory + @"\BepInEx\UKMM Mods\");
+            DirectoryInfo modsDirectory = new DirectoryInfo(Environment.CurrentDirectory + @"\BepInEx\UMM Mods\");
             if (modsDirectory.Exists)
                 foreach (FileInfo info in modsDirectory.GetFiles("*.dll", SearchOption.AllDirectories))
                     LoadFromAssembly(info);
             else
-                Directory.CreateDirectory(Environment.CurrentDirectory + @"\BepInEx\UKMM Mods\");
+                Directory.CreateDirectory(Environment.CurrentDirectory + @"\BepInEx\UMM Mods\");
             Debug.Log("Found " + foundMods.Count + " mods that can be loaded.");
         }
 
@@ -124,7 +124,7 @@ namespace UKMM.Loader
                 newMod = modObject.AddComponent(info.mod) as UKMod;
                 allLoadedMods.Add(info);
                 modObjects.Add(info, modObject);
-                UKPlugin metaData = UKModManager.GetUKMetaData(info.mod);
+                UKPlugin metaData = UltraModManager.GetUKMetaData(info.mod);
                 if (!metaData.allowCyberGrindSubmission)
                     UKAPI.DisableCyberGrindSubmission(info.modName);
                 modObject.SetActive(true);
@@ -156,7 +156,7 @@ namespace UKMM.Loader
                 modObjects.Remove(info);
                 allLoadedMods.Remove(info);
                 GameObject.Destroy(modObject);
-                if (!UKModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
+                if (!UltraModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
                     UKAPI.RemoveDisableCyberGrindReason(info.modName);
                 Debug.Log("successfully unloaded mod " + info.modName);
             }
