@@ -15,6 +15,8 @@ namespace UMM.Loader
     {
         public static List<ModInformation> foundMods = new List<ModInformation>();
         public static List<ModInformation> allLoadedMods = new List<ModInformation>();
+        public static bool outdated = false;
+        public static string newLoaderVersion = "";
         private static bool initialized = false;
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
 
@@ -62,21 +64,31 @@ namespace UMM.Loader
                 foreach (FileInfo info in dInfo.GetFiles("*.dll", SearchOption.AllDirectories))
                     Assembly.LoadFile(info.FullName);
             }
-            Assembly ass = Assembly.LoadFile(fInfo.FullName);
-            foreach (Type type in ass.GetTypes())
+            try
             {
-                ModInformation info;
-                if (type.IsSubclassOf(typeof(UKMod)))
-                    info = new ModInformation(type, ModInformation.ModType.UKMod);
-                else if (type.IsSubclassOf(typeof(BaseUnityPlugin)))
-                    info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
-                else
-                    continue;
-                Debug.Log("Adding mod info " + fInfo.FullName + " " + type.Name);
-                foundMods.Add(info);
-                object retrievedData = UKAPI.SaveFileHandler.RetrieveModData(info.modName, "LoadOnStart");
-                if (retrievedData != null && bool.Parse(retrievedData.ToString()))
-                    info.loadOnStart = true;
+                Assembly ass = Assembly.LoadFile(fInfo.FullName);
+                foreach (Type type in ass.GetTypes())
+                {
+                    ModInformation info;
+                    if (type.IsSubclassOf(typeof(UKMod)))
+                        info = new ModInformation(type, ModInformation.ModType.UKMod);
+                    else if (type.IsSubclassOf(typeof(BaseUnityPlugin)))
+                        info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
+                    else
+                        continue;
+                    Debug.Log("Adding mod info " + fInfo.FullName + " " + type.Name);
+                    foundMods.Add(info);
+                    object retrievedData = UKAPI.SaveFileHandler.RetrieveModData(info.modName, "LoadOnStart");
+                    if (retrievedData != null && bool.Parse(retrievedData.ToString()))
+                        info.loadOnStart = true;
+                }
+            }
+            catch (Exception e)
+            {
+                Debug.Log("Caught exception while trying to load assembly " + fInfo.FullName);
+                Debug.Log(e.ToString());
+                Debug.Log(e.Message);
+                return;
             }
         }
 

@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UMM.Loader;
 using Newtonsoft.Json;
+using UnityEngine.Networking;
 
 namespace UMM
 {
@@ -141,7 +142,9 @@ namespace UMM
         {
             return UltraModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
         }
-        
+        /// <summary>
+        /// Restarts Ultrakill
+        /// </summary>
         public static void Restart() // thanks https://gitlab.com/vtolvr-mods/ModLoader/-/blob/release/Launcher/Program.cs
         {
             Application.Quit();

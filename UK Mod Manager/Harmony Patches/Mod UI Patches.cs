@@ -27,14 +27,14 @@ namespace UMM.HarmonyPatches
                     bool wasActive = tf.gameObject.activeSelf;
                     tf.gameObject.SetActive(false);
                     //tf.localScale = new Vector3(.5f, 1f, 1f);
-                    tf.GetComponent<RectTransform>().sizeDelta = new Vector2(480, 80);
-                    tf.Find("Text").localScale = new Vector3(2f, 1f, 1f);
+                    tf.GetComponent<RectTransform>().sizeDelta = new Vector2(240, 80);
+                    //tf.Find("Text").localScale = new Vector3(2f, 1f, 1f);
                     if (left)
                         tf.localPosition -= new Vector3(120f, 0, 0);
                     else
                         tf.localPosition += new Vector3(120f, 0, 0);
                     Traverse hudEffect = Traverse.Create(tf.gameObject.GetComponent<HudOpenEffect>());
-                    hudEffect.Field("originalWidth").SetValue(.5f);
+                    hudEffect.Field("originalWidth").SetValue(1f);
                     hudEffect.Field("originalHeight").SetValue(1f);
                     tf.gameObject.SetActive(wasActive);
                 }
@@ -58,14 +58,21 @@ namespace UMM.HarmonyPatches
                 gitButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -350f);
                 gitButton.GetComponentInChildren<Text>().text = "UMM SOURCE";
                 gitButton.GetComponentInChildren<Image>().color = new Color32(191, 191, 191, 255);
-                gitButton.GetComponentInChildren<WebButton>().url = "https://github.com/Temperz87/UK-Mod-Manager";
+                gitButton.GetComponentInChildren<WebButton>().url = "https://github.com/Temperz87/ultra-mod-manager";
 
                 GameObject moreModsButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
                 moreModsButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -405.5f);
                 moreModsButton.GetComponentInChildren<Text>().text = "BROWSE MODS";
                 moreModsButton.GetComponentInChildren<Image>().color = new Color32(211, 218, 114, 255);
                 moreModsButton.GetComponentInChildren<WebButton>().url = "https://docs.google.com/spreadsheets/d/1x8P3GcdfWraZX1kz3bbHJIiY4hozxe8k1oieOm_fuL0/edit?usp=sharing";
-
+                if (UltraModManager.outdated)
+                {
+                    GameObject outDatedButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
+                    outDatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -461f);
+                    outDatedButton.GetComponentInChildren<Text>().text = "NEW VERSION FOUND: " + UltraModManager.newLoaderVersion.Trim();
+                    outDatedButton.GetComponentInChildren<Image>().color = new Color32(69, 0, 69, 255);
+                    outDatedButton.GetComponentInChildren<WebButton>().url = "https://github.com/Temperz87/ultra-mod-manager/releases/tag/" + UltraModManager.newLoaderVersion;
+                }
                 GameObject modsMenu = GameObject.Instantiate(__instance.optionsMenu, __instance.transform);
                 modsMenu.SetActive(false);
                 for (int i = 0; i < modsMenu.transform.childCount; i++)
@@ -187,7 +194,6 @@ namespace UMM.HarmonyPatches
                     __instance.pauseMenu.SetActive(false);
                     modsMenu.SetActive(true);
                 });
-
                 newModsButton.SetActive(true);
 
                 Transform quitButton = __instance.pauseMenu.transform.Find("Quit");

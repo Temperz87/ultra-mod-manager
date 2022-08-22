@@ -7,7 +7,7 @@ using UnityEngine.UI;
 namespace UMM.HarmonyPatches
 {
     [HarmonyPatch(typeof(ShopZone), "Start")]
-    public static class Inject_SoundPackShops
+    public static class Inject_CustomWeaponShop
     {
         public static void Prefix(ShopZone __instance)
         {
