@@ -7,7 +7,7 @@ namespace UMM.Loader
 {
     public static class VersionHandler
     {
-        public const string VERSION = "0.4.1"; // Should this be hardcoded? No it should not be
+        public const string VERSION = "0.4.2"; // Should this be hardcoded? No it should not be
         public static  IEnumerator CheckVersion()
         {
             Debug.Log("UMM: Trying to get verison.");

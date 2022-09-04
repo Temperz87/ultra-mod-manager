@@ -87,7 +87,6 @@ namespace UMM.Loader
             {
                 Debug.Log("Caught exception while trying to load assembly " + fInfo.FullName);
                 Debug.Log(e.ToString());
-                Debug.Log(e.Message);
                 return;
             }
         }

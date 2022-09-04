@@ -24,14 +24,13 @@ namespace UMM
         /// <summary>
         /// Returns whether or not leaderboard submissions are allowed.
         /// </summary>
-        public static bool CanSubmitLeaderboardScore {
-            get {
-                Debug.Log("Not submitting cybergrind");
-                foreach(string reason in disableCybergrindReasons)
-                    Debug.Log(" reason: " + reason);
+        public static bool CanSubmitCybergrindScore
+        {
+            get
+            {
                 return disableCybergrindReasons.Count == 0;
             }
-		}
+        }
 
         /// <summary>
         /// Returns a clone of all found <see cref="ModInformation"/> instances.
@@ -87,7 +86,7 @@ namespace UMM
         /// <summary>
         /// Disables CyberGrind submission, CyberGrind submissions can only be enabled if nothing else disables it
         /// </summary>
-        /// <param name="reason">Why you CyberGrind is disabled, if you want to reenable it later you can do so by removing the reason</param>
+        /// <param name="reason">Why CyberGrind is disabled, if you want to reenable it later you can do so by removing the reason</param>
         public static void DisableCyberGrindSubmission(string reason)
         {
             if (!disableCybergrindReasons.Contains(reason))
@@ -107,7 +106,7 @@ namespace UMM
         }
 
         [Obsolete("Use CanSubmitLeaderboardScore instead.")]
-        public static bool ShouldSubmitCyberGrindScore() => CanSubmitLeaderboardScore;
+        public static bool ShouldSubmitCyberGrindScore() => CanSubmitCybergrindScore;
 
         /// <summary>
         /// Tries to create a Ultrakill asset load request from ULTRAKILL_Data/StreamingAssets/common, note that this request has to be awaited
@@ -166,7 +165,7 @@ namespace UMM
             //strCmdText = "/K \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe\""/* + System.Diagnostics.Process.GetCurrentProcess().Id.ToString() + "\""*/;
             ////strCmdText = "/K \"" + Environment.CurrentDirectory + "\\ULTRAKILL.exe\"";
             //System.Diagnostics.Process.Start("CMD.exe", strCmdText);
-            
+
             //var psi = new System.Diagnostics.ProcessStartInfo 
             //{
             //    FileName = Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe",
