@@ -15,7 +15,7 @@ namespace UMM.HarmonyPatches
     {
         public static bool Prefix()
         {
-            bool flag = UKAPI.ShouldSubmitCyberGrindScore();
+            bool flag = UKAPI.CanSubmitLeaderboardScore;
             if (!flag)
                 StatsManager.Instance.majorUsed = true;
             Debug.Log("Flag is " + flag);
@@ -28,7 +28,7 @@ namespace UMM.HarmonyPatches
     {
         public static bool Prefix()
         {
-            bool flag = UKAPI.ShouldSubmitCyberGrindScore();
+            bool flag = UKAPI.CanSubmitLeaderboardScore;
             Debug.Log("Should submit cybergrind score is " + flag);
             return flag;
         }

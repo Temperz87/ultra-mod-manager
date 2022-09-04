@@ -22,6 +22,28 @@ namespace UMM
         private static List<string> disableCybergrindReasons = new List<string>();
 
         /// <summary>
+        /// Returns whether or not leaderboard submissions are allowed.
+        /// </summary>
+        public static bool CanSubmitLeaderboardScore {
+            get {
+                Debug.Log("Not submitting cybergrind");
+                foreach(string reason in disableCybergrindReasons)
+                    Debug.Log(" reason: " + reason);
+                return disableCybergrindReasons.Count == 0;
+            }
+		}
+
+        /// <summary>
+        /// Returns a clone of all found <see cref="ModInformation"/> instances.
+        /// </summary>
+        public static ModInformation[] AllModInfoClone => UltraModManager.foundMods.ToArray().Clone() as ModInformation[];
+
+        /// <summary>
+        /// Returns a clone of all loaded <see cref="ModInformation"/> instances.
+        /// </summary>
+        public static ModInformation[] AllLoadedModInfoClone => UltraModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
+
+        /// <summary>
         /// Initializes the API by loading the save file and common asset bundle
         /// </summary>
         internal static IEnumerator InitializeAPI()
@@ -84,16 +106,8 @@ namespace UMM
                 Debug.Log("Tried to remove cg reason " + reason + " but could not find it!");
         }
 
-        /// <summary>
-        /// Gets whether or not CyberGrind submissions are allowed
-        /// </summary>
-        public static bool ShouldSubmitCyberGrindScore()
-        {
-            Debug.Log("Not submitting cybergrind");
-            foreach (string reason in disableCybergrindReasons)
-                Debug.Log(" reason: " + reason);
-            return disableCybergrindReasons.Count == 0;
-        }
+        [Obsolete("Use CanSubmitLeaderboardScore instead.")]
+        public static bool ShouldSubmitCyberGrindScore() => CanSubmitLeaderboardScore;
 
         /// <summary>
         /// Tries to create a Ultrakill asset load request from ULTRAKILL_Data/StreamingAssets/common, note that this request has to be awaited
@@ -125,23 +139,11 @@ namespace UMM
             return commonBundle.LoadAsset(name);
         }
 
-        /// <summary>
-        /// Gets all mod information, loaded or not
-        /// </summary>
-        /// <returns>Returns an array of all found mods</returns>
-        public static ModInformation[] GetAllModInformation()
-        {
-            return UltraModManager.foundMods.ToArray().Clone() as ModInformation[];
-        }
+        [Obsolete("Use AllModInfoClone instead.")]
+        public static ModInformation[] GetAllModInformation() => AllModInfoClone;
 
-        /// <summary>
-        /// Gets all loaded mod information
-        /// </summary>
-        /// <returns>Returns an array of all loaded mods</returns>
-        public static ModInformation[] GetAllLoadedModInformation()
-        {
-            return UltraModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
-        }
+        [Obsolete("Use AllLoadedModInfoClone instead.")]
+        public static ModInformation[] GetAllLoadedModInformation() => AllLoadedModInfoClone;
 
         /// <summary>
         /// Restarts Ultrakill

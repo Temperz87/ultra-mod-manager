@@ -101,7 +101,7 @@ namespace UMM.HarmonyPatches
                 GameObject.Destroy(hoverText.GetComponent<Button>());
                 hoverText.SetActive(false);
 
-                ModInformation[] information = UKAPI.GetAllModInformation();
+                ModInformation[] information = UKAPI.AllModInfoClone;
                 if (information.Length > 0)
                 {
                     Array.Sort(information);
