@@ -181,7 +181,11 @@ namespace UMM.HarmonyPatches
                     content.gameObject.SetActive(false);
                     hoverText.SetActive(true);
                     hoverText.transform.localPosition += new Vector3(0f, 260f, 0f);
-                    hoverText.GetComponentInChildren<Text>().text = "NO MODS FOUND";
+                    Text hText = hoverText.GetComponentInChildren<Text>();
+                    hText.text = "NO MODS FOUND\n" + Environment.CurrentDirectory + @"\BepInEx\UMM Mods\";
+                    hText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                    hText.verticalOverflow = VerticalWrapMode.Overflow;
+                    hText.fontSize /= 2;
                 }
 
                 __instance.variationMemory.gameObject.SetActive(true);

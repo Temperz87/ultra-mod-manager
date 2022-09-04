@@ -51,7 +51,7 @@ namespace UMM
             commonBundle = request.assetBundle;
             triedLoadingBundle = true;
             UltraModManager.InitializeManager();
-            
+
             while (MapLoader.Instance == null)
                 yield return null;
             Dictionary<string, AssetBundle> bundles = Traverse.Create(MapLoader.Instance).Field("loadedBundles").GetValue() as Dictionary<string, AssetBundle>;
@@ -89,7 +89,7 @@ namespace UMM
         /// </summary>
         public static bool ShouldSubmitCyberGrindScore()
         {
-            Debug.Log("Not submitting cybergrind" );
+            Debug.Log("Not submitting cybergrind");
             foreach (string reason in disableCybergrindReasons)
                 Debug.Log(" reason: " + reason);
             return disableCybergrindReasons.Count == 0;
@@ -142,13 +142,15 @@ namespace UMM
         {
             return UltraModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
         }
+
         /// <summary>
         /// Restarts Ultrakill
-        /// </summary>
+        /// </summary> 
         public static void Restart() // thanks https://gitlab.com/vtolvr-mods/ModLoader/-/blob/release/Launcher/Program.cs
         {
             Application.Quit();
             Debug.Log("Restarting Ultrakill!");
+
             var psi = new System.Diagnostics.ProcessStartInfo
             {
                 FileName = @"steam://run/1229490",
@@ -156,6 +158,21 @@ namespace UMM
                 WindowStyle = System.Diagnostics.ProcessWindowStyle.Minimized
             };
             System.Diagnostics.Process.Start(psi);
+
+            //Debug.Log("Path is \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\UltrakillRestarter.exe\"");
+            //string strCmdText;
+            //strCmdText = "/K \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe\""/* + System.Diagnostics.Process.GetCurrentProcess().Id.ToString() + "\""*/;
+            ////strCmdText = "/K \"" + Environment.CurrentDirectory + "\\ULTRAKILL.exe\"";
+            //System.Diagnostics.Process.Start("CMD.exe", strCmdText);
+            
+            //var psi = new System.Diagnostics.ProcessStartInfo 
+            //{
+            //    FileName = Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe",
+            //    UseShellExecute = true,
+            //    WindowStyle = System.Diagnostics.ProcessWindowStyle.Minimized,
+            //    Arguments = System.Diagnostics.Process.GetCurrentProcess().Id.ToString()
+            //};
+            //System.Diagnostics.Process.Start(psi);
         }
 
         internal static class SaveFileHandler
@@ -243,7 +260,6 @@ namespace UMM
                 }
             }
         }
-
 
         #region CustomWeapons
         /* Shelved for now due to not being worth implementing over other features, will do later if the need arrises

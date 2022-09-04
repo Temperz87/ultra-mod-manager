@@ -5,10 +5,11 @@ using UnityEngine.Networking;
 using BepInEx;
 using HarmonyLib;
 using Newtonsoft.Json.Linq;
+using System;
 
 namespace UMM.Loader
 {
-    [BepInPlugin("UMM", "UMM", VersionHandler.versionString)]
+    [BepInPlugin("UMM", "UMM", VersionHandler.VERSION)]
     public class Plugin : BaseUnityPlugin
     {
         private static bool initialized = false;

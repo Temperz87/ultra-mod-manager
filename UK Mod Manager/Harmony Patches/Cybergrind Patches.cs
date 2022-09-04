@@ -29,7 +29,7 @@ namespace UMM.HarmonyPatches
         public static bool Prefix()
         {
             bool flag = UKAPI.ShouldSubmitCyberGrindScore();
-            Debug.Log("Flag is in submit " + flag);
+            Debug.Log("Should submit cybergrind score is " + flag);
             return flag;
         }
     }
