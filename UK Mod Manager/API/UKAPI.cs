@@ -256,6 +256,16 @@ namespace UMM
                         savedData[modName].Remove(key);
                 }
             }
+
+            /// <summary>
+            /// Checks if persistent mod data exists from a key and a mod name
+            /// </summary>
+            /// <param name="modName">The name of the mod to remove data from</param>
+            /// <param name="key">The key for the data</param>
+            public static bool EnsureModData(string modName, string key)
+            {
+                return savedData.ContainsKey(modName) && savedData[modName].ContainsKey(key);
+            }
         }
 
         #region CustomWeapons

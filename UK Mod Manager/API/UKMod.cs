@@ -202,9 +202,36 @@ namespace UMM
         /// Removes persistent mod data shared across all mods from a given key
         /// </summary>
         /// <param name="key">The name of the value you want to remove</param>
-        public static void RemoveUniversalModData(string key)
+        public static void RemovePersistentUniversalModData(string key)
         {
             UKAPI.SaveFileHandler.RemoveModData("allPersistentModData", key);
+        }
+
+        /// <summary>
+        /// Ensures persistent mod data exists shared across all mods from a given key
+        /// </summary>
+        /// <param name="key">The name of the value you want to ensure exists</param>
+        public static bool UniversalModDataExists(string key)
+        {
+            return UKAPI.SaveFileHandler.EnsureModData("allPersistentModData", key);
+        }
+
+        /// <summary>
+        /// Ensures persistent mod data exists from a given key
+        /// <param name="key">The name of the value you want to ensure exists</param>
+        public bool PersistentModDataExists(string key)
+        {
+            return UKAPI.SaveFileHandler.EnsureModData(metaData.name, key);
+        }
+
+        /// <summary>
+        /// Ensures persistent mod data exists from a given key and a mod name
+        /// </summary>
+        /// <param name="key">Name of value you want ot ensure exists</param>
+        /// <param name="modName">Name of mod to get the data from</param>
+        public static bool PersistentModDataExists(string key, string modName)
+        {
+            return UKAPI.SaveFileHandler.EnsureModData(modName, key);
         }
     }
 }
