@@ -1,11 +1,6 @@
-﻿using Newtonsoft.Json;
-using System.Collections;
-using UnityEngine;
-using UnityEngine.Networking;
+﻿using UnityEngine;
 using BepInEx;
 using HarmonyLib;
-using Newtonsoft.Json.Linq;
-using System;
 
 namespace UMM.Loader
 {

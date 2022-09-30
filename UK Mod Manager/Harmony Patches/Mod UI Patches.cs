@@ -1,14 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using HarmonyLib;
 using UnityEngine;
 using UnityEngine.UI;
 using UMM.Loader;
 using UnityEngine.EventSystems;
-using System.Collections;
 
 namespace UMM.HarmonyPatches
 {
