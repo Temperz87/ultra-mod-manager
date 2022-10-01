@@ -79,7 +79,7 @@ namespace UMM
         }
 
         /// <summary>
-        /// Disables CyberGrind submission, CyberGrind submissions can only be enabled if nothing else disables it
+        /// Disables CyberGrind score submission, CyberGrind submissions can only be re-enabled if nothing else disables it
         /// </summary>
         /// <param name="reason">Why CyberGrind is disabled, if you want to reenable it later you can do so by removing the reason</param>
         public static void DisableCyberGrindSubmission(string reason)
@@ -89,7 +89,7 @@ namespace UMM
         }
 
         /// <summary>
-        /// Disables CyberGrind submission, cybergrind submissions can only be enabled if nothing else disables it
+        /// Removes a Cybergrind disable reason if found, Cybergrind score submissions will only be enabled if there aren't any reasons to disable it
         /// </summary>
         /// <param name="reason">The reason to remove</param>
         public static void RemoveDisableCyberGrindReason(string reason)

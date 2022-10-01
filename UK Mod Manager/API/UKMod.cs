@@ -208,15 +208,6 @@ namespace UMM
         }
 
         /// <summary>
-        /// Ensures persistent mod data exists shared across all mods from a given key
-        /// </summary>
-        /// <param name="key">The name of the value you want to ensure exists</param>
-        public static bool UniversalModDataExists(string key)
-        {
-            return UKAPI.SaveFileHandler.EnsureModData("allPersistentModData", key);
-        }
-
-        /// <summary>
         /// Ensures persistent mod data exists from a given key
         /// <param name="key">The name of the value you want to ensure exists</param>
         public bool PersistentModDataExists(string key)
@@ -232,6 +223,15 @@ namespace UMM
         public static bool PersistentModDataExists(string key, string modName)
         {
             return UKAPI.SaveFileHandler.EnsureModData(modName, key);
+        }
+
+        /// <summary>
+        /// Ensures persistent mod data exists shared across all mods from a given key
+        /// </summary>
+        /// <param name="key">The name of the value you want to ensure exists</param>
+        public static bool UniversalModDataExists(string key)
+        {
+            return UKAPI.SaveFileHandler.EnsureModData("allPersistentModData", key);
         }
     }
 }
