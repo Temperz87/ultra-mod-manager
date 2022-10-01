@@ -30,7 +30,6 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
-
   <ItemGroup>
     <Reference Include="0Harmony">
       <HintPath>$(BepInExCoreDir)\0Harmony.dll</HintPath>
@@ -111,7 +110,6 @@
   <ItemGroup>
     <Compile Include="Harmony Patches\Cybergrind Patches.cs" />
     <Compile Include="Harmony Patches\Mod UI Patches.cs" />
-    <Compile Include="Harmony Patches\Shop Patches.cs" />
     <Compile Include="ModInformation.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="API\UKAPI.cs" />
@@ -125,22 +123,18 @@
     <WCFMetadata Include="Connected Services\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
-
   <PropertyGroup>
     <ManagedDir>$(ULTRAKILLPath)/ULTRAKILL_Data/Managed/</ManagedDir>
     <BepInExRootDir>$(ULTRAKILLPath)/BepInEx/</BepInExRootDir>
     <BepInExCoreDir>$(BepInExRootDir)/core/</BepInExCoreDir>
     <BepInExPluginsDir>$(BepInExRootDir)/plugins/</BepInExPluginsDir>
   </PropertyGroup>
-
   <ItemGroup>
     <ModDlls Include="$(OutDir)/$(AssemblyName).dll" />
   </ItemGroup>
-
   <Target Name="WarnBeforeBuild" BeforeTargets="BeforeBuild">
     <Error Condition="!Exists($(ULTRAKILLPath))" Text="ULTRAKILLPath not set, create a .csproj.user file that sets this property to compile" />
   </Target>
-
   <Target Name="CopyModDlls" AfterTargets="AfterBuild">
     <Copy SourceFiles="@(ModDlls)" DestinationFolder="$(BepInExRootDir)/plugins/UMM" />
   </Target>
