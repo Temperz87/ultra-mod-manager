@@ -7,6 +7,7 @@ using System.Reflection;
 using UnityEngine;
 using UMM.Loader;
 using Newtonsoft.Json;
+using UnityEngine.SceneManagement;
 
 namespace UMM
 {
@@ -76,6 +77,12 @@ namespace UMM
             bundles.Add("common", commonBundle);
             Traverse.Create(MapLoader.Instance).Field("loadedBundles").SetValue(bundles);
             MapLoader.Instance.isCommonLoaded = true;
+            
+            string[] arr = Environment.GetCommandLineArgs(); // This is here to ensure that the common asset bundle is loaded correctly before loading a level
+            if (arr != null)
+                foreach (string str in arr)
+                    if (str != null && (str.Contains("sandbox") || str.Contains("uk_construct")))
+                        SceneManager.LoadScene("uk_construct");
         }
 
         /// <summary>

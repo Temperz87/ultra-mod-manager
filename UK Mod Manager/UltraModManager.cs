@@ -1,9 +1,9 @@
-﻿using System;
+﻿using BepInEx;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
-using BepInEx;
 
 namespace UMM.Loader
 {
