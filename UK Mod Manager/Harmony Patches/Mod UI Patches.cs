@@ -8,9 +8,9 @@ using UnityEngine.EventSystems;
 namespace UMM.HarmonyPatches
 {
     [HarmonyPatch(typeof(OptionsMenuToManager), "Start")]
-    public static class Inject_ModsButton
+    static class Inject_ModsButton
     {
-        public static void Prefix(OptionsMenuToManager __instance)
+        static void Prefix(OptionsMenuToManager __instance)
         {
             if (__instance.pauseMenu.name == "Main Menu (1)") // check to see that we're patching out the main menu's menu, not like an in game menu one
             {
