@@ -11,8 +11,8 @@ namespace UMM.Loader
     {
         public static List<ModInformation> foundMods = new List<ModInformation>();
         public static List<ModInformation> allLoadedMods = new List<ModInformation>();
-        public static bool outdated = false;
-        public static string newLoaderVersion = "";
+        public static bool outdated { get; internal set; } = false;
+        public static string newLoaderVersion { get; internal set; } = "";
         private static bool initialized = false;
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
 

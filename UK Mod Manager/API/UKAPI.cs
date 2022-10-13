@@ -13,7 +13,7 @@ namespace UMM
 {
     public static class UKAPI
     {
-        public static bool triedLoadingBundle = false;
+        public static bool triedLoadingBundle { get; private set; } = false;
         private static AssetBundle commonBundle;
         private static List<string> disableCybergrindReasons = new List<string>();
 

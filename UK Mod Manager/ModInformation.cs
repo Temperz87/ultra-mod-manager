@@ -6,14 +6,14 @@ namespace UMM
 {
     public class ModInformation : IComparable<ModInformation>
     {
-        public ModType modType;
-        public Type mod;
-        public string modName;
-        public string modDescription;
-        public string modVersion;
-        public bool supportsUnloading;
-        public bool loadOnStart;
-        public bool loaded;
+        public ModType modType { get; }
+        public Type mod { get; }
+        public string modName { get; }
+        public string modDescription { get; }
+        public string modVersion { get; }
+        public bool supportsUnloading { get; }
+        public bool loadOnStart { get; internal set; }
+        public bool loaded { get; private set; }
 
         public ModInformation(Type mod, ModType modType)
         {
