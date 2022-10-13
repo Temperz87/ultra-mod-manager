@@ -8,7 +8,7 @@ namespace UMM.Loader
     public class Plugin : BaseUnityPlugin
     {
         private static bool initialized = false;
-        public void Start()
+        private void Start()
         {
             if (!initialized)
             {
@@ -20,7 +20,7 @@ namespace UMM.Loader
             }
         }
 
-        public void OnApplicationQuit()
+        private void OnApplicationQuit()
         {
             UKAPI.SaveFileHandler.DumpFile();
         }
