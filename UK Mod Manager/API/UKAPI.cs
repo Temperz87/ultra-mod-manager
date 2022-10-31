@@ -219,7 +219,7 @@ namespace UMM
             /// <param name="modName">The name of the mod to retrieve data from</param>
             /// <param name="key">The value you want</param>
             /// <returns>The mod data if found, otherwise null</returns>
-            public static string RetrieveModData(string modName, string key)
+            public static string RetrieveModData(string key, string modName)
             {
                 if (savedData.ContainsKey(modName))
                 {

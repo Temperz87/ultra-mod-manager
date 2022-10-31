@@ -71,7 +71,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public string RetrieveStringPersistentModData(string key)
         {
-            return UKAPI.SaveFileHandler.RetrieveModData(metaData.name, key);
+            return UKAPI.SaveFileHandler.RetrieveModData(key, metaData.name);
         }
 
         /// <summary>
@@ -108,7 +108,7 @@ namespace UMM
         /// <param name="modName">Name of mod to get the data from</param>
         public static string RetrieveStringPersistentModData(string key, string modName)
         {
-            return UKAPI.SaveFileHandler.RetrieveModData(modName, key);
+            return UKAPI.SaveFileHandler.RetrieveModData(key, modName);
         }
 
         /// <summary>
@@ -147,7 +147,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public static string RetrieveStringPersistentUniversalModData(string key)
         {
-            return UKAPI.SaveFileHandler.RetrieveModData("allPersistentModData", key);
+            return UKAPI.SaveFileHandler.RetrieveModData(key, "allPersistentModData");
         }
 
         /// <summary>

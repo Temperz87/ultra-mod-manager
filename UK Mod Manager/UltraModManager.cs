@@ -74,7 +74,7 @@ namespace UMM.Loader
                         continue;
                     Debug.Log("Adding mod info " + fInfo.FullName + " " + type.Name);
                     foundMods.Add(info);
-                    object retrievedData = UKAPI.SaveFileHandler.RetrieveModData(info.modName, "LoadOnStart");
+                    object retrievedData = UKAPI.SaveFileHandler.RetrieveModData("LoadOnStart", info.modName);
                     if (retrievedData != null && bool.Parse(retrievedData.ToString()))
                         info.loadOnStart = true;
                 }
