@@ -7,7 +7,7 @@ namespace UMM.Loader
 {
     public static class VersionHandler
     {
-        public const string VERSION = "0.4.3"; // Should this be hardcoded? No it should not be
+        public const string VERSION = "0.4.4"; // Should this be hardcoded? No it should not be
         public static  IEnumerator CheckVersion()
         {
             Debug.Log("UMM: Trying to get verison.");
@@ -25,7 +25,7 @@ namespace UMM.Loader
                     yield break;
                 }
                 string text = www.downloadHandler.text;
-                Debug.Log(text);
+                //Debug.Log(text);
                 JArray jObjects = JArray.Parse(text);
                 string latestVersion = jObjects[0].Value<string>("name");
                 if (latestVersion != VERSION)
