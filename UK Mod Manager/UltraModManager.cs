@@ -91,7 +91,7 @@ namespace UMM.Loader
             object[] customAttributes = t.GetCustomAttributes(typeof(BepInPlugin), true);
             if (customAttributes.Length == 0)
             {
-                throw new NullReferenceException("Could not find the metadata (BepInPlugin) to BaseUnityPlugin " + t.FullName);
+                throw new Exception("Could not find the metadata (BepInPlugin) to BaseUnityPlugin " + t.FullName);
             }
             return (BepInPlugin)customAttributes[0];
         }
@@ -101,7 +101,7 @@ namespace UMM.Loader
             object[] customAttributes = t.GetCustomAttributes(typeof(UKPlugin), true);
             if (customAttributes.Length == 0)
             {
-                throw new NullReferenceException("Could not find the metadata (UKPlugin) to UKMod " + t.FullName);
+                throw new Exception("Could not find the metadata (UKPlugin) to UKMod " + t.FullName);
             }
             return (UKPlugin)customAttributes[0];
         }
