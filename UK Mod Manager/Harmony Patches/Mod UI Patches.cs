@@ -8,9 +8,9 @@ using UnityEngine.EventSystems;
 namespace UMM.HarmonyPatches
 {
     [HarmonyPatch(typeof(OptionsMenuToManager), "Start")]
-    static class Inject_ModsButton
+    internal static class Inject_ModsButton
     {
-        static void Prefix(OptionsMenuToManager __instance)
+        private static void Prefix(OptionsMenuToManager __instance)
         {
             if (__instance.pauseMenu.name == "Main Menu (1)") // check to see that we're patching out the main menu's menu, not like an in game menu one
             {
@@ -200,7 +200,7 @@ namespace UMM.HarmonyPatches
 
                 GameObject restartButton = GameObject.Instantiate(__instance.pauseMenu.transform.Find("Continue").gameObject, __instance.pauseMenu.transform, true);
                 restartButton.SetActive(false);
-                Button.ButtonClickedEvent restartButtonEvent = restartButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
+                Button.ButtonClickedEvent restartButtonEvent = restartButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent(); // I have no memory of writing this, when did this get here?
                 restartButtonEvent.AddListener(delegate
                 {
                     UKAPI.Restart();

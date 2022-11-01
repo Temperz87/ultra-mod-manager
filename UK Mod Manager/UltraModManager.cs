@@ -125,7 +125,7 @@ namespace UMM.Loader
                     return;
                 }
                 if (!info.mod.IsSubclassOf(typeof(UKMod)))
-                    throw new ArgumentException("LoadMod(Type mod) was called using a type that did not inherit from UKMod or BaseUnityPlugin, type name is " + info.mod.Name);
+                    throw new ArgumentException("LoadMod was called using a type that did not inherit from UKMod or BaseUnityPlugin, type name is " + info.mod.Name);
                 GameObject.DontDestroyOnLoad(modObject);
                 modObject.SetActive(false);
                 newMod = modObject.AddComponent(info.mod) as UKMod;
@@ -155,7 +155,7 @@ namespace UMM.Loader
         {
             if (modObjects.ContainsKey(info) && info.supportsUnloading)
             {
-                Debug.Log("trying to unload mod " + info.modName);
+                Debug.Log("Trying to unload mod " + info.modName);
                 GameObject modObject = modObjects[info];
                 UKMod mod = modObject.GetComponent<UKMod>();
                 mod.OnModUnloaded.Invoke();
@@ -165,7 +165,7 @@ namespace UMM.Loader
                 GameObject.Destroy(modObject);
                 if (!UltraModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
                     UKAPI.RemoveDisableCyberGrindReason(info.modName);
-                Debug.Log("successfully unloaded mod " + info.modName);
+                Debug.Log("Successfully unloaded mod " + info.modName);
             }
         }
     }
