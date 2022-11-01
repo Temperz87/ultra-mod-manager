@@ -8,8 +8,8 @@ namespace UMM
     public abstract class UKMod : MonoBehaviour
     {
         public UnityEvent OnModUnloaded = new UnityEvent();
-        public string modFolder;
-        public UKPlugin metaData;
+        public string modFolder { get; internal set; }
+        public UKPlugin metaData { get; internal set; }
         // maybe include logo???
 
         public UKMod()

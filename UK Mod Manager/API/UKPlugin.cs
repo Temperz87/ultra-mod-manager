@@ -4,11 +4,11 @@ namespace UMM
 {
     public class UKPlugin : Attribute
     {
-        public string name;
-        public string version;
-        public string description;
-        public bool allowCyberGrindSubmission;
-        public bool unloadingSupported;
+        public string name { get; }
+        public string version { get; }
+        public string description { get; }
+        public bool allowCyberGrindSubmission { get; }
+        public bool unloadingSupported { get; }
 
         public UKPlugin(string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
         {
