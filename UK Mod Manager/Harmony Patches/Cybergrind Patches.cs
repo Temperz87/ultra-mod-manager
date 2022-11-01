@@ -1,4 +1,5 @@
 ﻿using HarmonyLib;
+using UMM.Loader;
 using UnityEngine;
 
 namespace UMM.HarmonyPatches
@@ -11,7 +12,7 @@ namespace UMM.HarmonyPatches
             bool flag = UKAPI.CanSubmitCybergrindScore;
             if (!flag)
                 StatsManager.Instance.majorUsed = true;
-            Debug.Log("Should submit Cybergrind score is " + flag);
+            Plugin.logger.LogDebug("Should submit Cybergrind score is " + flag);
             return true;
         }
     }
@@ -22,7 +23,7 @@ namespace UMM.HarmonyPatches
         private static bool Prefix()
         {
             bool flag = UKAPI.CanSubmitCybergrindScore;
-            Debug.Log("Should submit cybergrind score is " + flag);
+            Plugin.logger.LogDebug("Should submit cybergrind score is " + flag);
             return flag;
         }
     }

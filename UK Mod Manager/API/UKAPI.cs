@@ -46,7 +46,7 @@ namespace UMM
             if (triedLoadingBundle)
                 yield break;
             SaveFileHandler.LoadData();
-            Debug.Log("UMM: Trying to load common asset bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
+            Plugin.logger.LogInfo("Trying to load common asset bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
             yield return request;
             int attempts = 1;
@@ -55,7 +55,7 @@ namespace UMM
                 yield return new WaitForSeconds(0.2f); // why 0.2? I dunno I just chose it man
                 if (attempts >= 5)
                 {
-                    Debug.Log("UMM: Could not load common asset bundle");
+                    Plugin.logger.LogInfo("Could not load common asset bundle");
                     triedLoadingBundle = true;
                     yield break;
                 }
@@ -64,7 +64,7 @@ namespace UMM
                 attempts++;
             }
 
-            Debug.Log("Loaded common asset bundle");
+            Plugin.logger.LogInfo("Loaded common asset bundle");
             commonBundle = request.assetBundle;
             triedLoadingBundle = true;
             UltraModManager.InitializeManager();
@@ -104,7 +104,7 @@ namespace UMM
             if (disableCybergrindReasons.Contains(reason))
                 disableCybergrindReasons.Remove(reason);
             else
-                Debug.Log("Tried to remove cg reason " + reason + " but could not find it!");
+                Plugin.logger.LogError("Tried to remove cg reason " + reason + " but could not find it!");
         }
 
         [Obsolete("Use CanSubmitLeaderboardScore instead.")]
@@ -119,7 +119,7 @@ namespace UMM
         {
             if (commonBundle == null)
             {
-                Debug.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
+                Plugin.logger.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
                 return null;
             }
             return commonBundle.LoadAssetAsync(name);
@@ -134,7 +134,7 @@ namespace UMM
         {
             if (commonBundle == null)
             {
-                Debug.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
+                Plugin.logger.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
                 return null;
             }
             return commonBundle.LoadAsset(name);
@@ -152,7 +152,7 @@ namespace UMM
         public static void Restart() // thanks https://gitlab.com/vtolvr-mods/ModLoader/-/blob/release/Launcher/Program.cs
         {
             Application.Quit();
-            Debug.Log("Restarting Ultrakill!");
+            Plugin.logger.LogMessage("Restarting Ultrakill!");
 
             var psi = new System.Diagnostics.ProcessStartInfo
             {
@@ -187,7 +187,7 @@ namespace UMM
             {
                 path = Assembly.GetExecutingAssembly().Location;
                 path = path.Substring(0, path.LastIndexOf("\\")) + "\\persistent mod data.json";
-                Debug.Log("Trying to mod persistent data file from " + path);
+                Plugin.logger.LogInfo("Trying to mod persistent data file from " + path);
                 FileInfo fInfo = new FileInfo(path);
                 if (fInfo.Exists)
                 {
@@ -201,7 +201,7 @@ namespace UMM
                 }
                 else
                 {
-                    Debug.Log("Couldn't find a save file, making one now");
+                    Plugin.logger.LogInfo("Couldn't find a save file, making one now");
                     fInfo.Create();
                 }
             }
@@ -209,7 +209,7 @@ namespace UMM
             internal static void DumpFile()
             {
                 FileInfo fInfo = new FileInfo(path);
-                Debug.Log("Dumping mod persistent data file to " + path);
+                Plugin.logger.LogInfo("Dumping mod persistent data file to " + path);
                 File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(savedData));
             }
 

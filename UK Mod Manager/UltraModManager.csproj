@@ -132,6 +132,9 @@
   <ItemGroup>
     <ModDlls Include="$(OutDir)/$(AssemblyName).dll" />
   </ItemGroup>
+  <ItemGroup>
+    <Content Include="UltraModManager.csproj.user" />
+  </ItemGroup>
   <Target Name="WarnBeforeBuild" BeforeTargets="BeforeBuild">
     <Error Condition="!Exists($(ULTRAKILLPath))" Text="ULTRAKILLPath not set, create a .csproj.user file that sets this property to compile" />
   </Target>
