@@ -80,7 +80,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public int RetrieveIntPersistentModData(string key)
         {
-            return int.Parse(RetrieveStringPersistentModData(metaData.name, key));
+            return int.Parse(RetrieveStringPersistentModData(key, metaData.name));
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public bool RetrieveBooleanPersistentModData(string key)
         {
-            return bool.Parse(RetrieveStringPersistentModData(metaData.name, key));
+            return bool.Parse(RetrieveStringPersistentModData(key, metaData.name));
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public float RetrieveFloatPersistentModData(string key)
         {
-            return float.Parse(RetrieveStringPersistentModData(metaData.name, key));
+            return float.Parse(RetrieveStringPersistentModData(key, metaData.name));
         }
 
         /// <summary>
@@ -118,7 +118,7 @@ namespace UMM
         /// <param name="modName">Name of mod to get the data from</param>
         public static int RetrieveIntPersistentModData(string key, string modName)
         {
-            return int.Parse(RetrieveStringPersistentModData(modName, key));
+            return int.Parse(RetrieveStringPersistentModData(key, modName));
         }
 
         /// <summary>
@@ -128,7 +128,7 @@ namespace UMM
         /// <param name="modName">Name of mod to get the data from</param>
         public static bool RetrieveBooleanPersistentModData(string key, string modName)
         {
-            return bool.Parse(RetrieveStringPersistentModData(modName, key));
+            return bool.Parse(RetrieveStringPersistentModData(key, modName));
         }
 
         /// <summary>
@@ -138,7 +138,7 @@ namespace UMM
         /// <param name="modName">Name of mod to get the data from</param>
         public static float RetrieveFloatPersistentModData(string key, string modName)
         {
-            return float.Parse(RetrieveStringPersistentModData(modName, key));
+            return float.Parse(RetrieveStringPersistentModData(key, modName));
         }
 
         /// <summary>
