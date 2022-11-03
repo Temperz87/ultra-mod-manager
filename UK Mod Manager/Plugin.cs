@@ -1,11 +1,11 @@
-﻿using UnityEngine;
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
+using UnityEngine;
 
 namespace UMM.Loader
 {
-    [BepInPlugin("UMM", "UMM", VersionHandler.VERSION)]
+    [BepInPlugin("UMM", "umm.mainManager", VersionHandler.VERSION)]
     public class Plugin : BaseUnityPlugin
     {
         private static bool initialized = false;
