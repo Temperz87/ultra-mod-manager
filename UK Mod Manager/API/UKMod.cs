@@ -19,7 +19,7 @@ namespace UMM
             object[] customAttributes = type.GetCustomAttributes(typeof(UKPlugin), false);
             if (customAttributes.Length == 0)
             {
-                throw new NullReferenceException("Could not find the metadata (UKPlugin) to UKMod " + type.Name);
+                throw new Exception("Could not find the metadata (UKPlugin) to UKMod " + type.Name);
             }
             metaData = (UKPlugin)customAttributes[0];
         }

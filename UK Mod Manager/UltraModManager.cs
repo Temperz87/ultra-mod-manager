@@ -20,7 +20,7 @@ namespace UMM.Loader
         {
             if (!initialized)
             {
-                Debug.Log("Beginning UltraModManager");
+                Plugin.logger.LogMessage("Beginning UltraModManager");
                 initialized = true;
                 CollectAssemblies();
                 LoadOnStart();
@@ -35,7 +35,7 @@ namespace UMM.Loader
                     LoadFromAssembly(info);
             else
                 Directory.CreateDirectory(Environment.CurrentDirectory + @"\BepInEx\UMM Mods\");
-            Debug.Log("Found " + foundMods.Count + " mods that can be loaded.");
+            Plugin.logger.LogInfo("Found " + foundMods.Count + " mods that can be loaded.");
         }
 
         private static void LoadOnStart()
@@ -49,7 +49,7 @@ namespace UMM.Loader
                     loadedMods++;
                 }
             }
-            Debug.Log("Loaded " + loadedMods + " mods on start");
+            Plugin.logger.LogInfo("Loaded " + loadedMods + " mods on start");
         }
 
         public static void LoadFromAssembly(FileInfo fInfo)
@@ -72,7 +72,7 @@ namespace UMM.Loader
                         info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
                     else
                         continue;
-                    Debug.Log("Adding mod info " + fInfo.FullName + " " + type.Name);
+                    Plugin.logger.LogInfo("Adding mod info " + fInfo.FullName + " " + type.Name);
                     foundMods.Add(info);
                     object retrievedData = UKAPI.SaveFileHandler.RetrieveModData("LoadOnStart", info.modName);
                     if (retrievedData != null && bool.Parse(retrievedData.ToString()))
@@ -81,8 +81,7 @@ namespace UMM.Loader
             }
             catch (Exception e)
             {
-                Debug.Log("Caught exception while trying to load assembly " + fInfo.FullName);
-                Debug.Log(e.ToString());
+                Plugin.logger.LogError("Caught exception while trying to load assembly " + fInfo.FullName + ": " + e.ToString());
                 return;
             }
         }
@@ -92,7 +91,7 @@ namespace UMM.Loader
             object[] customAttributes = t.GetCustomAttributes(typeof(BepInPlugin), true);
             if (customAttributes.Length == 0)
             {
-                throw new NullReferenceException("Could not find the metadata (BepInPlugin) to BaseUnityPlugin " + t.FullName);
+                throw new Exception("Could not find the metadata (BepInPlugin) to BaseUnityPlugin " + t.FullName);
             }
             return (BepInPlugin)customAttributes[0];
         }
@@ -102,7 +101,7 @@ namespace UMM.Loader
             object[] customAttributes = t.GetCustomAttributes(typeof(UKPlugin), true);
             if (customAttributes.Length == 0)
             {
-                throw new NullReferenceException("Could not find the metadata (UKPlugin) to UKMod " + t.FullName);
+                throw new Exception("Could not find the metadata (UKPlugin) to UKMod " + t.FullName);
             }
             return (UKPlugin)customAttributes[0];
         }
@@ -113,7 +112,7 @@ namespace UMM.Loader
             UKMod newMod = null;
             try
             {
-                Debug.Log("Trying to load mod " + info.modName);
+                Plugin.logger.LogInfo("Trying to load mod " + info.modName);
                 if (info.mod.IsSubclassOf(typeof(BaseUnityPlugin)))
                 {
                     GameObject.DontDestroyOnLoad(modObject);
@@ -121,7 +120,7 @@ namespace UMM.Loader
                     modObject.AddComponent(info.mod);
                     allLoadedMods.Add(info);
                     modObject.SetActive(true);
-                    Debug.Log("Loaded BepInExPlugin " + info.modName);
+                    Plugin.logger.LogInfo("Loaded BepInExPlugin " + info.modName);
                     return;
                 }
                 if (!info.mod.IsSubclassOf(typeof(UKMod)))
@@ -136,12 +135,11 @@ namespace UMM.Loader
                     UKAPI.DisableCyberGrindSubmission(info.modName);
                 modObject.SetActive(true);
                 newMod.OnModLoaded();
-                Debug.Log("Loaded UKMod " + info.modName);
+                Plugin.logger.LogInfo("Loaded UKMod " + info.modName);
             }
             catch (Exception e)
             {
-                Debug.LogError("Caught exception while trying to load modinformation " + info.modName);
-                Debug.LogException(e);
+                Plugin.logger.LogError("Caught exception while trying to load modinformation " + info.modName + ": " + e.ToString());
                 if (modObject != null)
                 {
                     if (newMod != null)
@@ -155,7 +153,7 @@ namespace UMM.Loader
         {
             if (modObjects.ContainsKey(info) && info.supportsUnloading)
             {
-                Debug.Log("Trying to unload mod " + info.modName);
+                Plugin.logger.LogInfo("Trying to unload mod " + info.modName);
                 GameObject modObject = modObjects[info];
                 UKMod mod = modObject.GetComponent<UKMod>();
                 mod.OnModUnloaded.Invoke();
@@ -165,7 +163,7 @@ namespace UMM.Loader
                 GameObject.Destroy(modObject);
                 if (!UltraModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
                     UKAPI.RemoveDisableCyberGrindReason(info.modName);
-                Debug.Log("Successfully unloaded mod " + info.modName);
+                Plugin.logger.LogInfo("Successfully unloaded mod " + info.modName);
             }
         }
     }
