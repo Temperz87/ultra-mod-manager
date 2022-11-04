@@ -96,13 +96,13 @@ namespace UMM.HarmonyPatches
                 GameObject.Destroy(hoverText.GetComponent<Button>());
                 hoverText.SetActive(false);
 
-                ModInformation[] information = UKAPI.AllModInfoClone;
+                ModInfo[] information = UKAPI.AllModInfoClone;
                 if (information.Length > 0)
                 {
                     Array.Sort(information);
                     for (int i = 0; i < information.Length; i++)
                     {
-                        ModInformation info = information[i];
+                        ModInfo info = information[i];
                         GameObject newInformation = GameObject.Instantiate(template, content);
                         GameObject.Destroy(newInformation.GetComponent<ColorBlindSetter>());
 

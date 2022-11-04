@@ -9,12 +9,12 @@ namespace UMM.Loader
 {
     public static class UltraModManager
     {
-        public static List<ModInformation> foundMods = new List<ModInformation>();
-        public static List<ModInformation> allLoadedMods = new List<ModInformation>();
+        public static List<ModInfo> foundMods = new List<ModInfo>();
+        public static List<ModInfo> allLoadedMods = new List<ModInfo>();
         public static bool outdated { get; internal set; } = false;
         public static string newLoaderVersion { get; internal set; } = "";
         private static bool initialized = false;
-        private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
+        private static Dictionary<ModInfo, GameObject> modObjects = new Dictionary<ModInfo, GameObject>();
 
         internal static void InitializeManager()
         {
@@ -41,7 +41,7 @@ namespace UMM.Loader
         private static void LoadOnStart()
         {
             int loadedMods = 0;
-            foreach (ModInformation info in foundMods)
+            foreach (ModInfo info in foundMods)
             {
                 if (info.LoadOnStart)
                 {
@@ -65,11 +65,11 @@ namespace UMM.Loader
                 Assembly ass = Assembly.LoadFile(fInfo.FullName);
                 foreach (Type type in ass.GetTypes())
                 {
-                    ModInformation info;
+                    ModInfo info;
                     if (type.IsSubclassOf(typeof(UKMod)))
-                        info = new ModInformation(type, ModInformation.ModType.UKMod);
+                        info = new ModInfo(type, ModInfo.ModType.UKMod);
                     else if (type.IsSubclassOf(typeof(BaseUnityPlugin)))
-                        info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
+                        info = new ModInfo(type, ModInfo.ModType.BepInPlugin);
                     else
                         continue;
                     Plugin.logger.LogInfo("Adding mod info " + fInfo.FullName + " " + type.Name);
@@ -106,7 +106,7 @@ namespace UMM.Loader
             return (ModMetaData)customAttributes[0];
         }
 
-        public static void LoadMod(ModInformation info)
+        public static void LoadMod(ModInfo info)
         {
             GameObject modObject = GameObject.Instantiate(new GameObject());
             UKMod newMod = null;
@@ -149,7 +149,7 @@ namespace UMM.Loader
             }
         }
 
-        public static void UnloadMod(ModInformation info)
+        public static void UnloadMod(ModInfo info)
         {
             if (modObjects.ContainsKey(info) && info.CanBeUnloaded)
             {

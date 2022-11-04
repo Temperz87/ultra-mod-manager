@@ -4,7 +4,7 @@ using BepInEx;
 
 namespace UMM
 {
-    public class ModInformation : IComparable<ModInformation>
+    public class ModInfo : IComparable<ModInfo>
     {
         public ModType Type { get; }
         public Type MainClass { get; }
@@ -15,7 +15,7 @@ namespace UMM
         public bool LoadOnStart { get; internal set; }
         public bool IsLoaded { get; private set; }
 
-        public ModInformation(Type mod, ModType modType)
+        public ModInfo(Type mod, ModType modType)
         {
             this.Type = modType;
             this.MainClass = mod;
@@ -46,7 +46,7 @@ namespace UMM
                 UnLoadThisMod();
         }
 
-        public int CompareTo(ModInformation other)
+        public int CompareTo(ModInfo other)
         {
             return String.Compare(Name, other.Name);
         }

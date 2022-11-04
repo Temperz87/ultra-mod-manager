@@ -29,14 +29,14 @@ namespace UMM
         }
 
         /// <summary>
-        /// Returns a clone of all found <see cref="ModInformation"/> instances.
+        /// Returns a clone of all found <see cref="ModInfo"/> instances.
         /// </summary>
-        public static ModInformation[] AllModInfoClone => UltraModManager.foundMods.ToArray().Clone() as ModInformation[];
+        public static ModInfo[] AllModInfoClone => UltraModManager.foundMods.ToArray().Clone() as ModInfo[];
 
         /// <summary>
-        /// Returns a clone of all loaded <see cref="ModInformation"/> instances.
+        /// Returns a clone of all loaded <see cref="ModInfo"/> instances.
         /// </summary>
-        public static ModInformation[] AllLoadedModInfoClone => UltraModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
+        public static ModInfo[] AllLoadedModInfoClone => UltraModManager.allLoadedMods.ToArray().Clone() as ModInfo[];
 
         /// <summary>
         /// Initializes the API by loading the save file and common asset bundle
@@ -141,10 +141,10 @@ namespace UMM
         }
 
         [Obsolete("Use AllModInfoClone instead.")]
-        public static ModInformation[] GetAllModInformation() => AllModInfoClone;
+        public static ModInfo[] GetAllModInformation() => AllModInfoClone;
 
         [Obsolete("Use AllLoadedModInfoClone instead.")]
-        public static ModInformation[] GetAllLoadedModInformation() => AllLoadedModInfoClone;
+        public static ModInfo[] GetAllLoadedModInformation() => AllLoadedModInfoClone;
 
         /// <summary>
         /// Restarts Ultrakill
