@@ -8,20 +8,20 @@ namespace UMM
     public abstract class UKMod : MonoBehaviour
     {
         public UnityEvent OnModUnloaded = new UnityEvent();
-        public string modFolder { get; internal set; }
-        public UKPlugin metaData { get; internal set; }
+        public string ModDirectoryPath { get; internal set; }
+        public UKPlugin MetaData { get; internal set; }
         // maybe include logo???
 
         public UKMod()
         {
             Type type = this.GetType();
-            modFolder = new FileInfo(type.Assembly.Location).DirectoryName; // There has to be a better way to do this, right?
+            ModDirectoryPath = new FileInfo(type.Assembly.Location).DirectoryName; // There has to be a better way to do this, right?
             object[] customAttributes = type.GetCustomAttributes(typeof(UKPlugin), false);
             if (customAttributes.Length == 0)
             {
                 throw new Exception("Could not find the metadata (UKPlugin) to UKMod " + type.Name);
             }
-            metaData = (UKPlugin)customAttributes[0];
+            MetaData = (UKPlugin)customAttributes[0];
         }
 
         /// <summary>
@@ -41,7 +41,7 @@ namespace UMM
         /// <param name="value">Value to Set as a string</param>
         public void SetPersistentModData(string key, string value)
         {
-            UKAPI.SaveFileHandler.SetModData(metaData.name, key, value);
+            UKAPI.SaveFileHandler.SetModData(MetaData.Name, key, value);
         }
 
         /// <summary>
@@ -71,7 +71,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public string RetrieveStringPersistentModData(string key)
         {
-            return UKAPI.SaveFileHandler.RetrieveModData(key, metaData.name);
+            return UKAPI.SaveFileHandler.RetrieveModData(key, MetaData.Name);
         }
 
         /// <summary>
@@ -80,7 +80,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public int RetrieveIntPersistentModData(string key)
         {
-            return int.Parse(RetrieveStringPersistentModData(key, metaData.name));
+            return int.Parse(RetrieveStringPersistentModData(key, MetaData.Name));
         }
 
         /// <summary>
@@ -89,7 +89,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public bool RetrieveBooleanPersistentModData(string key)
         {
-            return bool.Parse(RetrieveStringPersistentModData(key, metaData.name));
+            return bool.Parse(RetrieveStringPersistentModData(key, MetaData.Name));
         }
 
         /// <summary>
@@ -98,7 +98,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public float RetrieveFloatPersistentModData(string key)
         {
-            return float.Parse(RetrieveStringPersistentModData(key, metaData.name));
+            return float.Parse(RetrieveStringPersistentModData(key, MetaData.Name));
         }
 
         /// <summary>
@@ -185,7 +185,7 @@ namespace UMM
         /// <param name="key">The name of the value you want to remove</param>
         public void RemovePersistentModData(string key)
         {
-            UKAPI.SaveFileHandler.RemoveModData(metaData.name, key);
+            UKAPI.SaveFileHandler.RemoveModData(MetaData.Name, key);
         }
 
         /// <summary>
@@ -212,7 +212,7 @@ namespace UMM
         /// <param name="key">The name of the value you want to ensure exists</param>
         public bool PersistentModDataExists(string key)
         {
-            return UKAPI.SaveFileHandler.EnsureModData(metaData.name, key);
+            return UKAPI.SaveFileHandler.EnsureModData(MetaData.Name, key);
         }
 
         /// <summary>

@@ -4,19 +4,19 @@ namespace UMM
 {
     public class UKPlugin : Attribute
     {
-        public string name { get; }
-        public string version { get; }
-        public string description { get; }
-        public bool allowCyberGrindSubmission { get; }
-        public bool unloadingSupported { get; }
+        public string Name { get; }
+        public string Version { get; }
+        public string Description { get; }
+        public bool AllowCybergrindSubmission { get; }
+        public bool CanBeUnloaded { get; }
 
         public UKPlugin(string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
         {
-            this.name = name;
-            this.version = version;
-            this.description = description;
-            this.allowCyberGrindSubmission = allowCyberGrindSubmission;
-            this.unloadingSupported = supportsUnloading;
+            this.Name = name;
+            this.Version = version;
+            this.Description = description;
+            this.AllowCybergrindSubmission = allowCyberGrindSubmission;
+            this.CanBeUnloaded = supportsUnloading;
         }
     }
 }

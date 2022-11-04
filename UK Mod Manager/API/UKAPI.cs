@@ -13,7 +13,7 @@ namespace UMM
 {
     public static class UKAPI
     {
-        public static bool triedLoadingBundle { get; private set; } = false;
+        public static bool TriedLoadingCommonBundle { get; private set; } = false;
         private static AssetBundle commonBundle;
         private static List<string> disableCybergrindReasons = new List<string>();
 
@@ -43,7 +43,7 @@ namespace UMM
         /// </summary>
         internal static IEnumerator InitializeAPI()
         {
-            if (triedLoadingBundle)
+            if (TriedLoadingCommonBundle)
                 yield break;
             SaveFileHandler.LoadData();
             Plugin.logger.LogInfo("Trying to load common asset bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
@@ -56,7 +56,7 @@ namespace UMM
                 if (attempts >= 5)
                 {
                     Plugin.logger.LogInfo("Could not load common asset bundle");
-                    triedLoadingBundle = true;
+                    TriedLoadingCommonBundle = true;
                     yield break;
                 }
                 request = AssetBundle.LoadFromFileAsync(Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
@@ -66,7 +66,7 @@ namespace UMM
 
             Plugin.logger.LogInfo("Loaded common asset bundle");
             commonBundle = request.assetBundle;
-            triedLoadingBundle = true;
+            TriedLoadingCommonBundle = true;
             UltraModManager.InitializeManager();
 
             while (MapLoader.Instance == null)

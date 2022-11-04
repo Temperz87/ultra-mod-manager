@@ -6,41 +6,41 @@ namespace UMM
 {
     public class ModInformation : IComparable<ModInformation>
     {
-        public ModType modType { get; }
-        public Type mod { get; }
-        public string modName { get; }
-        public string modDescription { get; }
-        public string modVersion { get; }
-        public bool supportsUnloading { get; }
-        public bool loadOnStart { get; internal set; }
-        public bool loaded { get; private set; }
+        public ModType Type { get; }
+        public Type MainClass { get; }
+        public string Name { get; }
+        public string Description { get; }
+        public string Version { get; }
+        public bool CanBeUnloaded { get; }
+        public bool LoadOnStart { get; internal set; }
+        public bool IsLoaded { get; private set; }
 
         public ModInformation(Type mod, ModType modType)
         {
-            this.modType = modType;
-            this.mod = mod;
+            this.Type = modType;
+            this.MainClass = mod;
 
             // TODO: Read mod name from a manifest file
             if (modType == ModType.BepInPlugin)
             {
                 BepInPlugin metaData = UltraModManager.GetBepinMetaData(mod);
-                modName = metaData.Name;
-                modVersion = metaData.Version.ToString();
-                modDescription = "Mod unloading and descriptions are not supported by BepInEx plugins.";
+                Name = metaData.Name;
+                Version = metaData.Version.ToString();
+                Description = "Mod unloading and descriptions are not supported by BepInEx plugins.";
             }
             else if (modType == ModType.UKMod)
             {
                 UKPlugin metaData = UltraModManager.GetUKMetaData(mod);
-                modName = metaData.name;
-                modDescription = metaData.description;
-                modVersion = metaData.version;
-                supportsUnloading = metaData.unloadingSupported;
+                Name = metaData.Name;
+                Description = metaData.Description;
+                Version = metaData.Version;
+                CanBeUnloaded = metaData.CanBeUnloaded;
             }
         }
 
-        public void Clicked()
+        public void ToggleLoaded()
         {
-            if (!loaded)
+            if (!IsLoaded)
                 LoadThisMod();
             else
                 UnLoadThisMod();
@@ -48,24 +48,24 @@ namespace UMM
 
         public int CompareTo(ModInformation other)
         {
-            return String.Compare(modName, other.modName);
+            return String.Compare(Name, other.Name);
         }
 
         public void LoadThisMod()
         {
-            if (!loaded)
+            if (!IsLoaded)
             {
                 UltraModManager.LoadMod(this);
-                loaded = true;
+                IsLoaded = true;
             }
         }
 
         public void UnLoadThisMod()
         {
-            if (loaded && supportsUnloading)
+            if (IsLoaded && CanBeUnloaded)
             {
                 UltraModManager.UnloadMod(this);
-                loaded = false; 
+                IsLoaded = false; 
             }
         }
 
