@@ -2,7 +2,7 @@
 
 namespace UMM
 {
-    public class UKPlugin : Attribute
+    public class ModMetaData : Attribute
     {
         public string Name { get; }
         public string Version { get; }
@@ -10,7 +10,7 @@ namespace UMM
         public bool AllowCybergrindSubmission { get; }
         public bool CanBeUnloaded { get; }
 
-        public UKPlugin(string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
+        public ModMetaData(string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
         {
             this.Name = name;
             this.Version = version;

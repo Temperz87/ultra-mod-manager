@@ -96,14 +96,14 @@ namespace UMM.Loader
             return (BepInPlugin)customAttributes[0];
         }
 
-        internal static UKPlugin GetUKMetaData(Type t)
+        internal static ModMetaData GetUKMetaData(Type t)
         {
-            object[] customAttributes = t.GetCustomAttributes(typeof(UKPlugin), true);
+            object[] customAttributes = t.GetCustomAttributes(typeof(ModMetaData), true);
             if (customAttributes.Length == 0)
             {
                 throw new Exception("Could not find the metadata (UKPlugin) to UKMod " + t.FullName);
             }
-            return (UKPlugin)customAttributes[0];
+            return (ModMetaData)customAttributes[0];
         }
 
         public static void LoadMod(ModInformation info)
@@ -130,7 +130,7 @@ namespace UMM.Loader
                 newMod = modObject.AddComponent(info.MainClass) as UKMod;
                 allLoadedMods.Add(info);
                 modObjects.Add(info, modObject);
-                UKPlugin metaData = UltraModManager.GetUKMetaData(info.MainClass);
+                ModMetaData metaData = UltraModManager.GetUKMetaData(info.MainClass);
                 if (!metaData.AllowCybergrindSubmission)
                     UKAPI.DisableCyberGrindSubmission(info.Name);
                 modObject.SetActive(true);

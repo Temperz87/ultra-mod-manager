@@ -9,19 +9,19 @@ namespace UMM
     {
         public UnityEvent OnModUnloaded = new UnityEvent();
         public string ModDirectoryPath { get; internal set; }
-        public UKPlugin MetaData { get; internal set; }
+        public ModMetaData MetaData { get; internal set; }
         // maybe include logo???
 
         public UKMod()
         {
             Type type = this.GetType();
             ModDirectoryPath = new FileInfo(type.Assembly.Location).DirectoryName; // There has to be a better way to do this, right?
-            object[] customAttributes = type.GetCustomAttributes(typeof(UKPlugin), false);
+            object[] customAttributes = type.GetCustomAttributes(typeof(ModMetaData), false);
             if (customAttributes.Length == 0)
             {
                 throw new Exception("Could not find the metadata (UKPlugin) to UKMod " + type.Name);
             }
-            MetaData = (UKPlugin)customAttributes[0];
+            MetaData = (ModMetaData)customAttributes[0];
         }
 
         /// <summary>

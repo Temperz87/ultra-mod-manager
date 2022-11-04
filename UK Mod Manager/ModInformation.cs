@@ -30,7 +30,7 @@ namespace UMM
             }
             else if (modType == ModType.UKMod)
             {
-                UKPlugin metaData = UltraModManager.GetUKMetaData(mod);
+                ModMetaData metaData = UltraModManager.GetUKMetaData(mod);
                 Name = metaData.Name;
                 Description = metaData.Description;
                 Version = metaData.Version;

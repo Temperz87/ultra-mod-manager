@@ -6,7 +6,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UMM;
 
-[UKPlugin("Custom Arms", "1.0.0", "Custom arms!", false, true)]
+[ModMetaData("Custom Arms", "1.0.0", "Custom arms!", false, true)]
 public class CustomArmMod : UKMod
 {
     private static Harmony harmony;
