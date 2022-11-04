@@ -140,6 +140,14 @@ namespace UMM
             return commonBundle.LoadAsset(name);
         }
 
+        public static T LoadCommonAsset<T>(string name) where T : UnityEngine.Object {
+            if(commonBundle == null) {
+                Plugin.logger.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
+                return null;
+            }
+            return commonBundle.LoadAsset<T>(name);
+        }
+
         [Obsolete("Use AllModInfoClone instead.")]
         public static ModInfo[] GetAllModInformation() => AllModInfoClone;
 

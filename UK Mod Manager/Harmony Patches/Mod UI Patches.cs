@@ -109,12 +109,12 @@ namespace UMM.HarmonyPatches
                         Button newButton = newInformation.AddComponent<Button>();
                         newButton.transition = Selectable.Transition.ColorTint;
                         newButton.targetGraphic = newInformation.GetComponent<Image>();
-                        newButton.targetGraphic.color = info.IsLoaded ? Color.green : Color.red;
+                        newButton.targetGraphic.color = info.IsEnabled ? Color.green : Color.red;
                         newButton.onClick = new Button.ButtonClickedEvent();
                         newButton.onClick.AddListener(delegate
                         {
-                            info.ToggleLoaded();
-                            newButton.targetGraphic.color = info.IsLoaded ? Color.green : Color.red;
+                            info.ToggleEnabled();
+                            newButton.targetGraphic.color = info.IsEnabled ? Color.green : Color.red;
                         });
 
                         newInformation.transform.Find("Red").gameObject.SetActive(false);
@@ -125,7 +125,7 @@ namespace UMM.HarmonyPatches
                         newInformation.transform.localPosition = new Vector3(0f, -200f * i, 0f);
 
                         Text modText = newInformation.transform.Find("Text").GetComponent<Text>();
-                        modText.text = info.Name + " " + info.Version;
+                        modText.text = info.Metadata.Name + " " + info.Metadata.Version;
                         modText.alignment = TextAnchor.UpperLeft;
                         modText.transform.localPosition = new Vector3(-49.2f, 0f, 0f);
                         modText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
@@ -136,18 +136,18 @@ namespace UMM.HarmonyPatches
                         descriptionText.rectTransform.offsetMax = new Vector2(73.58125f, -16.4f);
                         descriptionText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
                         descriptionText.fontSize = 16;
-                        descriptionText.text = info.Description;
+                        descriptionText.text = info.Metadata.Description;
 
                         GameObject toggleObj = GameObject.Instantiate(__instance.variationMemory.gameObject, newInformation.transform);
                         toggleObj.transform.localPosition = new Vector3(247f, -9f, 0f);
                         Toggle toggle = toggleObj.GetComponent<Toggle>();
-                        toggle.isOn = info.LoadOnStart;
+                        toggle.isOn = info.EnableOnStart;
                         toggle.onValueChanged = new Toggle.ToggleEvent();
                         toggle.onValueChanged.AddListener(delegate
                         {
-                            info.LoadOnStart = !info.LoadOnStart;
-                            toggle.isOn = info.LoadOnStart;
-                            UKAPI.SaveFileHandler.SetModData(info.Name, "LoadOnStart", info.LoadOnStart.ToString());
+                            info.EnableOnStart = !info.EnableOnStart;
+                            toggle.isOn = info.EnableOnStart;
+                            UKAPI.SaveFileHandler.SetModData(info.Metadata.Name, "LoadOnStart", info.EnableOnStart.ToString());
                         });
                         EventTrigger trigger = toggle.gameObject.AddComponent<EventTrigger>();
                         EventTrigger.Entry hoverEntry = new EventTrigger.Entry();

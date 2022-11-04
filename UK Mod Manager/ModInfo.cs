@@ -7,72 +7,48 @@ namespace UMM
     public class ModInfo : IComparable<ModInfo>
     {
         public ModType Type { get; }
-        public Type MainClass { get; }
-        public string Name { get; }
-        public string Description { get; }
-        public string Version { get; }
-        public bool CanBeUnloaded { get; }
-        public bool LoadOnStart { get; internal set; }
-        public bool IsLoaded { get; private set; }
+        public Type MainClass { get; } 
+        public ModMetaData Metadata { get; }
+        public bool EnableOnStart { get; internal set; }
+        public bool IsEnabled { get; private set; }
 
         public ModInfo(Type mod, ModType modType)
         {
             this.Type = modType;
             this.MainClass = mod;
 
-            // TODO: Read mod name from a manifest file
-            if (modType == ModType.BepInPlugin)
-            {
-                BepInPlugin metaData = UltraModManager.GetBepinMetaData(mod);
-                Name = metaData.Name;
-                Version = metaData.Version.ToString();
-                Description = "Mod unloading and descriptions are not supported by BepInEx plugins.";
-            }
-            else if (modType == ModType.UKMod)
-            {
-                ModMetaData metaData = UltraModManager.GetUKMetaData(mod);
-                Name = metaData.Name;
-                Description = metaData.Description;
-                Version = metaData.Version;
-                CanBeUnloaded = metaData.CanBeUnloaded;
-            }
+            Metadata = ModMetaData.GetFromType(modType, mod);
         }
 
-        public void ToggleLoaded()
+        public void ToggleEnabled()
         {
-            if (!IsLoaded)
-                LoadThisMod();
+            if (!IsEnabled)
+                Enable();
             else
-                UnLoadThisMod();
+                Disable();
         }
 
         public int CompareTo(ModInfo other)
         {
-            return String.Compare(Name, other.Name);
+            return String.Compare(Metadata.Name, other.Metadata.Name);
         }
 
-        public void LoadThisMod()
+        public void Enable()
         {
-            if (!IsLoaded)
+            if (!IsEnabled)
             {
                 UltraModManager.LoadMod(this);
-                IsLoaded = true;
+                IsEnabled = true;
             }
         }
 
-        public void UnLoadThisMod()
+        public void Disable()
         {
-            if (IsLoaded && CanBeUnloaded)
+            if (IsEnabled && Metadata.CanBeDisabled)
             {
-                UltraModManager.UnloadMod(this);
-                IsLoaded = false; 
+                UltraModManager.DisableMod(this);
+                IsEnabled = false; 
             }
-        }
-
-        public enum ModType
-        {
-            UKMod,
-            BepInPlugin
         }
     }
 }

@@ -7,32 +7,24 @@ namespace UMM
 {
     public abstract class UKMod : MonoBehaviour
     {
-        public UnityEvent OnModUnloaded = new UnityEvent();
+        public event Action ModDisabled;
         public string ModDirectoryPath { get; internal set; }
-        public ModMetaData MetaData { get; internal set; }
+        public ModInfo Info { get; internal set; }
         // maybe include logo???
-
-        public UKMod()
-        {
-            Type type = this.GetType();
-            ModDirectoryPath = new FileInfo(type.Assembly.Location).DirectoryName; // There has to be a better way to do this, right?
-            object[] customAttributes = type.GetCustomAttributes(typeof(ModMetaData), false);
-            if (customAttributes.Length == 0)
-            {
-                throw new Exception("Could not find the metadata (UKPlugin) to UKMod " + type.Name);
-            }
-            MetaData = (ModMetaData)customAttributes[0];
-        }
 
         /// <summary>
         /// Runs once when the mod gets loaded
         /// </summary>
-        public virtual void OnModLoaded() { }
+        protected internal virtual void OnModEnabled() { 
+            
+        }
 
         /// <summary>
         /// Runs once when the mod gets unloaded
         /// </summary>
-        public virtual void OnModUnload() { }
+        protected internal virtual void OnModDisabled() {
+            ModDisabled?.Invoke();
+        }
 
         /// <summary>
         /// Sets persistent mod data to a save file
@@ -41,7 +33,7 @@ namespace UMM
         /// <param name="value">Value to Set as a string</param>
         public void SetPersistentModData(string key, string value)
         {
-            UKAPI.SaveFileHandler.SetModData(MetaData.Name, key, value);
+            UKAPI.SaveFileHandler.SetModData(Info.Metadata.Name, key, value);
         }
 
         /// <summary>
@@ -71,7 +63,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public string RetrieveStringPersistentModData(string key)
         {
-            return UKAPI.SaveFileHandler.RetrieveModData(key, MetaData.Name);
+            return UKAPI.SaveFileHandler.RetrieveModData(key, Info.Metadata.Name);
         }
 
         /// <summary>
@@ -80,7 +72,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public int RetrieveIntPersistentModData(string key)
         {
-            return int.Parse(RetrieveStringPersistentModData(key, MetaData.Name));
+            return int.Parse(RetrieveStringPersistentModData(key, Info.Metadata.Name));
         }
 
         /// <summary>
@@ -89,7 +81,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public bool RetrieveBooleanPersistentModData(string key)
         {
-            return bool.Parse(RetrieveStringPersistentModData(key, MetaData.Name));
+            return bool.Parse(RetrieveStringPersistentModData(key, Info.Metadata.Name));
         }
 
         /// <summary>
@@ -98,7 +90,7 @@ namespace UMM
         /// <param name="key">Name of value</param>
         public float RetrieveFloatPersistentModData(string key)
         {
-            return float.Parse(RetrieveStringPersistentModData(key, MetaData.Name));
+            return float.Parse(RetrieveStringPersistentModData(key, Info.Metadata.Name));
         }
 
         /// <summary>
@@ -185,7 +177,7 @@ namespace UMM
         /// <param name="key">The name of the value you want to remove</param>
         public void RemovePersistentModData(string key)
         {
-            UKAPI.SaveFileHandler.RemoveModData(MetaData.Name, key);
+            UKAPI.SaveFileHandler.RemoveModData(Info.Metadata.Name, key);
         }
 
         /// <summary>
@@ -212,7 +204,7 @@ namespace UMM
         /// <param name="key">The name of the value you want to ensure exists</param>
         public bool PersistentModDataExists(string key)
         {
-            return UKAPI.SaveFileHandler.EnsureModData(MetaData.Name, key);
+            return UKAPI.SaveFileHandler.EnsureModData(Info. Metadata.Name, key);
         }
 
         /// <summary>
