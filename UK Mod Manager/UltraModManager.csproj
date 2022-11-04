@@ -116,7 +116,7 @@
     <Compile Include="UltraModManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="API\UKMod.cs" />
-    <Compile Include="API\UKPlugin.cs" />
+    <Compile Include="API\ModMetaData.cs" />
     <Compile Include="VersionHandler.cs" />
   </ItemGroup>
   <ItemGroup>
