@@ -110,13 +110,14 @@
   <ItemGroup>
     <Compile Include="Harmony Patches\Cybergrind Patches.cs" />
     <Compile Include="Harmony Patches\Mod UI Patches.cs" />
-    <Compile Include="ModInformation.cs" />
+    <Compile Include="ModInfo.cs" />
+    <Compile Include="ModType.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="API\UKAPI.cs" />
     <Compile Include="UltraModManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="API\UKMod.cs" />
-    <Compile Include="API\UKPlugin.cs" />
+    <Compile Include="API\ModMetaData.cs" />
     <Compile Include="VersionHandler.cs" />
   </ItemGroup>
   <ItemGroup>

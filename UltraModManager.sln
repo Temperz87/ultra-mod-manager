@@ -9,6 +9,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Ultrakill Restarter", "Ultrakill Restarter\Ultrakill Restarter.csproj", "{121CF959-93B7-4B0D-9428-0A7CE007D7FD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltraModManager.Tests", "UltraModManager.Tests\UltraModManager.Tests.csproj", "{F21997A9-B03B-4DF7-B162-3C7B105B60BE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -27,6 +29,10 @@ Global
 		{121CF959-93B7-4B0D-9428-0A7CE007D7FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{121CF959-93B7-4B0D-9428-0A7CE007D7FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{121CF959-93B7-4B0D-9428-0A7CE007D7FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F21997A9-B03B-4DF7-B162-3C7B105B60BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F21997A9-B03B-4DF7-B162-3C7B105B60BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F21997A9-B03B-4DF7-B162-3C7B105B60BE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F21997A9-B03B-4DF7-B162-3C7B105B60BE}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

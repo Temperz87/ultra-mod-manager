@@ -9,12 +9,12 @@ namespace UMM.Loader
 {
     public static class UltraModManager
     {
-        public static List<ModInformation> foundMods = new List<ModInformation>();
-        public static List<ModInformation> allLoadedMods = new List<ModInformation>();
+        public static List<ModInfo> foundMods = new List<ModInfo>();
+        public static List<ModInfo> allLoadedMods = new List<ModInfo>();
         public static bool outdated { get; internal set; } = false;
         public static string newLoaderVersion { get; internal set; } = "";
         private static bool initialized = false;
-        private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
+        private static Dictionary<ModInfo, GameObject> modObjects = new Dictionary<ModInfo, GameObject>();
 
         internal static void InitializeManager()
         {
@@ -41,11 +41,11 @@ namespace UMM.Loader
         private static void LoadOnStart()
         {
             int loadedMods = 0;
-            foreach (ModInformation info in foundMods)
+            foreach (ModInfo info in foundMods)
             {
-                if (info.loadOnStart)
+                if (info.EnableOnStart)
                 {
-                    info.LoadThisMod();
+                    info.Enable();
                     loadedMods++;
                 }
             }
@@ -65,18 +65,18 @@ namespace UMM.Loader
                 Assembly ass = Assembly.LoadFile(fInfo.FullName);
                 foreach (Type type in ass.GetTypes())
                 {
-                    ModInformation info;
+                    ModInfo info;
                     if (type.IsSubclassOf(typeof(UKMod)))
-                        info = new ModInformation(type, ModInformation.ModType.UKMod);
+                        info = new ModInfo(type, ModType.UKMod);
                     else if (type.IsSubclassOf(typeof(BaseUnityPlugin)))
-                        info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
+                        info = new ModInfo(type, ModType.BepInPlugin);
                     else
                         continue;
                     Plugin.logger.LogInfo("Adding mod info " + fInfo.FullName + " " + type.Name);
                     foundMods.Add(info);
-                    object retrievedData = UKAPI.SaveFileHandler.RetrieveModData("LoadOnStart", info.modName);
+                    object retrievedData = UKAPI.SaveFileHandler.RetrieveModData("LoadOnStart", info.Metadata.Name);
                     if (retrievedData != null && bool.Parse(retrievedData.ToString()))
-                        info.loadOnStart = true;
+                        info.EnableOnStart = true;
                 }
             }
             catch (Exception e)
@@ -96,74 +96,74 @@ namespace UMM.Loader
             return (BepInPlugin)customAttributes[0];
         }
 
-        internal static UKPlugin GetUKMetaData(Type t)
+        internal static ModMetaData GetUKMetaData(Type t)
         {
-            object[] customAttributes = t.GetCustomAttributes(typeof(UKPlugin), true);
+            object[] customAttributes = t.GetCustomAttributes(typeof(ModMetaData), true);
             if (customAttributes.Length == 0)
             {
                 throw new Exception("Could not find the metadata (UKPlugin) to UKMod " + t.FullName);
             }
-            return (UKPlugin)customAttributes[0];
+            return (ModMetaData)customAttributes[0];
         }
 
-        public static void LoadMod(ModInformation info)
+        public static void LoadMod(ModInfo info)
         {
             GameObject modObject = GameObject.Instantiate(new GameObject());
             UKMod newMod = null;
             try
             {
-                Plugin.logger.LogInfo("Trying to load mod " + info.modName);
-                if (info.mod.IsSubclassOf(typeof(BaseUnityPlugin)))
+                Plugin.logger.LogInfo("Trying to load mod " + info.Metadata.Name);
+                if (info.MainClass.IsSubclassOf(typeof(BaseUnityPlugin)))
                 {
                     GameObject.DontDestroyOnLoad(modObject);
                     modObject.SetActive(false);
-                    modObject.AddComponent(info.mod);
+                    modObject.AddComponent(info.MainClass);
                     allLoadedMods.Add(info);
                     modObject.SetActive(true);
-                    Plugin.logger.LogInfo("Loaded BepInExPlugin " + info.modName);
+                    Plugin.logger.LogInfo("Loaded BepInExPlugin " + info.Metadata.Name);
                     return;
                 }
-                if (!info.mod.IsSubclassOf(typeof(UKMod)))
-                    throw new ArgumentException("LoadMod was called using a type that did not inherit from UKMod or BaseUnityPlugin, type name is " + info.mod.Name);
+                if (!info.MainClass.IsSubclassOf(typeof(UKMod)))
+                    throw new ArgumentException("LoadMod was called using a type that did not inherit from UKMod or BaseUnityPlugin, type name is " + info.MainClass.Name);
                 GameObject.DontDestroyOnLoad(modObject);
                 modObject.SetActive(false);
-                newMod = modObject.AddComponent(info.mod) as UKMod;
+                newMod = modObject.AddComponent(info.MainClass) as UKMod;
+                newMod.Info = info;
                 allLoadedMods.Add(info);
                 modObjects.Add(info, modObject);
-                UKPlugin metaData = UltraModManager.GetUKMetaData(info.mod);
-                if (!metaData.allowCyberGrindSubmission)
-                    UKAPI.DisableCyberGrindSubmission(info.modName);
+                ModMetaData metaData = UltraModManager.GetUKMetaData(info.MainClass);
+                if (!metaData.AllowCybergrindSubmission)
+                    UKAPI.DisableCyberGrindSubmission(info.Metadata.Name);
                 modObject.SetActive(true);
-                newMod.OnModLoaded();
-                Plugin.logger.LogInfo("Loaded UKMod " + info.modName);
+                newMod.OnModEnabled();
+                Plugin.logger.LogInfo("Loaded UKMod " + info.Metadata.Name);
             }
             catch (Exception e)
             {
-                Plugin.logger.LogError("Caught exception while trying to load modinformation " + info.modName + ": " + e.ToString());
+                Plugin.logger.LogError("Caught exception while trying to load modinformation " + info.Metadata.Name + ": " + e.ToString());
                 if (modObject != null)
                 {
                     if (newMod != null)
-                        newMod.OnModUnload();
+                        newMod.OnModDisabled();
                     GameObject.Destroy(modObject); // I don't know if this is a good thing to do, if not please scream at me to remove it
                 }
             }
         }
 
-        public static void UnloadMod(ModInformation info)
+        public static void DisableMod(ModInfo info)
         {
-            if (modObjects.ContainsKey(info) && info.supportsUnloading)
+            if (modObjects.ContainsKey(info) && info.Metadata.CanBeDisabled)
             {
-                Plugin.logger.LogInfo("Trying to unload mod " + info.modName);
+                Plugin.logger.LogInfo("Trying to unload mod " + info.Metadata.Name);
                 GameObject modObject = modObjects[info];
                 UKMod mod = modObject.GetComponent<UKMod>();
-                mod.OnModUnloaded.Invoke();
-                mod.OnModUnload();
+                mod.OnModDisabled();
                 modObjects.Remove(info);
                 allLoadedMods.Remove(info);
                 GameObject.Destroy(modObject);
-                if (!UltraModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
-                    UKAPI.RemoveDisableCyberGrindReason(info.modName);
-                Plugin.logger.LogInfo("Successfully unloaded mod " + info.modName);
+                if (!UltraModManager.GetUKMetaData(info.MainClass).AllowCybergrindSubmission)
+                    UKAPI.RemoveDisableCyberGrindReason(info.Metadata.Name);
+                Plugin.logger.LogInfo("Successfully unloaded mod " + info.Metadata.Name);
             }
         }
     }

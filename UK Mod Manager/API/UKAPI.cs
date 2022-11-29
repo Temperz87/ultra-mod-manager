@@ -13,7 +13,7 @@ namespace UMM
 {
     public static class UKAPI
     {
-        public static bool triedLoadingBundle { get; private set; } = false;
+        public static bool TriedLoadingCommonBundle { get; private set; } = false;
         private static AssetBundle commonBundle;
         private static List<string> disableCybergrindReasons = new List<string>();
 
@@ -29,21 +29,21 @@ namespace UMM
         }
 
         /// <summary>
-        /// Returns a clone of all found <see cref="ModInformation"/> instances.
+        /// Returns a clone of all found <see cref="ModInfo"/> instances.
         /// </summary>
-        public static ModInformation[] AllModInfoClone => UltraModManager.foundMods.ToArray().Clone() as ModInformation[];
+        public static ModInfo[] AllModInfoClone => UltraModManager.foundMods.ToArray().Clone() as ModInfo[];
 
         /// <summary>
-        /// Returns a clone of all loaded <see cref="ModInformation"/> instances.
+        /// Returns a clone of all loaded <see cref="ModInfo"/> instances.
         /// </summary>
-        public static ModInformation[] AllLoadedModInfoClone => UltraModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
+        public static ModInfo[] AllLoadedModInfoClone => UltraModManager.allLoadedMods.ToArray().Clone() as ModInfo[];
 
         /// <summary>
         /// Initializes the API by loading the save file and common asset bundle
         /// </summary>
         internal static IEnumerator InitializeAPI()
         {
-            if (triedLoadingBundle)
+            if (TriedLoadingCommonBundle)
                 yield break;
             SaveFileHandler.LoadData();
             Plugin.logger.LogInfo("Trying to load common asset bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
@@ -56,7 +56,7 @@ namespace UMM
                 if (attempts >= 5)
                 {
                     Plugin.logger.LogInfo("Could not load common asset bundle");
-                    triedLoadingBundle = true;
+                    TriedLoadingCommonBundle = true;
                     yield break;
                 }
                 request = AssetBundle.LoadFromFileAsync(Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
@@ -66,7 +66,7 @@ namespace UMM
 
             Plugin.logger.LogInfo("Loaded common asset bundle");
             commonBundle = request.assetBundle;
-            triedLoadingBundle = true;
+            TriedLoadingCommonBundle = true;
             UltraModManager.InitializeManager();
 
             while (MapLoader.Instance == null)
@@ -140,11 +140,19 @@ namespace UMM
             return commonBundle.LoadAsset(name);
         }
 
+        public static T LoadCommonAsset<T>(string name) where T : UnityEngine.Object {
+            if(commonBundle == null) {
+                Plugin.logger.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
+                return null;
+            }
+            return commonBundle.LoadAsset<T>(name);
+        }
+
         [Obsolete("Use AllModInfoClone instead.")]
-        public static ModInformation[] GetAllModInformation() => AllModInfoClone;
+        public static ModInfo[] GetAllModInformation() => AllModInfoClone;
 
         [Obsolete("Use AllLoadedModInfoClone instead.")]
-        public static ModInformation[] GetAllLoadedModInformation() => AllLoadedModInfoClone;
+        public static ModInfo[] GetAllLoadedModInformation() => AllLoadedModInfoClone;
 
         /// <summary>
         /// Restarts Ultrakill

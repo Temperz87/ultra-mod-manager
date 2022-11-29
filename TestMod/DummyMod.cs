@@ -6,11 +6,11 @@ using UnityEngine;
 using UnityEngine.Events;
 using UMM;
 
-[UKPlugin("Custom Arms", "1.0.0", "Custom arms!", false, true)]
+[ModMetaData("Custom Arms", "1.0.0", "Custom arms!", false, true)]
 public class CustomArmMod : UKMod
 {
     private static Harmony harmony;
-    public override void OnModLoaded()
+    public override void OnModEnabled()
     {
         Debug.Log("Starting custom arms");
         harmony = new Harmony("tempy.customArms");
@@ -18,11 +18,11 @@ public class CustomArmMod : UKMod
         StartCoroutine(LoadStockPrefabs());
     }
 
-    public override void OnModUnload()
+    public override void OnModDisabled()
     {
         CustomArmController.UnloadArms();
         harmony.UnpatchSelf();
-        base.OnModUnload();
+        base.OnModDisabled();
     }
 
     public IEnumerator LoadStockPrefabs()
