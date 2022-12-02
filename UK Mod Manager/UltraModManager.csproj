@@ -131,7 +131,7 @@
     <BepInExPluginsDir>$(BepInExRootDir)/plugins/</BepInExPluginsDir>
   </PropertyGroup>
   <ItemGroup>
-    <ModDlls Include="bin\Debug\/UMM.dll" />
+    <ModDlls Include="$(OutDir)/$(AssemblyName).dll" />
   </ItemGroup>
   <Target Name="WarnBeforeBuild" BeforeTargets="BeforeBuild">
     <Error Condition="!Exists($(ULTRAKILLPath))" Text="ULTRAKILLPath not set, create a .csproj.user file that sets this property to compile" />
