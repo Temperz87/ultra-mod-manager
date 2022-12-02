@@ -8,12 +8,14 @@ namespace UMM
     {
         public ModType modType;
         public Type mod;
+        public string GUID;
         public string modName;
         public string modDescription;
-        public string modVersion;
+        public Version modVersion;
         public bool supportsUnloading;
         public bool loadOnStart;
         public bool loaded;
+        public Dependency[] dependencies;
 
         public ModInformation(Type mod, ModType modType)
         {
@@ -24,17 +26,21 @@ namespace UMM
             if (modType == ModType.BepInPlugin)
             {
                 BepInPlugin metaData = UltraModManager.GetBepinMetaData(mod);
+                GUID = metaData.GUID;
                 modName = metaData.Name;
-                modVersion = metaData.Version.ToString();
+                modVersion = metaData.Version;
                 modDescription = "Mod unloading and descriptions are not supported by BepInEx plugins.";
+                dependencies = UltraModManager.GetBepinDependencies(mod);
             }
             else if (modType == ModType.UKMod)
             {
                 UKPlugin metaData = UltraModManager.GetUKMetaData(mod);
+                GUID = metaData.GUID;
                 modName = metaData.name;
                 modDescription = metaData.description;
-                modVersion = metaData.version;
+                modVersion = Version.Parse(metaData.version);
                 supportsUnloading = metaData.unloadingSupported;
+                dependencies = UltraModManager.GetUKModDependencies(mod);
             }
         }
 
@@ -55,8 +61,8 @@ namespace UMM
         {
             if (!loaded)
             {
-                UltraModManager.LoadMod(this);
                 loaded = true;
+                UltraModManager.LoadMod(this);
             }
         }
 
@@ -64,8 +70,8 @@ namespace UMM
         {
             if (loaded && supportsUnloading)
             {
+                loaded = false;
                 UltraModManager.UnloadMod(this);
-                loaded = false; 
             }
         }
 
@@ -74,5 +80,11 @@ namespace UMM
             UKMod,
             BepInPlugin
         }
+    }
+
+    public class Dependency
+    {
+        public string GUID;
+        public Version MinimumVersion;
     }
 }

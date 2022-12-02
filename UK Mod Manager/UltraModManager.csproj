@@ -69,7 +69,7 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ManagedDir)\UnityEngine.PhysicsModule.dll</HintPath>
     </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null" />
+    <Reference Include="UnityEngine.TextRenderingModule, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null"/>
     <Reference Include="UnityEngine.UI, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ManagedDir)\UnityEngine.UI.dll</HintPath>
@@ -108,6 +108,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\UKDependency.cs" />
     <Compile Include="Harmony Patches\Cybergrind Patches.cs" />
     <Compile Include="Harmony Patches\Mod UI Patches.cs" />
     <Compile Include="ModInformation.cs" />
@@ -130,7 +131,7 @@
     <BepInExPluginsDir>$(BepInExRootDir)/plugins/</BepInExPluginsDir>
   </PropertyGroup>
   <ItemGroup>
-    <ModDlls Include="$(OutDir)/$(AssemblyName).dll" />
+    <ModDlls Include="bin\Debug\/UMM.dll" />
   </ItemGroup>
   <Target Name="WarnBeforeBuild" BeforeTargets="BeforeBuild">
     <Error Condition="!Exists($(ULTRAKILLPath))" Text="ULTRAKILLPath not set, create a .csproj.user file that sets this property to compile" />
