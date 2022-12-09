@@ -108,6 +108,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\UKDependency.cs" />
     <Compile Include="Harmony Patches\Cybergrind Patches.cs" />
     <Compile Include="Harmony Patches\Mod UI Patches.cs" />
     <Compile Include="ModInformation.cs" />

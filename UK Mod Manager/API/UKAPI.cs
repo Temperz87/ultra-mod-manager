@@ -8,6 +8,7 @@ using UnityEngine;
 using UMM.Loader;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
+using System.Linq;
 
 namespace UMM
 {
@@ -31,12 +32,12 @@ namespace UMM
         /// <summary>
         /// Returns a clone of all found <see cref="ModInformation"/> instances.
         /// </summary>
-        public static ModInformation[] AllModInfoClone => UltraModManager.foundMods.ToArray().Clone() as ModInformation[];
+        public static Dictionary<string, ModInformation> AllModInfoClone => UltraModManager.foundMods.ToDictionary(entry => entry.Key, entry => entry.Value);
 
         /// <summary>
         /// Returns a clone of all loaded <see cref="ModInformation"/> instances.
         /// </summary>
-        public static ModInformation[] AllLoadedModInfoClone => UltraModManager.allLoadedMods.ToArray().Clone() as ModInformation[];
+        public static Dictionary<string, ModInformation> AllLoadedModInfoClone => UltraModManager.allLoadedMods.ToDictionary(entry => entry.Key, entry => entry.Value);
 
         /// <summary>
         /// Initializes the API by loading the save file and common asset bundle
@@ -141,10 +142,10 @@ namespace UMM
         }
 
         [Obsolete("Use AllModInfoClone instead.")]
-        public static ModInformation[] GetAllModInformation() => AllModInfoClone;
+        public static Dictionary<string, ModInformation> GetAllModInformation() => AllModInfoClone;
 
         [Obsolete("Use AllLoadedModInfoClone instead.")]
-        public static ModInformation[] GetAllLoadedModInformation() => AllLoadedModInfoClone;
+        public static Dictionary<string, ModInformation> GetAllLoadedModInformation() => AllLoadedModInfoClone;
 
         /// <summary>
         /// Restarts Ultrakill
