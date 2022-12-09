@@ -137,14 +137,14 @@ namespace UMM.Loader
                     else
                     {
                         info.UnLoadThisMod();
-                        Debug.LogError($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
+                        Plugin.logger.LogWarning($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
                         return;
                     }
                 }
                 else
                 {
                     info.UnLoadThisMod();
-                    Debug.LogError($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
+                    Plugin.logger.LogWarning($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
                     return;
                 }
             }
