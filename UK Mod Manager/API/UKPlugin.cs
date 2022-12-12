@@ -10,10 +10,20 @@ namespace UMM
         public string description { get; }
         public bool allowCyberGrindSubmission { get; }
         public bool unloadingSupported { get; }
-
+        
         public UKPlugin(string GUID, string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
         {
             this.GUID = GUID;
+            this.name = name;
+            this.version = version;
+            this.description = description;
+            this.allowCyberGrindSubmission = allowCyberGrindSubmission;
+            this.unloadingSupported = supportsUnloading;
+        }
+
+        public UKPlugin(string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
+        {
+            this.GUID = name;
             this.name = name;
             this.version = version;
             this.description = description;
