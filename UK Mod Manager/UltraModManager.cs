@@ -4,13 +4,14 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using static UMM.ModInformation;
 
 namespace UMM.Loader
 {
     public static class UltraModManager
     {
-        public static List<ModInformation> foundMods = new List<ModInformation>();
-        public static List<ModInformation> allLoadedMods = new List<ModInformation>();
+        public static Dictionary<string, ModInformation> foundMods = new Dictionary<string, ModInformation>();
+        public static Dictionary<string, ModInformation> allLoadedMods = new Dictionary<string, ModInformation>();
         public static bool outdated { get; internal set; } = false;
         public static string newLoaderVersion { get; internal set; } = "";
         private static bool initialized = false;
@@ -41,7 +42,7 @@ namespace UMM.Loader
         private static void LoadOnStart()
         {
             int loadedMods = 0;
-            foreach (ModInformation info in foundMods)
+            foreach (ModInformation info in foundMods.Values)
             {
                 if (info.loadOnStart)
                 {
@@ -55,12 +56,6 @@ namespace UMM.Loader
 
         public static void LoadFromAssembly(FileInfo fInfo)
         {
-            DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + "\\dependencies");
-            if (dInfo.Exists) // this solution is a hack i am well aware
-            {
-                foreach (FileInfo info in dInfo.GetFiles("*.dll", SearchOption.AllDirectories))
-                    Assembly.LoadFile(info.FullName);
-            }
             try
             {
                 Assembly ass = Assembly.LoadFile(fInfo.FullName);
@@ -74,7 +69,7 @@ namespace UMM.Loader
                     else
                         continue;
                     Plugin.logger.LogInfo("Adding mod info " + fInfo.FullName + " " + type.Name);
-                    foundMods.Add(info);
+                    foundMods.Add(info.GUID, info);
                     object retrievedData = UKAPI.SaveFileHandler.RetrieveModData("LoadOnStart", info.modName);
                     if (retrievedData != null && bool.Parse(retrievedData.ToString()))
                         info.loadOnStart = true;
@@ -107,8 +102,53 @@ namespace UMM.Loader
             return (UKPlugin)customAttributes[0];
         }
 
+        internal static Dependency[] GetBepinDependencies(Type t)
+        {
+            BepInDependency[] customAttributes = (BepInDependency[])t.GetCustomAttributes(typeof(BepInDependency), true);
+            List<Dependency> dependencies = new List<Dependency>();
+            foreach (BepInDependency attribute in customAttributes)
+            {
+                dependencies.Add(new Dependency() { GUID = attribute.DependencyGUID, MinimumVersion = attribute.MinimumVersion });
+            }
+            return dependencies.ToArray();
+        }
+
+        internal static Dependency[] GetUKModDependencies(Type t)
+        {
+            UKDependency[] customAttributes = (UKDependency[])t.GetCustomAttributes(typeof(UKDependency), true);
+            List<Dependency> dependencies = new List<Dependency>();
+            foreach (UKDependency attribute in customAttributes)
+            {
+                dependencies.Add(new Dependency() { GUID = attribute.GUID, MinimumVersion = attribute.MinimumVersion });
+            }
+            return dependencies.ToArray();
+        }
+
         public static void LoadMod(ModInformation info)
         {
+            if (allLoadedMods.ContainsKey(info.GUID)) return;
+            foreach (Dependency dependency in info.dependencies)
+            {
+                if (foundMods.ContainsKey(dependency.GUID))
+                {
+                    if (foundMods[dependency.GUID].modVersion >= dependency.MinimumVersion)
+                    {
+                        LoadMod(foundMods[dependency.GUID]);
+                    }
+                    else
+                    {
+                        info.UnLoadThisMod();
+                        Plugin.logger.LogWarning($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
+                        return;
+                    }
+                }
+                else
+                {
+                    info.UnLoadThisMod();
+                    Plugin.logger.LogWarning($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
+                    return;
+                }
+            }
             GameObject modObject = GameObject.Instantiate(new GameObject());
             UKMod newMod = null;
             try
@@ -119,7 +159,7 @@ namespace UMM.Loader
                     GameObject.DontDestroyOnLoad(modObject);
                     modObject.SetActive(false);
                     modObject.AddComponent(info.mod);
-                    allLoadedMods.Add(info);
+                    allLoadedMods.Add(info.GUID, info);
                     modObject.SetActive(true);
                     Plugin.logger.LogMessage("Loaded BepInExPlugin " + info.modName);
                     return;
@@ -129,7 +169,7 @@ namespace UMM.Loader
                 GameObject.DontDestroyOnLoad(modObject);
                 modObject.SetActive(false);
                 newMod = modObject.AddComponent(info.mod) as UKMod;
-                allLoadedMods.Add(info);
+                allLoadedMods.Add(info.GUID, info);
                 modObjects.Add(info, modObject);
                 UKPlugin metaData = UltraModManager.GetUKMetaData(info.mod);
                 if (!metaData.allowCyberGrindSubmission)
@@ -161,7 +201,7 @@ namespace UMM.Loader
                 mod.OnModUnloaded.Invoke();
                 mod.OnModUnload();
                 modObjects.Remove(info);
-                allLoadedMods.Remove(info);
+                allLoadedMods.Remove(info.GUID);
                 GameObject.Destroy(modObject);
                 if (!UltraModManager.GetUKMetaData(info.mod).allowCyberGrindSubmission)
                     UKAPI.RemoveDisableCyberGrindReason(info.modName);

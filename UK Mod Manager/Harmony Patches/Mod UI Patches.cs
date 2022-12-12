@@ -4,8 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UMM.Loader;
 using UnityEngine.EventSystems;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace UMM.HarmonyPatches
 {
@@ -100,7 +100,7 @@ namespace UMM.HarmonyPatches
                 GameObject.Destroy(hoverText.GetComponent<Button>());
                 hoverText.SetActive(false);
 
-                ModInformation[] information = UKAPI.AllModInfoClone;
+                ModInformation[] information = UKAPI.AllModInfoClone.Values.ToArray();
                 if (information.Length > 0)
                 {
                     Array.Sort(information);
