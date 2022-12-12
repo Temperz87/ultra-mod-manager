@@ -4,6 +4,8 @@ using UnityEngine;
 using UnityEngine.UI;
 using UMM.Loader;
 using UnityEngine.EventSystems;
+using System.Linq;
+using System.Collections.Generic;
 
 namespace UMM.HarmonyPatches
 {
@@ -14,8 +16,10 @@ namespace UMM.HarmonyPatches
         {
             if (__instance.pauseMenu.name == "Main Menu (1)") // check to see that we're patching out the main menu's menu, not like an in game menu one
             {
+                // Inject the mods button                
+
                 bool wasOn = MonoSingleton<PrefsManager>.Instance.GetBool("variationMemory", false);
-                __instance.pauseMenu.transform.Find("Panel").localPosition = new Vector3(0, 325, 0); 
+                __instance.pauseMenu.transform.Find("Panel").localPosition = new Vector3(0, 325, 0);
 
                 void Halve(Transform tf, bool left)
                 {
@@ -42,7 +46,7 @@ namespace UMM.HarmonyPatches
                 newModsButton.transform.localPosition = new Vector3(0, options.localPosition.y, 0);
                 Halve(newModsButton.transform, false);
                 newModsButton.GetComponentInChildren<Text>(true).text = "MODS";
-                
+
                 Transform panel = __instance.pauseMenu.transform.Find("Panel");
                 GameObject discordButton = panel.Find("Discord").gameObject;
                 discordButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(-164f, -350f);
@@ -169,7 +173,7 @@ namespace UMM.HarmonyPatches
                         newInformation.SetActive(true);
                     }
 
-                    cRect.sizeDelta = new Vector2(600f, information.Length * 200); // setting the scrollbar fit all of the mods
+                    cRect.sizeDelta = new Vector2(600f, information.Length * 200); // setting the scrollbar to fit all of the mods
                 }
                 else
                 {
@@ -184,7 +188,7 @@ namespace UMM.HarmonyPatches
                 }
 
                 __instance.variationMemory.gameObject.SetActive(true);
-                MonoSingleton<PrefsManager>.Instance.SetBool("variationMemory", wasOn); // there's a bug where this patch sets variation memory to always be on once you get to the menu fo romse reason, this fixes that
+                MonoSingleton<PrefsManager>.Instance.SetBool("variationMemory", wasOn); // there's a bug where this patch sets variation memory to always be on once you get to the menu for some reason, this fixes that
 
                 Button.ButtonClickedEvent modsButton = newModsButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent();
                 modsButton.AddListener(delegate
@@ -209,7 +213,79 @@ namespace UMM.HarmonyPatches
                 restartButton.GetComponentInChildren<Text>(true).text = "RESTART";
                 restartButton.SetActive(true);
                 Halve(restartButton.transform, false);
+
+
             }
+
+            // Here we don't care what menu we're patching (main menu or in game one), hence the stuff here is outside the if
+
+            // Inject mod control options
+            GameObject controlOptions = __instance.optionsMenu.transform.Find("Controls Options").gameObject;
+            Transform controlContent = controlOptions.transform.Find("Scroll Rect").Find("Contents");
+            controlContent.GetComponent<RectTransform>().sizeDelta = new Vector2(620f, 1558.6f);
+
+            GameObject modOptions = GameObject.Instantiate(controlContent.Find("Weapons Settings").gameObject, controlContent);
+            modOptions.transform.localPosition -= new Vector3(0f, 410f, 0f);
+            GameObject bindTemplate = modOptions.transform.Find("Slot 1").gameObject;
+            bindTemplate.SetActive(false);
+            modOptions.transform.Find("Slot 2").gameObject.SetActive(false);
+            modOptions.transform.Find("Slot 3").gameObject.SetActive(false);
+            modOptions.transform.Find("Slot 4").gameObject.SetActive(false);
+            modOptions.transform.Find("Slot 5").gameObject.SetActive(false);
+            modOptions.transform.Find("Mouse Wheel Settings").gameObject.SetActive(false);
+            modOptions.transform.Find("Text (1)").GetComponent<Text>().text = "-- MODDED --";
+
+
+            List<string> binds = UKAPI.KeyBindHandler.moddedKeyBinds.Keys.ToList().Where(x => UKAPI.KeyBindHandler.moddedKeyBinds[x].enabled).ToList(); // CoPilot wrote that Where statement, I am so fucking bamboozled
+            int bindIndex;
+            for (bindIndex = 0; bindIndex < binds.Count; bindIndex++)
+            {
+                string keybindName = binds[bindIndex];
+                UKKeyBind keybind = UKAPI.KeyBindHandler.moddedKeyBinds[keybindName];
+                GameObject newKeyBind = GameObject.Instantiate(bindTemplate, modOptions.transform);
+                if (bindIndex % 2 == 0)
+                    newKeyBind.transform.localPosition = new Vector3(0f, -80f * ((bindIndex / 2) + 1), 0f); // I love math
+                else
+                    newKeyBind.transform.localPosition = new Vector3(315f, -80f * ((bindIndex + 1) / 2), 0f); // So much fun
+                newKeyBind.SetActive(true);
+                newKeyBind.transform.Find("Text").GetComponent<Text>().text = keybindName;
+                Text toSet = newKeyBind.transform.Find("Slot1").Find("Text").GetComponent<Text>();
+                toSet.text = keybind.keyBind.ToString();
+
+                Button button = newKeyBind.transform.Find("Slot1").GetComponent<Button>();
+                button.onClick = new Button.ButtonClickedEvent();
+                button.onClick.AddListener(delegate
+                {
+                    OptionsManager.Instance.dontUnpause = true;
+                    __instance.StartCoroutine(UKAPI.KeyBindHandler.SetKeyBindRoutine(button.gameObject, keybindName));
+                    button.gameObject.GetComponent<Image>().color = new Color32(255, 103, 0, 255);
+                });
+            }
+
+            UKAPI.KeyBindHandler.OnKeyBindEnabled.AddListener(delegate (UKKeyBind keybind)
+            {
+                if (bindTemplate == null)
+                    return;
+                GameObject newKeyBind = GameObject.Instantiate(bindTemplate, modOptions.transform);
+                if (bindIndex % 2 == 0)
+                    newKeyBind.transform.localPosition = new Vector3(0f, -80f * ((bindIndex / 2) + 1), 0f); // I love math
+                else
+                    newKeyBind.transform.localPosition = new Vector3(315f, -80f * ((bindIndex + 1) / 2), 0f); // So much fun
+                newKeyBind.SetActive(true);
+                newKeyBind.transform.Find("Text").GetComponent<Text>().text = keybind.bindName;
+                Text toSet = newKeyBind.transform.Find("Slot1").Find("Text").GetComponent<Text>();
+                toSet.text = keybind.keyBind.ToString();
+
+                Button button = newKeyBind.transform.Find("Slot1").GetComponent<Button>();
+                button.onClick = new Button.ButtonClickedEvent();
+                button.onClick.AddListener(delegate
+                {
+                    OptionsManager.Instance.dontUnpause = true;
+                    __instance.StartCoroutine(UKAPI.KeyBindHandler.SetKeyBindRoutine(button.gameObject, keybind.bindName));
+                    button.gameObject.GetComponent<Image>().color = new Color32(255, 103, 0, 255);
+                });
+                bindIndex++;
+            });
         }
     }
 }

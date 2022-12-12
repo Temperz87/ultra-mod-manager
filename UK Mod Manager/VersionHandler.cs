@@ -25,7 +25,7 @@ namespace UMM.Loader
                     yield break;
                 }
                 string text = www.downloadHandler.text;
-                //Debug.Log(text);
+                //Plugin.logger.LogMessage(text);
                 JArray jObjects = JArray.Parse(text);
                 string latestVersion = jObjects[0].Value<string>("name");
                 if (latestVersion != VERSION)

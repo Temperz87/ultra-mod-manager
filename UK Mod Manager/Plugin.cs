@@ -25,6 +25,11 @@ namespace UMM.Loader
             }
         }
 
+        public void Update()
+        {
+            UKAPI.Update();
+        }
+
         private void OnApplicationQuit()
         {
             UKAPI.SaveFileHandler.DumpFile();

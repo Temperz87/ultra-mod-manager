@@ -8,6 +8,12 @@ using UnityEngine;
 using UMM.Loader;
 using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
+using UnityEngine.InputSystem;
+using UnityEngine.UI;
+using NewBlood;
+using UnityEngine.InputSystem.Controls;
+using System.Linq;
+using UnityEngine.Events;
 
 namespace UMM
 {
@@ -77,12 +83,17 @@ namespace UMM
             bundles.Add("common", commonBundle);
             Traverse.Create(MapLoader.Instance).Field("loadedBundles").SetValue(bundles);
             MapLoader.Instance.isCommonLoaded = true;
-            
             string[] arr = Environment.GetCommandLineArgs(); // This is here to ensure that the common asset bundle is loaded correctly before loading a level
             if (arr != null)
                 foreach (string str in arr)
                     if (str != null && (str.Contains("sandbox") || str.Contains("uk_construct")))
                         SceneManager.LoadScene("uk_construct");
+        }
+
+        internal static void Update()
+        {
+            foreach (UKKeyBind bind in KeyBindHandler.moddedKeyBinds.Values.ToList())
+                bind?.CheckEvents(); // Always null check :P
         }
 
         /// <summary>
@@ -106,9 +117,6 @@ namespace UMM
             else
                 Plugin.logger.LogError("Tried to remove cg reason " + reason + " but could not find it!");
         }
-
-        [Obsolete("Use CanSubmitLeaderboardScore instead.")]
-        public static bool ShouldSubmitCyberGrindScore() => CanSubmitCybergrindScore;
 
         /// <summary>
         /// Tries to create a Ultrakill asset load request from ULTRAKILL_Data/StreamingAssets/common, note that this request has to be awaited
@@ -140,11 +148,21 @@ namespace UMM
             return commonBundle.LoadAsset(name);
         }
 
-        [Obsolete("Use AllModInfoClone instead.")]
-        public static ModInformation[] GetAllModInformation() => AllModInfoClone;
+        public static UKKeyBind GetKeyBind(string key, KeyCode fallback = KeyCode.None)
+        {
+            UKKeyBind bind = KeyBindHandler.GetKeyBind(key, fallback);
+            if (!bind.enabled)
+            {
+                bind.enabled = true;
+                KeyBindHandler.OnKeyBindEnabled.Invoke(bind);
+            }
+            return bind;
+        }
 
-        [Obsolete("Use AllLoadedModInfoClone instead.")]
-        public static ModInformation[] GetAllLoadedModInformation() => AllLoadedModInfoClone;
+        public static bool EnsureKeyBindExists(string key)
+        {
+            return KeyBindHandler.moddedKeyBinds.ContainsKey(key);
+        }
 
         /// <summary>
         /// Restarts Ultrakill
@@ -162,7 +180,7 @@ namespace UMM
             };
             System.Diagnostics.Process.Start(psi);
 
-            //Debug.Log("Path is \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\UltrakillRestarter.exe\"");
+            //Plugin.logger.LogMessage("Path is \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\UltrakillRestarter.exe\"");
             //string strCmdText;
             //strCmdText = "/K \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe\""/* + System.Diagnostics.Process.GetCurrentProcess().Id.ToString() + "\""*/;
             ////strCmdText = "/K \"" + Environment.CurrentDirectory + "\\ULTRAKILL.exe\"";
@@ -204,10 +222,13 @@ namespace UMM
                     Plugin.logger.LogInfo("Couldn't find a save file, making one now");
                     fInfo.Create();
                 }
+                KeyBindHandler.LoadKeyBinds();
             }
 
             internal static void DumpFile()
             {
+                Plugin.logger.LogInfo("Dumping keybinds");
+                KeyBindHandler.DumpKeyBinds();
                 FileInfo fInfo = new FileInfo(path);
                 Plugin.logger.LogInfo("Dumping mod persistent data file to " + path);
                 File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(savedData));
@@ -272,6 +293,145 @@ namespace UMM
             {
                 return savedData.ContainsKey(modName) && savedData[modName].ContainsKey(key);
             }
+        }
+
+        internal static class KeyBindHandler
+        {
+            internal static Dictionary<string, UKKeyBind> moddedKeyBinds = new Dictionary<string, UKKeyBind>();
+            internal static KeyBindEnabledEvent OnKeyBindEnabled = new KeyBindEnabledEvent();
+
+            internal static void LoadKeyBinds() // Copilot basically wrote this code
+            {
+                if (SaveFileHandler.EnsureModData("UMM", "KeyBinds"))
+                {
+                    string[] keyBinds = SaveFileHandler.RetrieveModData("KeyBinds", "UMM").Split(';');
+                    foreach (string keyBind in keyBinds)
+                    {
+                        string[] keyBindData = keyBind.Split(':');
+                        if (keyBindData.Length == 2)
+                        {
+                            Debug.Log("Loading keybind" + keyBindData[0] + " : " + keyBindData[1]);
+                            UKKeyBind bind = new UKKeyBind(new InputAction(keyBindData[0], InputActionType.Value, null, null, null, null), keyBindData[0], (KeyCode)Enum.Parse(typeof(KeyCode), keyBindData[1]));
+                            moddedKeyBinds.Add(keyBindData[0], bind);
+                        }
+                    }
+                }
+                else
+                {
+                    SaveFileHandler.SetModData("UMM", "KeyBinds", "");
+                }
+            }
+
+            internal static UKKeyBind GetKeyBind(string key, KeyCode defaultBind)
+            {
+                if (moddedKeyBinds.ContainsKey(key))
+                    return moddedKeyBinds[key];
+                UKKeyBind bind = new UKKeyBind(new InputAction(key, InputActionType.Value, null, null, null, null), key, defaultBind);
+                moddedKeyBinds.Add(key, bind);
+                return bind;
+            }
+
+            internal static void DumpKeyBinds()
+            {
+                string keyBinds = "";
+                foreach (KeyValuePair<string, UKKeyBind> keyBind in moddedKeyBinds)
+                {
+                    Plugin.logger.LogInfo("Adding keybind " + keyBind.Key + ":" + keyBind.Value.keyBind + ";");
+                    keyBinds += keyBind.Key + ":" + keyBind.Value.keyBind + ";"; // This is fine because all keyBinds should only have one action
+                }
+                SaveFileHandler.SetModData("UMM", "KeyBinds", keyBinds);
+            }
+
+            internal static IEnumerator SetKeyBindRoutine(GameObject currentKey, string keyName) // I copy and pasted this functions completely, credit to whoever wrote ControlsOptions.OnGUI
+            {
+                Color32 normalColor = new Color32(20, 20, 20, 255);
+                yield return null;
+                while (true) // This is bad practice, I don't care :P
+                {
+                    Event current = Event.current;
+                    if (current == null)
+                    {
+                        yield return null;
+                        continue;
+                    }
+                    KeyCode keyCode = KeyCode.None;
+                    if (current.keyCode == KeyCode.Escape)
+                    {
+                        currentKey.GetComponent<Image>().color = normalColor;
+                        currentKey = null;
+                        OptionsManager.Instance.dontUnpause = false;
+                    }
+                    else if (current.isKey || current.isMouse || current.button > 2 || current.shift)
+                    {
+                        if (current.isKey)
+                        {
+                            keyCode = current.keyCode;
+                        }
+                        else if (Input.GetKey(KeyCode.LeftShift))
+                        {
+                            keyCode = KeyCode.LeftShift;
+                        }
+                        else if (Input.GetKey(KeyCode.RightShift))
+                        {
+                            keyCode = KeyCode.RightShift;
+                        }
+                        else
+                        {
+                            if (current.button > 6)
+                            {
+                                currentKey.GetComponent<Image>().color = normalColor;
+                                OptionsManager.Instance.dontUnpause = false;
+                                yield break;
+                            }
+                            keyCode = KeyCode.Mouse0 + current.button;
+                        }
+                    }
+                    else if (Input.GetKey(KeyCode.Mouse3) || Input.GetKey(KeyCode.Mouse4) || Input.GetKey(KeyCode.Mouse5) || Input.GetKey(KeyCode.Mouse6))
+                    {
+                        if (Input.GetKey(KeyCode.Mouse4))
+                        {
+                            keyCode = KeyCode.Mouse4;
+                        }
+                        else if (Input.GetKey(KeyCode.Mouse5))
+                        {
+                            keyCode = KeyCode.Mouse5;
+                        }
+                        else if (Input.GetKey(KeyCode.Mouse6))
+                        {
+                            keyCode = KeyCode.Mouse6;
+                        }
+                    }
+                    else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                    {
+                        keyCode = KeyCode.LeftShift;
+                        if (Input.GetKey(KeyCode.RightShift))
+                        {
+                            keyCode = KeyCode.RightShift;
+                        }
+                    }
+                    else
+                    {
+                        yield return null;
+                        continue;
+                    }
+                    if (keyCode == KeyCode.None)
+                    {
+                        Plugin.logger.LogInfo("WHY?");
+                        yield return null;
+                        continue;
+                    }
+                    //InputManager.Instance.Inputs[this.currentKey.name] = keyCode;
+                    currentKey.GetComponentInChildren<Text>().text = ControlsOptions.GetKeyName(keyCode);
+                    //MonoSingleton<PrefsManager>.Instance.SetInt("keyBinding." + this.currentKey.name, (int)keyCode);
+                    //InputManager.Instance.UpdateBindings();
+                    moddedKeyBinds[keyName].ChangeKeyBind(keyCode);
+                    currentKey.GetComponent<Image>().color = normalColor;
+                    OptionsManager.Instance.dontUnpause = false;
+                    yield break;
+                }
+            }
+
+            internal class KeyBindEnabledEvent : UnityEvent<UKKeyBind> { }
         }
     }
 }

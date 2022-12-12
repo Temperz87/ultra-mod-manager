@@ -1,6 +1,7 @@
 ﻿using System;
 using UMM.Loader;
 using BepInEx;
+using UnityEngine;
 
 namespace UMM
 {
@@ -51,13 +52,23 @@ namespace UMM
             return String.Compare(modName, other.modName);
         }
 
-        public void LoadThisMod()
+        public bool LoadThisMod()
         {
             if (!loaded)
             {
-                UltraModManager.LoadMod(this);
-                loaded = true;
+                try
+                {
+                    UltraModManager.LoadMod(this);
+                    loaded = true;
+                }
+                catch (Exception e)
+                {
+                    Plugin.logger.LogMessage("Caught exception while trying to load mod " + modName);
+                    Plugin.logger.LogMessage(e.ToString());
+                    loaded = false;
+                }
             }
+            return loaded;
         }
 
         public void UnLoadThisMod()

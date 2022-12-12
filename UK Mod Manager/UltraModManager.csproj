@@ -40,9 +40,17 @@
     <Reference Include="BepInEx">
       <HintPath>$(BepInExCoreDir)\BepInEx.dll</HintPath>
     </Reference>
+    <Reference Include="NewBlood.LegacyInput, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\ULTRAKILL_Data\Managed\NewBlood.LegacyInput.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(ManagedDir)\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="Unity.InputSystem, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\ULTRAKILL_Data\Managed\Unity.InputSystem.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine">
       <HintPath>$(ManagedDir)\UnityEngine.dll</HintPath>
@@ -61,6 +69,10 @@
     </Reference>
     <Reference Include="UnityEngine.CoreModule">
       <HintPath>$(ManagedDir)\UnityEngine.CoreModule.dll</HintPath>
+    </Reference>
+    <Reference Include="UnityEngine.IMGUIModule, Version=0.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\..\..\..\..\Program Files (x86)\Steam\steamapps\common\ULTRAKILL\ULTRAKILL_Data\Managed\UnityEngine.IMGUIModule.dll</HintPath>
     </Reference>
     <Reference Include="UnityEngine.InputLegacyModule">
       <HintPath>$(ManagedDir)\UnityEngine.InputLegacyModule.dll</HintPath>
@@ -108,6 +120,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="API\UMMKeyBind.cs" />
     <Compile Include="Harmony Patches\Cybergrind Patches.cs" />
     <Compile Include="Harmony Patches\Mod UI Patches.cs" />
     <Compile Include="ModInformation.cs" />
@@ -128,17 +141,12 @@
     <BepInExRootDir>$(ULTRAKILLPath)/BepInEx/</BepInExRootDir>
     <BepInExCoreDir>$(BepInExRootDir)/core/</BepInExCoreDir>
     <BepInExPluginsDir>$(BepInExRootDir)/plugins/</BepInExPluginsDir>
+    <UMMPath>$(BepInExPluginsDir)/UMM/</UMMPath>
   </PropertyGroup>
-  <ItemGroup>
-    <ModDlls Include="$(OutDir)/$(AssemblyName).dll" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="UltraModManager.csproj.user" />
-  </ItemGroup>
   <Target Name="WarnBeforeBuild" BeforeTargets="BeforeBuild">
     <Error Condition="!Exists($(ULTRAKILLPath))" Text="ULTRAKILLPath not set, create a .csproj.user file that sets this property to compile" />
   </Target>
   <Target Name="CopyModDlls" AfterTargets="AfterBuild">
-    <Copy SourceFiles="@(ModDlls)" DestinationFolder="$(BepInExRootDir)/plugins/UMM" />
+    <Copy SourceFiles="$(OutDir)/$(AssemblyName).dll" DestinationFolder="$(UMMPath)" />
   </Target>
 </Project>
