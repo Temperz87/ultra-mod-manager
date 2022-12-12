@@ -56,6 +56,12 @@ namespace UMM.Loader
 
         public static void LoadFromAssembly(FileInfo fInfo)
         {
+            DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + "\\dependencies");
+            if (dInfo.Exists) // this solution is a hack i am well aware
+            {
+                foreach (FileInfo info in dInfo.GetFiles("*.dll", SearchOption.AllDirectories))
+                    Assembly.LoadFile(info.FullName);
+            }
             try
             {
                 Assembly ass = Assembly.LoadFile(fInfo.FullName);

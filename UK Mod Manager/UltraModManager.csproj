@@ -120,7 +120,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="API\UMMKeyBind.cs" />
+    <Compile Include="API\UKKeyBind.cs" />
     <Compile Include="API\UKDependency.cs" />
     <Compile Include="Harmony Patches\Cybergrind Patches.cs" />
     <Compile Include="Harmony Patches\Mod UI Patches.cs" />

@@ -4,8 +4,8 @@ namespace UMM
 {
     public class UKDependency : Attribute
     {
-        public string GUID;
-        public Version MinimumVersion;
+        public string GUID { get; private set; }
+        public Version MinimumVersion { get; private set; }
 
         public UKDependency(string GUID, string MinimumVersion)
         {
