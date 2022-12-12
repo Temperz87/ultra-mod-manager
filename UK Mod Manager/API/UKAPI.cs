@@ -167,7 +167,7 @@ namespace UMM
         }
         
         /// <summary>
-        /// Ensures that a <see cref="UKKeyBind"/> exists given a key, if it doesn't exit it isn't created
+        /// Ensures that a <see cref="UKKeyBind"/> exists given a key, if it doesn't exit it won't be created
         /// </summary>
         /// <param name="key">The name of the keybind</param>
         /// <returns>If the keybind exists</returns>
