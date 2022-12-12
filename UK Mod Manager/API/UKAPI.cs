@@ -148,6 +148,13 @@ namespace UMM
             return commonBundle.LoadAsset(name);
         }
 
+
+        /// <summary>
+        /// Gets a <see cref="UKKeyBind"/> given its name, if the keybind doesn't exist it will be created
+        /// </summary>
+        /// <param name="key">The name of the keybind</param>
+        /// <param name="fallback">The default key of the keybind</param>
+        /// <returns>An instance of a <see cref="UKKeyBind"/></returns>
         public static UKKeyBind GetKeyBind(string key, KeyCode fallback = KeyCode.None)
         {
             UKKeyBind bind = KeyBindHandler.GetKeyBind(key, fallback);
@@ -158,11 +165,17 @@ namespace UMM
             }
             return bind;
         }
-
+        
+        /// <summary>
+        /// Ensures that a <see cref="UKKeyBind"/> exists given a key, if it doesn't exit it won't be created
+        /// </summary>
+        /// <param name="key">The name of the keybind</param>
+        /// <returns>If the keybind exists</returns>
         public static bool EnsureKeyBindExists(string key)
         {
             return KeyBindHandler.moddedKeyBinds.ContainsKey(key);
         }
+        
         [Obsolete("Use AllModInfoClone instead.")]
         public static Dictionary<string, ModInformation> GetAllModInformation() => AllModInfoClone;
 
@@ -347,7 +360,7 @@ namespace UMM
                 SaveFileHandler.SetModData("UMM", "KeyBinds", keyBinds);
             }
 
-            internal static IEnumerator SetKeyBindRoutine(GameObject currentKey, string keyName) // I copy and pasted this functions completely, credit to whoever wrote ControlsOptions.OnGUI
+            internal static IEnumerator SetKeyBindRoutine(GameObject currentKey, string keyName) // I copy and pasted this function completely, credit to whoever wrote ControlsOptions.OnGUI
             {
                 Color32 normalColor = new Color32(20, 20, 20, 255);
                 yield return null;
