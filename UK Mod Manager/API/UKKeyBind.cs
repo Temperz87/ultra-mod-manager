@@ -58,7 +58,7 @@ namespace UMM
         }
 
         /// <summary>
-        /// Fires when the bindings keycode changes, supplies a string
+        /// Fires when the bindings keycode changes, supplies a KeyCode
         /// </summary>
         public BindingChangedEvent OnBindingChanged = new BindingChangedEvent();
 
