@@ -269,6 +269,8 @@ namespace UMM.HarmonyPatches
                 });
             }
 
+            RectTransform controlContentRect = controlContent.GetComponent<RectTransform>();
+            controlContentRect.sizeDelta = new Vector2(620f, 1558.6f + (binds.Count * 20)); // setting the scrollbar to fit all of the binds
             UKAPI.KeyBindHandler.OnKeyBindEnabled.AddListener(delegate (UKKeyBind keybind)
             {
                 if (bindTemplate == null)
@@ -300,6 +302,7 @@ namespace UMM.HarmonyPatches
                     if (keyText != null)
                         keyText.text = newBind.ToString().Trim();
                 });
+                controlContentRect.sizeDelta += new Vector2(0f, 20f); // setting the scrollbar to fit all of the binds
             });
         }
     }
