@@ -10,8 +10,6 @@ using Newtonsoft.Json;
 using UnityEngine.SceneManagement;
 using UnityEngine.InputSystem;
 using UnityEngine.UI;
-using NewBlood;
-using UnityEngine.InputSystem.Controls;
 using System.Linq;
 using UnityEngine.Events;
 
