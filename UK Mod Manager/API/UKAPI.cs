@@ -432,7 +432,6 @@ namespace UMM
                     }
                     if (keyCode == KeyCode.None)
                     {
-                        Plugin.logger.LogInfo("WHY?");
                         yield return null;
                         continue;
                     }

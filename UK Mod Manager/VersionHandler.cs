@@ -10,7 +10,7 @@ namespace UMM.Loader
         public const string VERSION = "0.5.0"; // Should this be hardcoded? No it should not be
         public static  IEnumerator CheckVersion()
         {
-            Plugin.logger.LogInfo("Trying to get verison.");
+            //Plugin.logger.LogInfo("Trying to get verison.");
             using (UnityWebRequest www = UnityWebRequest.Get("https://api.github.com/repos/Temperz87/ultra-mod-manager/tags"))
             {
                 yield return www.SendWebRequest();
@@ -30,10 +30,12 @@ namespace UMM.Loader
                 string latestVersion = jObjects[0].Value<string>("name");
                 if (latestVersion != VERSION)
                 {
-                    Plugin.logger.LogWarning("New version found: " + latestVersion + " while the current version is " + VERSION);
+                    Plugin.logger.LogWarning("New UMM version found: " + latestVersion + " while the current version is " + VERSION);
                     UltraModManager.outdated = true;
                     UltraModManager.newLoaderVersion = latestVersion;
                 }
+                else
+                    Plugin.logger.LogMessage("UMM is up to date!");
                 yield break;
             }
         }
