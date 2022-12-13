@@ -260,6 +260,13 @@ namespace UMM.HarmonyPatches
                     __instance.StartCoroutine(UKAPI.KeyBindHandler.SetKeyBindRoutine(button.gameObject, keybindName));
                     button.gameObject.GetComponent<Image>().color = new Color32(255, 103, 0, 255);
                 });
+
+                Text keyText = button.gameObject.GetComponentInChildren<Text>();
+                keybind.OnBindingChanged.AddListener(delegate (KeyCode newBind)
+                {
+                    if (keyText != null)
+                        keyText.text = newBind.ToString().Trim();
+                });
             }
 
             UKAPI.KeyBindHandler.OnKeyBindEnabled.AddListener(delegate (UKKeyBind keybind)
@@ -285,6 +292,14 @@ namespace UMM.HarmonyPatches
                     button.gameObject.GetComponent<Image>().color = new Color32(255, 103, 0, 255);
                 });
                 bindIndex++;
+
+
+                Text keyText = button.gameObject.GetComponentInChildren<Text>();
+                keybind.OnBindingChanged.AddListener(delegate (KeyCode newBind)
+                {
+                    if (keyText != null)
+                        keyText.text = newBind.ToString().Trim();
+                });
             });
         }
     }

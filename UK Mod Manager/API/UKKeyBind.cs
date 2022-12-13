@@ -57,6 +57,11 @@ namespace UMM
             }
         }
 
+        /// <summary>
+        /// Fires when the bindings keycode changes, supplies a string
+        /// </summary>
+        public BindingChangedEvent OnBindingChanged = new BindingChangedEvent();
+
         internal UKKeyBind(InputAction action, string BindName, KeyCode KeyBind) : base(action)
         {
             this.bindName = BindName;
@@ -70,13 +75,18 @@ namespace UMM
                 throw new ArgumentException("Couldn't find button control for keybind " + BindName + " of bind " + KeyBind);
         }
 
-        internal void ChangeKeyBind(KeyCode bind)
+        /// <summary>
+        /// Changes the keybind's key given a KeyCode
+        /// </summary>
+        /// <param name="bind"></param>
+        public void ChangeKeyBind(KeyCode bind)
         {
             ButtonControl buttonControl;
             if (LegacyInput.current.TryGetButton(bind, out buttonControl))
             {
                 Action.ChangeBinding(0).WithPath(buttonControl.path);
                 this.keyBind = bind;
+                OnBindingChanged.Invoke(bind);
             }
         }
 
@@ -90,5 +100,7 @@ namespace UMM
             else if (WasPerformedThisFrame)
                 onPress.Invoke();
         }
+
+        public class BindingChangedEvent : UnityEvent<KeyCode> { }
     }
 }
