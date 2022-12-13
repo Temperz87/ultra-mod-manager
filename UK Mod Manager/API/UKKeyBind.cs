@@ -9,14 +9,35 @@ namespace UMM
 {
     public class UKKeyBind : InputActionState
     {
+        /// <summary>
+        /// Gets the KeyCode associated with the keybind
+        /// </summary>
         public KeyCode keyBind { get; internal set; }
+        
+        /// <summary>
+        /// Gets the name associated with the bind
+        /// </summary>
         public string bindName { get; internal set; }
-
+        
+        /// <summary>
+        /// A UnityEvent that fires when the button is pressed
+        /// </summary>
         public UnityEvent onPress = new UnityEvent();
+        
+        /// <summary>
+        /// A UnityEvent that fires when the button is pressed and the player is in a playable scene
+        /// </summary>
         public UnityEvent onPerformInScene = new UnityEvent();
         
+        /// <summary>
+        /// Whether or not the keybind is currently being used by a mod
+        /// </summary>
         internal bool enabled = false;
 
+
+        /// <summary>
+        /// Gets whether or not the keybind is pressed and the player is in a playable scene
+        /// </summary>
         public bool IsPressedInScene
         {
             get
@@ -25,6 +46,9 @@ namespace UMM
             }
         }
 
+        /// <summary>
+        /// Gets whether or not the keybind was pressed in this frame and the player is in a playable scene.
+        /// </summary>
         public bool WasPerformedThisFrameInScene
         {
             get
@@ -33,7 +57,7 @@ namespace UMM
             }
         }
 
-        public UKKeyBind(InputAction action, string BindName, KeyCode KeyBind) : base(action)
+        internal UKKeyBind(InputAction action, string BindName, KeyCode KeyBind) : base(action)
         {
             this.bindName = BindName;
             this.keyBind = KeyBind;
@@ -46,7 +70,7 @@ namespace UMM
                 throw new ArgumentException("Couldn't find button control for keybind " + BindName + " of bind " + KeyBind);
         }
 
-        public void ChangeKeyBind(KeyCode bind)
+        internal void ChangeKeyBind(KeyCode bind)
         {
             ButtonControl buttonControl;
             if (LegacyInput.current.TryGetButton(bind, out buttonControl))
@@ -56,7 +80,7 @@ namespace UMM
             }
         }
 
-        public void CheckEvents()
+        internal void CheckEvents()
         {
             if (WasPerformedThisFrameInScene)
             {
