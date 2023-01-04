@@ -174,15 +174,15 @@ namespace UMM
         private static void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
         {
             string sceneName = scene.name;
-            UKLevelType newScene = GetUKLevelType(sceneName);
-
-            OnLevelChanged?.Invoke(CurrentLevelType);
+            UKLevelType newScene = GetUKLevelType(sceneName);            
 
             if (newScene != CurrentLevelType)
             {
                 CurrentLevelType = newScene;
                 OnLevelTypeChanged?.Invoke(newScene);
             }
+
+            OnLevelChanged?.Invoke(CurrentLevelType);
         }
 
         //Perhaps there is a better way to do this. Also this will most definitely cause problems in the future if PITR or Hakita rename any scenes.
@@ -217,7 +217,7 @@ namespace UMM
         /// <returns></returns>
         public static bool InLevel()
         {
-            bool notInLevel = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro);
+            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro);
             return !notInLevel;
         }
 
