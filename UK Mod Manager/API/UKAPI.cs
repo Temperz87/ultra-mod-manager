@@ -218,7 +218,7 @@ namespace UMM
         public static bool InLevel()
         {
             bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro);
-            return !notInLevel;
+            return !inNonPlayable;
         }
 
         /// <summary>
