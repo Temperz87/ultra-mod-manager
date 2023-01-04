@@ -208,7 +208,7 @@ namespace UMM
                     return UKLevelType.Endless;
                 case "uk_construct":
                     return UKLevelType.Sandbox;
-                case "Intermission1":
+                case "Intermission":
                     return UKLevelType.Intermission;
                 case "Level":
                     return UKLevelType.Level;
