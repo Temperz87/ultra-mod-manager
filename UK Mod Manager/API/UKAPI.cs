@@ -151,7 +151,7 @@ namespace UMM
         /// <summary>
         /// Enumerated version of the Ultrakill scene types
         /// </summary>
-        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Custom}
+        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Custom, Intermission, Unknown}
 
         /// <summary>
         /// Returns the current level type
@@ -194,6 +194,8 @@ namespace UMM
         /// <returns></returns>
         public static UKLevelType GetUKLevelType(string sceneName)
         {
+            sceneName = (sceneName.Contains("Level")) ? "Level": (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
+
             switch(sceneName)
             {
                 case "Main Menu":
@@ -206,8 +208,12 @@ namespace UMM
                     return UKLevelType.Endless;
                 case "uk_construct":
                     return UKLevelType.Sandbox;
-                default:
+                case "Intermission1":
+                    return UKLevelType.Intermission;
+                case "Level":
                     return UKLevelType.Level;
+                default:
+                    return UKLevelType.Unknown;
             }
         }
 
@@ -217,7 +223,7 @@ namespace UMM
         /// <returns></returns>
         public static bool InLevel()
         {
-            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro);
+            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Unknown);
             return !inNonPlayable;
         }
 
