@@ -10,9 +10,11 @@ namespace UMM.Loader
 {
     public static class UltraModManager
     {
+        public static DirectoryInfo modsDirectory = new DirectoryInfo(Path.Combine(BepInEx.Paths.BepInExRootPath, "UMM Mods\\"));
         public static Dictionary<string, ModInformation> foundMods = new Dictionary<string, ModInformation>();
         public static Dictionary<string, ModInformation> allLoadedMods = new Dictionary<string, ModInformation>();
         public static bool outdated { get; internal set; } = false;
+        public static bool devBuild { get; internal set; } = false;
         public static string newLoaderVersion { get; internal set; } = "";
         private static bool initialized = false;
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
@@ -30,12 +32,11 @@ namespace UMM.Loader
 
         private static void CollectAssemblies()
         {
-            DirectoryInfo modsDirectory = new DirectoryInfo(Environment.CurrentDirectory + @"\BepInEx\UMM Mods\");
             if (modsDirectory.Exists)
                 foreach (FileInfo info in modsDirectory.GetFiles("*.dll", SearchOption.AllDirectories))
                     LoadFromAssembly(info);
             else
-                Directory.CreateDirectory(Environment.CurrentDirectory + @"\BepInEx\UMM Mods\");
+                modsDirectory.Create(); // TODO: Test this to make sure it works, because I don't know if it does
             Plugin.logger.LogInfo("Found " + foundMods.Count + " mods that can be loaded.");
         }
 

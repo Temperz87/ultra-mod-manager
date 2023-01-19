@@ -12,6 +12,7 @@ using UnityEngine.InputSystem;
 using UnityEngine.UI;
 using System.Linq;
 using UnityEngine.Events;
+using System.Diagnostics;
 
 namespace UMM
 {
@@ -50,8 +51,12 @@ namespace UMM
             if (triedLoadingBundle)
                 yield break;
             SaveFileHandler.LoadData();
-            Plugin.logger.LogInfo("Trying to load common asset bundle from " + Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
-            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+            
+            string commonAssetBundlePath = Path.Combine(BepInEx.Paths.GameRootPath, "ULTRAKILL_Data\\StreamingAssets\\common");
+            Plugin.logger.LogInfo("Trying to load common asset bundle from " + commonAssetBundlePath + "\\");
+            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
             yield return request;
             int attempts = 1;
             while (request.assetBundle == null)
@@ -59,11 +64,11 @@ namespace UMM
                 yield return new WaitForSeconds(0.2f); // why 0.2? I dunno I just chose it man
                 if (attempts >= 5)
                 {
-                    Plugin.logger.LogInfo("Could not load common asset bundle");
+                    Plugin.logger.LogInfo("Could not load the common asset bundle, not starting UMM.");
                     triedLoadingBundle = true;
                     yield break;
                 }
-                request = AssetBundle.LoadFromFileAsync(Environment.CurrentDirectory + "\\ULTRAKILL_Data\\StreamingAssets\\common");
+                request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
                 yield return request;
                 attempts++;
             }
@@ -84,12 +89,26 @@ namespace UMM
             SceneManager.sceneLoaded += OnSceneLoad;
             string[] arr = Environment.GetCommandLineArgs(); // This is here to ensure that the common asset bundle is loaded correctly before loading a level
             if (arr != null)
+            {
                 foreach (string str in arr)
+                {
                     if (str != null && (str.Contains("sandbox") || str.Contains("uk_construct")))
+                    {
+                        Plugin.logger.LogMessage("Launch argument detected: " + str + ", loading into the sandbox!");
                         SceneManager.LoadScene("uk_construct");
+                    }
+                    else
+                    {
+                        Plugin.logger.LogMessage("Launch argument detected: " + str + ", but is has no use with UKAPI!");
+                    }
+                }
+            }
+
+            watch.Stop();  
+            Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds/1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
         }
 
-        
+
         internal static void Update()
         {
             foreach (UKKeyBind bind in KeyBindHandler.moddedKeyBinds.Values.ToList())
@@ -151,7 +170,7 @@ namespace UMM
         /// <summary>
         /// Enumerated version of the Ultrakill scene types
         /// </summary>
-        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Custom, Intermission, Unknown}
+        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Custom, Intermission, Unknown }
 
         /// <summary>
         /// Returns the current level type
@@ -174,7 +193,7 @@ namespace UMM
         private static void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
         {
             string sceneName = scene.name;
-            UKLevelType newScene = GetUKLevelType(sceneName);            
+            UKLevelType newScene = GetUKLevelType(sceneName);
 
             if (newScene != CurrentLevelType)
             {
@@ -194,9 +213,9 @@ namespace UMM
         /// <returns></returns>
         public static UKLevelType GetUKLevelType(string sceneName)
         {
-            sceneName = (sceneName.Contains("Level")) ? "Level": (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
+            sceneName = (sceneName.Contains("Level")) ? "Level" : (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
 
-            switch(sceneName)
+            switch (sceneName)
             {
                 case "Main Menu":
                     return UKLevelType.MainMenu;
@@ -243,7 +262,7 @@ namespace UMM
             }
             return bind;
         }
-        
+
         /// <summary>
         /// Ensures that a <see cref="UKKeyBind"/> exists given a key, if it doesn't exist it won't be created
         /// </summary>
@@ -253,7 +272,7 @@ namespace UMM
         {
             return KeyBindHandler.moddedKeyBinds.ContainsKey(key);
         }
-        
+
         [Obsolete("Use AllModInfoClone instead.")]
         public static Dictionary<string, ModInformation> GetAllModInformation() => AllModInfoClone;
 
@@ -301,7 +320,7 @@ namespace UMM
             {
                 path = Assembly.GetExecutingAssembly().Location;
                 path = path.Substring(0, path.LastIndexOf("\\")) + "\\persistent mod data.json";
-                Plugin.logger.LogInfo("Trying to mod persistent data file from " + path);
+                Plugin.logger.LogInfo("Trying to load persistent mod data.json from " + path);
                 FileInfo fInfo = new FileInfo(path);
                 if (fInfo.Exists)
                 {
@@ -406,7 +425,7 @@ namespace UMM
                         string[] keyBindData = keyBind.Split(':');
                         if (keyBindData.Length == 2)
                         {
-                            Debug.Log("Loading keybind" + keyBindData[0] + " : " + keyBindData[1]);
+                            Plugin.logger.LogMessage("Loading keybind" + keyBindData[0] + " : " + keyBindData[1]);
                             UKKeyBind bind = new UKKeyBind(new InputAction(keyBindData[0], InputActionType.Value, null, null, null, null), keyBindData[0], (KeyCode)Enum.Parse(typeof(KeyCode), keyBindData[1]));
                             moddedKeyBinds.Add(keyBindData[0], bind);
                         }

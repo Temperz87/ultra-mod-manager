@@ -72,6 +72,14 @@ namespace UMM.HarmonyPatches
                     outDatedButton.GetComponentInChildren<Image>().color = new Color32(69, 0, 69, 255);
                     outDatedButton.GetComponentInChildren<WebButton>().url = "https://github.com/Temperz87/ultra-mod-manager/releases/tag/" + UltraModManager.newLoaderVersion;
                 }
+                else if (UltraModManager.devBuild)
+                {
+                    GameObject devBuildButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
+                    devBuildButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -461f);
+                    devBuildButton.GetComponentInChildren<Text>().text = "DEV BUILD: " + UltraModManager.newLoaderVersion.Trim();
+                    devBuildButton.GetComponentInChildren<Image>().color = new Color32(69, 0, 69, 255);
+                    devBuildButton.GetComponentInChildren<WebButton>().url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" + UltraModManager.newLoaderVersion;
+                }
                 GameObject modsMenu = GameObject.Instantiate(__instance.optionsMenu, __instance.transform);
                 modsMenu.SetActive(false);
                 for (int i = 0; i < modsMenu.transform.childCount; i++)
@@ -181,7 +189,7 @@ namespace UMM.HarmonyPatches
                     hoverText.SetActive(true);
                     hoverText.transform.localPosition += new Vector3(0f, 260f, 0f);
                     Text hText = hoverText.GetComponentInChildren<Text>();
-                    hText.text = "NO MODS FOUND\n" + Environment.CurrentDirectory + @"\BepInEx\UMM Mods\";
+                    hText.text = "NO MODS FOUND\n" + UltraModManager.modsDirectory;
                     hText.horizontalOverflow = HorizontalWrapMode.Wrap;
                     hText.verticalOverflow = VerticalWrapMode.Overflow;
                     hText.fontSize /= 2;

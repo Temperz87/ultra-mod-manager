@@ -30,8 +30,18 @@ namespace UMM.Loader
                 string latestVersion = jObjects[0].Value<string>("name");
                 if (latestVersion != VERSION)
                 {
-                    Plugin.logger.LogWarning("New UMM version found: " + latestVersion + " while the current version is " + VERSION);
-                    UltraModManager.outdated = true;
+                    // Check current version string against the newer one
+                    if (VERSION.CompareTo(latestVersion) < 0)
+                    {
+
+                        Plugin.logger.LogWarning("New UMM version found: " + latestVersion + " while the current version is: " + VERSION + ", consider upgrading to the new version.");
+                        UltraModManager.outdated = true;
+                    }
+                    else
+                    {
+                        Plugin.logger.LogWarning("Latest available UMM build is: " + latestVersion + " while the current version is: " + VERSION + ", be warned that in a dev build mods, or UMM itself, can break.");
+                        UltraModManager.devBuild = true;
+                    }
                     UltraModManager.newLoaderVersion = latestVersion;
                 }
                 else
