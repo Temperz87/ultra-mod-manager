@@ -1,7 +1,9 @@
 ﻿using System;
+using UMM.Loader;
 
 namespace UMM
 {
+    [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
     public class UKDependency : Attribute
     {
         public string GUID { get; private set; }

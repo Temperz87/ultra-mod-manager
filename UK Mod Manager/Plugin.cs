@@ -12,6 +12,8 @@ namespace UMM.Loader
 
         internal static ManualLogSource logger;
 
+        internal const string UKMOD_DEPRECATION_MESSAGE = "The UKMod system has been deprecated. Learn more: <insert link here>";
+
         private void Start()
         {
             if (!initialized)

@@ -2,6 +2,7 @@
 
 namespace UMM
 {
+    [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
     public class UKPlugin : Attribute
     {
         public string GUID { get; }

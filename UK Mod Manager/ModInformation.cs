@@ -5,6 +5,7 @@ using UnityEngine;
 
 namespace UMM
 {
+    [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
     public class ModInformation : IComparable<ModInformation>
     {
         public ModType modType { get; }

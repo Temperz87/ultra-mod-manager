@@ -8,14 +8,16 @@ using static UMM.ModInformation;
 
 namespace UMM.Loader
 {
+   [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
     public static class UltraModManager
     {
+
         public static DirectoryInfo modsDirectory = new DirectoryInfo(Path.Combine(BepInEx.Paths.BepInExRootPath, "UMM Mods\\"));
         public static Dictionary<string, ModInformation> foundMods = new Dictionary<string, ModInformation>();
         public static Dictionary<string, ModInformation> allLoadedMods = new Dictionary<string, ModInformation>();
-        public static bool outdated { get; internal set; } = false;
-        public static bool devBuild { get; internal set; } = false;
-        public static string newLoaderVersion { get; internal set; } = "";
+        public static bool outdated => VersionHandler.IsUMMOutdated;
+        public static bool devBuild => VersionHandler.IsUMMDevBuild;
+        public static string newLoaderVersion => VersionHandler.UMMNewVersion.ToString();
         private static bool initialized = false;
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
 
