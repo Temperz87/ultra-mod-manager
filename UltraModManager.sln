@@ -5,8 +5,6 @@ VisualStudioVersion = 17.2.32602.215
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UltraModManager", "UK Mod Manager\UltraModManager.csproj", "{DDEBE751-4B58-4EFE-9E8B-A9F8BAA98F33}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestMod", "TestMod\TestMod.csproj", "{26EF46E5-961C-4AD2-AF52-7823210C04FA}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -17,10 +15,6 @@ Global
 		{DDEBE751-4B58-4EFE-9E8B-A9F8BAA98F33}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DDEBE751-4B58-4EFE-9E8B-A9F8BAA98F33}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DDEBE751-4B58-4EFE-9E8B-A9F8BAA98F33}.Release|Any CPU.Build.0 = Release|Any CPU
-		{26EF46E5-961C-4AD2-AF52-7823210C04FA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{26EF46E5-961C-4AD2-AF52-7823210C04FA}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{26EF46E5-961C-4AD2-AF52-7823210C04FA}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{26EF46E5-961C-4AD2-AF52-7823210C04FA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
