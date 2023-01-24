@@ -43,7 +43,7 @@ namespace UMM.Restarter
                             Thread.Sleep(100);
                         }
                     }
-                    catch (Exception e)
+                    catch (Exception)
                     {
                         while (FileOpen())
                         {

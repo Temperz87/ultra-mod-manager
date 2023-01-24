@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
-using static UMM.ModInformation;
 
 namespace UMM.Loader
 {
@@ -111,24 +110,24 @@ namespace UMM.Loader
             return (UKPlugin)customAttributes[0];
         }
 
-        internal static Dependency[] GetBepinDependencies(Type t)
+        internal static ModInformation.Dependency[] GetBepinDependencies(Type t)
         {
             BepInDependency[] customAttributes = (BepInDependency[])t.GetCustomAttributes(typeof(BepInDependency), true);
-            List<Dependency> dependencies = new List<Dependency>();
+            List<ModInformation.Dependency> dependencies = new List<ModInformation.Dependency>();
             foreach (BepInDependency attribute in customAttributes)
             {
-                dependencies.Add(new Dependency() { GUID = attribute.DependencyGUID, MinimumVersion = attribute.MinimumVersion });
+                dependencies.Add(new ModInformation.Dependency() { GUID = attribute.DependencyGUID, MinimumVersion = attribute.MinimumVersion });
             }
             return dependencies.ToArray();
         }
 
-        internal static Dependency[] GetUKModDependencies(Type t)
+        internal static ModInformation.Dependency[] GetUKModDependencies(Type t)
         {
             UKDependency[] customAttributes = (UKDependency[])t.GetCustomAttributes(typeof(UKDependency), true);
-            List<Dependency> dependencies = new List<Dependency>();
+            List<ModInformation.Dependency> dependencies = new List<ModInformation.Dependency>();
             foreach (UKDependency attribute in customAttributes)
             {
-                dependencies.Add(new Dependency() { GUID = attribute.GUID, MinimumVersion = attribute.MinimumVersion });
+                dependencies.Add(new ModInformation.Dependency() { GUID = attribute.GUID, MinimumVersion = attribute.MinimumVersion });
             }
             return dependencies.ToArray();
         }
@@ -136,7 +135,7 @@ namespace UMM.Loader
         public static void LoadMod(ModInformation info)
         {
             if (allLoadedMods.ContainsKey(info.GUID)) return;
-            foreach (Dependency dependency in info.dependencies)
+            foreach (ModInformation.Dependency dependency in info.dependencies)
             {
                 if (foundMods.ContainsKey(dependency.GUID))
                 {

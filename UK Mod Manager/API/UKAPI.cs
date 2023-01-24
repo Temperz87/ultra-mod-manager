@@ -36,11 +36,13 @@ namespace UMM
         /// <summary>
         /// Returns a clone of all found <see cref="ModInformation"/> instances.
         /// </summary>
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         public static Dictionary<string, ModInformation> AllModInfoClone => UltraModManager.foundMods.ToDictionary(entry => entry.Key, entry => entry.Value);
 
         /// <summary>
         /// Returns a clone of all loaded <see cref="ModInformation"/> instances.
         /// </summary>
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         public static Dictionary<string, ModInformation> AllLoadedModInfoClone => UltraModManager.allLoadedMods.ToDictionary(entry => entry.Key, entry => entry.Value);
 
         /// <summary>
@@ -76,7 +78,9 @@ namespace UMM
             Plugin.logger.LogInfo("Loaded common asset bundle");
             commonBundle = request.assetBundle;
             triedLoadingBundle = true;
+#pragma warning disable CS0618 // Type or member is obsolete
             UltraModManager.InitializeManager();
+#pragma warning restore CS0618 // Type or member is obsolete
 
             while (MapLoader.Instance == null)
                 yield return null;
