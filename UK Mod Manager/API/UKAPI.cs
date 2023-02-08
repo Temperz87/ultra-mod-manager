@@ -53,7 +53,7 @@ namespace UMM
             SaveFileHandler.LoadData();
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            
+
             string commonAssetBundlePath = Path.Combine(BepInEx.Paths.GameRootPath, "ULTRAKILL_Data\\StreamingAssets\\common");
             Plugin.logger.LogInfo("Trying to load common asset bundle from " + commonAssetBundlePath + "\\");
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
@@ -104,7 +104,7 @@ namespace UMM
                 }
             }
 
-            watch.Stop();  
+            watch.Stop();
             Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds/1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
         }
 
@@ -306,7 +306,7 @@ namespace UMM
 
         /// <summary>
         /// Restarts Ultrakill
-        /// </summary> 
+        /// </summary>
         public static void Restart() // thanks https://gitlab.com/vtolvr-mods/ModLoader/-/blob/release/Launcher/Program.cs
         {
             Application.Quit();
@@ -326,7 +326,7 @@ namespace UMM
             ////strCmdText = "/K \"" + Environment.CurrentDirectory + "\\ULTRAKILL.exe\"";
             //System.Diagnostics.Process.Start("CMD.exe", strCmdText);
 
-            //var psi = new System.Diagnostics.ProcessStartInfo 
+            //var psi = new System.Diagnostics.ProcessStartInfo
             //{
             //    FileName = Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe",
             //    UseShellExecute = true,
@@ -375,7 +375,7 @@ namespace UMM
             }
 
             /// <summary>
-            /// Gets presistent mod data from a key and modname 
+            /// Gets presistent mod data from a key and modname
             /// </summary>
             /// <param name="modName">The name of the mod to retrieve data from</param>
             /// <param name="key">The value you want</param>
