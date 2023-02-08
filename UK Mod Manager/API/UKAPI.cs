@@ -170,12 +170,17 @@ namespace UMM
         /// <summary>
         /// Enumerated version of the Ultrakill scene types
         /// </summary>
-        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Custom, Intermission, Unknown }
+        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Credits, Custom, Intermission, Secret, PrimeSanctum, Unknown }
 
         /// <summary>
         /// Returns the current level type
         /// </summary>
         public static UKLevelType CurrentLevelType = UKLevelType.Intro;
+
+        /// <summary>
+        /// Returns the currently active ultrakill scene name.
+        /// </summary>
+        public static string CurrentSceneName = "";
 
         public delegate void OnLevelChangedHandler(UKLevelType uKLevelType);
 
@@ -193,11 +198,16 @@ namespace UMM
         private static void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
         {
             string sceneName = scene.name;
+
+            if (scene != SceneManager.GetActiveScene())
+                return;
+
             UKLevelType newScene = GetUKLevelType(sceneName);
 
             if (newScene != CurrentLevelType)
             {
                 CurrentLevelType = newScene;
+                CurrentSceneName = scene.name;
                 OnLevelTypeChanged?.Invoke(newScene);
             }
 
@@ -213,7 +223,10 @@ namespace UMM
         /// <returns></returns>
         public static UKLevelType GetUKLevelType(string sceneName)
         {
-            sceneName = (sceneName.Contains("Level")) ? "Level" : (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
+            sceneName = (sceneName.Contains("P-")) ? "Sanctum" : sceneName;
+            sceneName = (sceneName.Contains("-S")) ? "Secret" : sceneName;
+            sceneName = (sceneName.Contains("Level")) ? "Level" : sceneName;
+            sceneName = (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
 
             switch (sceneName)
             {
@@ -231,18 +244,25 @@ namespace UMM
                     return UKLevelType.Intermission;
                 case "Level":
                     return UKLevelType.Level;
+                case "Secret":
+                    return UKLevelType.Secret;
+                case "Sanctum":
+                    return UKLevelType.PrimeSanctum;
+                case "Credits":
+                    return UKLevelType.Credits;
                 default:
                     return UKLevelType.Unknown;
             }
         }
 
         /// <summary>
-        /// Returns true if the current scene is playable
+        /// Returns true if the current scene is playable.
+        /// This will return false for all secret levels.
         /// </summary>
         /// <returns></returns>
         public static bool InLevel()
         {
-            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Unknown);
+            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Secret || CurrentLevelType == UKLevelType.Unknown);
             return !inNonPlayable;
         }
 
