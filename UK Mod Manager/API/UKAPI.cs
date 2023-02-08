@@ -182,6 +182,11 @@ namespace UMM
         /// </summary>
         public static string CurrentSceneName = "";
 
+
+        /// <summary>
+        /// Invoked whenever the current level type is changed.
+        /// </summary>
+        /// <param name="uKLevelType">The type of level that was loaded.</param>
         public delegate void OnLevelChangedHandler(UKLevelType uKLevelType);
 
         /// <summary>
