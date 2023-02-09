@@ -180,7 +180,7 @@ namespace UMM
         /// <summary>
         /// Returns the currently active ultrakill scene name.
         /// </summary>
-        public static string CurrentSceneName = "";
+        public static string CurrentSceneName { get; private set; } = "";
 
 
         /// <summary>
