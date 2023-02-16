@@ -53,7 +53,7 @@ namespace UMM
             SaveFileHandler.LoadData();
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            
+
             string commonAssetBundlePath = Path.Combine(BepInEx.Paths.GameRootPath, "ULTRAKILL_Data\\StreamingAssets\\common");
             Plugin.logger.LogInfo("Trying to load common asset bundle from " + commonAssetBundlePath + "\\");
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
@@ -104,7 +104,7 @@ namespace UMM
                 }
             }
 
-            watch.Stop();  
+            watch.Stop();
             Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds/1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
         }
 
@@ -170,12 +170,17 @@ namespace UMM
         /// <summary>
         /// Enumerated version of the Ultrakill scene types
         /// </summary>
-        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Custom, Intermission, Unknown }
+        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Credits, Custom, Intermission, Secret, PrimeSanctum, Unknown }
 
         /// <summary>
         /// Returns the current level type
         /// </summary>
         public static UKLevelType CurrentLevelType = UKLevelType.Intro;
+
+        /// <summary>
+        /// Returns the currently active ultrakill scene name.
+        /// </summary>
+        public static string CurrentSceneName { get; private set; } = "";
 
 
         /// <summary>
@@ -198,11 +203,16 @@ namespace UMM
         private static void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
         {
             string sceneName = scene.name;
+
+            if (scene != SceneManager.GetActiveScene())
+                return;
+
             UKLevelType newScene = GetUKLevelType(sceneName);
 
             if (newScene != CurrentLevelType)
             {
                 CurrentLevelType = newScene;
+                CurrentSceneName = scene.name;
                 OnLevelTypeChanged?.Invoke(newScene);
             }
 
@@ -218,7 +228,10 @@ namespace UMM
         /// <returns></returns>
         public static UKLevelType GetUKLevelType(string sceneName)
         {
-            sceneName = (sceneName.Contains("Level")) ? "Level" : (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
+            sceneName = (sceneName.Contains("P-")) ? "Sanctum" : sceneName;
+            sceneName = (sceneName.Contains("-S")) ? "Secret" : sceneName;
+            sceneName = (sceneName.Contains("Level")) ? "Level" : sceneName;
+            sceneName = (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
 
             switch (sceneName)
             {
@@ -236,18 +249,25 @@ namespace UMM
                     return UKLevelType.Intermission;
                 case "Level":
                     return UKLevelType.Level;
+                case "Secret":
+                    return UKLevelType.Secret;
+                case "Sanctum":
+                    return UKLevelType.PrimeSanctum;
+                case "Credits":
+                    return UKLevelType.Credits;
                 default:
                     return UKLevelType.Unknown;
             }
         }
 
         /// <summary>
-        /// Returns true if the current scene is playable
+        /// Returns true if the current scene is playable.
+        /// This will return false for all secret levels.
         /// </summary>
         /// <returns></returns>
         public static bool InLevel()
         {
-            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Unknown);
+            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Secret || CurrentLevelType == UKLevelType.Unknown);
             return !inNonPlayable;
         }
 
@@ -286,7 +306,7 @@ namespace UMM
 
         /// <summary>
         /// Restarts Ultrakill
-        /// </summary> 
+        /// </summary>
         public static void Restart() // thanks https://gitlab.com/vtolvr-mods/ModLoader/-/blob/release/Launcher/Program.cs
         {
             Application.Quit();
@@ -306,7 +326,7 @@ namespace UMM
             ////strCmdText = "/K \"" + Environment.CurrentDirectory + "\\ULTRAKILL.exe\"";
             //System.Diagnostics.Process.Start("CMD.exe", strCmdText);
 
-            //var psi = new System.Diagnostics.ProcessStartInfo 
+            //var psi = new System.Diagnostics.ProcessStartInfo
             //{
             //    FileName = Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe",
             //    UseShellExecute = true,
@@ -355,7 +375,7 @@ namespace UMM
             }
 
             /// <summary>
-            /// Gets presistent mod data from a key and modname 
+            /// Gets presistent mod data from a key and modname
             /// </summary>
             /// <param name="modName">The name of the mod to retrieve data from</param>
             /// <param name="key">The value you want</param>
