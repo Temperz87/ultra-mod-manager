@@ -9,8 +9,8 @@ namespace UMM
         public string version { get; }
         public string description { get; }
         public bool allowCyberGrindSubmission { get; }
-        public bool unloadingSupported { get; }
-        
+        public bool unloadingSupported { get; } 
+       
         public UKPlugin(string GUID, string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
         {
             this.GUID = GUID;
@@ -21,6 +21,7 @@ namespace UMM
             this.unloadingSupported = supportsUnloading;
         }
 
+        [Obsolete("Please specify a GUID when making your mod, however since one wasn't specified it will be your mods name.")]
         public UKPlugin(string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
         {
             this.GUID = name;

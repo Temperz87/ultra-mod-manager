@@ -2,6 +2,7 @@
 using UMM.Loader;
 using BepInEx;
 using UnityEngine;
+using UnityEngine.UI;
 
 namespace UMM
 {
@@ -12,6 +13,7 @@ namespace UMM
         public string GUID { get; }
         public string modName { get; }
         public string modDescription { get; }
+        public Texture2D previewIcon { get; internal set; }
         public Version modVersion { get; }
         public bool supportsUnloading { get; }
         public bool loadOnStart { get; internal set; }

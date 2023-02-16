@@ -19,6 +19,7 @@ namespace UMM
     public static class UKAPI
     {
         public static bool triedLoadingBundle { get; private set; } = false;
+        public static bool IsDevBuild { get { return UltraModManager.outdated; } }
         private static AssetBundle commonBundle;
         private static List<string> disableCybergrindReasons = new List<string>();
 
@@ -48,6 +49,18 @@ namespace UMM
         /// </summary>
         internal static IEnumerator InitializeAPI()
         {
+            string[] launchArgs = Environment.GetCommandLineArgs();
+            if (launchArgs != null)
+            {
+                foreach (string str in launchArgs)
+                {
+                    if (str.Contains("disable_mods"))
+                    {
+                        Plugin.logger.LogMessage("Not starting UMM due to launch arg disabling it.");
+                        yield break;
+                    }
+                }
+            }
             if (triedLoadingBundle)
                 yield break;
             SaveFileHandler.LoadData();
@@ -87,10 +100,9 @@ namespace UMM
             Traverse.Create(MapLoader.Instance).Field("loadedBundles").SetValue(bundles);
             MapLoader.Instance.isCommonLoaded = true;
             SceneManager.sceneLoaded += OnSceneLoad;
-            string[] arr = Environment.GetCommandLineArgs(); // This is here to ensure that the common asset bundle is loaded correctly before loading a level
-            if (arr != null)
+            if (launchArgs != null)
             {
-                foreach (string str in arr)
+                foreach (string str in launchArgs)
                 {
                     if (str != null && (str.Contains("sandbox") || str.Contains("uk_construct")))
                     {
@@ -105,7 +117,7 @@ namespace UMM
             }
 
             watch.Stop();
-            Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds/1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
+            Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds / 1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
         }
 
 
@@ -363,12 +375,21 @@ namespace UMM
                     fInfo.Create();
                 }
                 KeyBindHandler.LoadKeyBinds();
+                if (EnsureModData("UMM", "ModProfiles"))
+                    UltraModManager.LoadModProfiles();
+                else
+                {
+                    SetModData("UMM", "ModProfiles", "");
+                    SetModData("UMM", "CurrentModProfile", "Default");
+                }
             }
 
             internal static void DumpFile()
             {
                 Plugin.logger.LogInfo("Dumping keybinds");
                 KeyBindHandler.DumpKeyBinds();
+                Plugin.logger.LogInfo("Dumping mod profiles");
+                UltraModManager.DumpModProfiles();
                 FileInfo fInfo = new FileInfo(path);
                 Plugin.logger.LogInfo("Dumping mod persistent data file to " + path);
                 File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(savedData));
