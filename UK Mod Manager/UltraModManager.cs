@@ -1,9 +1,11 @@
 ﻿using BepInEx;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
 using UnityEngine;
+using UnityEngine.Networking;
 using static UMM.ModInformation;
 
 namespace UMM.Loader
@@ -18,6 +20,8 @@ namespace UMM.Loader
         public static string newLoaderVersion { get; internal set; } = "";
         private static bool initialized = false;
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
+        private static Dictionary<string, ModProfile> allProfiles = new Dictionary<string, ModProfile>();
+        private static ModProfile currentProfile = null;
 
         internal static void InitializeManager()
         {
@@ -36,7 +40,7 @@ namespace UMM.Loader
                 foreach (FileInfo info in modsDirectory.GetFiles("*.dll", SearchOption.AllDirectories))
                     LoadFromAssembly(info);
             else
-                modsDirectory.Create(); // TODO: Test this to make sure it works, because I don't know if it does
+                modsDirectory.Create();
             Plugin.logger.LogInfo("Found " + foundMods.Count + " mods that can be loaded.");
         }
 
@@ -75,6 +79,9 @@ namespace UMM.Loader
                         info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
                     else
                         continue;
+                    FileInfo iconInfo = new FileInfo(Path.Combine(fInfo.DirectoryName + "\\" + "icon.png"));
+                    if (iconInfo.Exists)
+                        Plugin.instance.StartCoroutine(GetModImage(iconInfo, info));
                     Plugin.logger.LogInfo("Adding mod info " + fInfo.FullName + " " + type.Name);
                     foundMods.Add(info.GUID, info);
                     object retrievedData = UKAPI.SaveFileHandler.RetrieveModData("LoadOnStart", info.modName);
@@ -87,6 +94,25 @@ namespace UMM.Loader
                 Plugin.logger.LogError("Caught exception while trying to load assembly " + fInfo.FullName + ": " + e.ToString());
                 return;
             }
+        }
+
+        internal static IEnumerator GetModImage(FileInfo imageURL, ModInformation info)
+        {
+            using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(imageURL.FullName))
+            {
+                yield return www.SendWebRequest();
+                if (www.isNetworkError)
+                {
+                    Plugin.logger.LogError("Couldn't load preview image " + imageURL + " for mod " + info.modName);
+                    Plugin.logger.LogError(www.error);
+                }
+                else
+                {
+                    info.previewIcon = DownloadHandlerTexture.GetContent(www);
+                    Plugin.logger.LogInfo("Loaded preview image for mod " + info.modName);
+                }
+            }
+            yield break;
         }
 
         internal static BepInPlugin GetBepinMetaData(Type t)
@@ -214,6 +240,32 @@ namespace UMM.Loader
                     UKAPI.RemoveDisableCyberGrindReason(info.modName);
                 Plugin.logger.LogInfo("Successfully unloaded mod " + info.modName);
             }
+        }
+
+        public static void LoadModProfiles()
+        {
+            string modProfiles = UKAPI.SaveFileHandler.RetrieveModData("ModProfiles", "UMM");
+            while (modProfiles.IndexOf(";;") != -1)
+            {
+                ModProfile newProfile = new ModProfile(modProfiles.Substring(0, modProfiles.IndexOf(";;")));
+                allProfiles.Add(newProfile.name, newProfile);
+                modProfiles = modProfiles.Substring(modProfiles.IndexOf(";;") + 2);
+            }
+            string currentProfileRetrieved = UKAPI.SaveFileHandler.RetrieveModData("CurrentModProfile", "UMM");
+            if (allProfiles.ContainsKey(currentProfileRetrieved))
+                currentProfile = allProfiles[currentProfileRetrieved];
+        }
+
+        public static void DumpModProfiles()
+        {
+            string modProfiles = "";
+            foreach (ModProfile profile in allProfiles.Values)
+            {
+                modProfiles += profile?.ToString();
+            }
+            UKAPI.SaveFileHandler.SetModData("UMM", "ModProfiles", modProfiles);
+            if (currentProfile != null)
+                UKAPI.SaveFileHandler.SetModData("UMM", "CurrentModProfile", currentProfile.name);
         }
     }
 }

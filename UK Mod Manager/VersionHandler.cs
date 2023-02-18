@@ -7,7 +7,7 @@ namespace UMM.Loader
 {
     public static class VersionHandler
     {
-        public const string VERSION = "0.5.1"; // Should this be hardcoded? No it should not be
+        public const string VERSION = "0.5.2"; // Should this be hardcoded? No it should not be
         public static  IEnumerator CheckVersion()
         {
             //Plugin.logger.LogInfo("Trying to get verison.");
@@ -33,7 +33,6 @@ namespace UMM.Loader
                     // Check current version string against the newer one
                     if (VERSION.CompareTo(latestVersion) < 0)
                     {
-
                         Plugin.logger.LogWarning("New UMM version found: " + latestVersion + " while the current version is: " + VERSION + ", consider upgrading to the new version.");
                         UltraModManager.outdated = true;
                     }

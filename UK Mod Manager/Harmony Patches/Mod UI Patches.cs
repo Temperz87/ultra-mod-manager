@@ -6,6 +6,7 @@ using UMM.Loader;
 using UnityEngine.EventSystems;
 using System.Collections.Generic;
 using System.Linq;
+using System.Collections;
 
 namespace UMM.HarmonyPatches
 {
@@ -64,10 +65,18 @@ namespace UMM.HarmonyPatches
                 moreModsButton.GetComponentInChildren<Text>().text = "BROWSE MODS";
                 moreModsButton.GetComponentInChildren<Image>().color = new Color32(211, 218, 114, 255);
                 moreModsButton.GetComponentInChildren<WebButton>().url = "https://docs.google.com/spreadsheets/d/1x8P3GcdfWraZX1kz3bbHJIiY4hozxe8k1oieOm_fuL0/edit?usp=sharing";
+
+
+                GameObject thunderstoreButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
+                thunderstoreButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -461f);
+                thunderstoreButton.GetComponentInChildren<Text>().text = "THUNDER STORE";
+                thunderstoreButton.GetComponentInChildren<Image>().color = new Color32(55, 90, 127, 255);
+                thunderstoreButton.GetComponentInChildren<WebButton>().url = "https://thunderstore.io/c/ultrakill/";
+
                 if (UltraModManager.outdated)
                 {
                     GameObject outDatedButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
-                    outDatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -461f);
+                    outDatedButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -516.5f);
                     outDatedButton.GetComponentInChildren<Text>().text = "NEW VERSION FOUND: " + UltraModManager.newLoaderVersion.Trim();
                     outDatedButton.GetComponentInChildren<Image>().color = new Color32(69, 0, 69, 255);
                     outDatedButton.GetComponentInChildren<WebButton>().url = "https://github.com/Temperz87/ultra-mod-manager/releases/tag/" + UltraModManager.newLoaderVersion;
@@ -75,13 +84,15 @@ namespace UMM.HarmonyPatches
                 else if (UltraModManager.devBuild)
                 {
                     GameObject devBuildButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
-                    devBuildButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -461f);
+                    devBuildButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -516.5f);
                     devBuildButton.GetComponentInChildren<Text>().text = "DEV BUILD: " + UltraModManager.newLoaderVersion.Trim();
                     devBuildButton.GetComponentInChildren<Image>().color = new Color32(69, 0, 69, 255);
-                    devBuildButton.GetComponentInChildren<WebButton>().url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ" + UltraModManager.newLoaderVersion;
+                    devBuildButton.GetComponentInChildren<WebButton>().url = "https://www.youtube.com/watch?v=dQw4w9WgXcQ";
                 }
+
                 GameObject modsMenu = GameObject.Instantiate(__instance.optionsMenu, __instance.transform);
                 modsMenu.SetActive(false);
+                modsMenu.GetComponent<Image>().enabled = false;
                 for (int i = 0; i < modsMenu.transform.childCount; i++)
                     modsMenu.transform.GetChild(i).gameObject.SetActive(false);
 
@@ -100,13 +111,13 @@ namespace UMM.HarmonyPatches
                 template.SetActive(false);
                 __instance.variationMemory.gameObject.SetActive(false);
 
-                GameObject hoverText = content.Find("Default").gameObject;
-                hoverText.transform.parent = modsMenu.transform;
-                hoverText.GetComponentInChildren<Text>().text = "Toggles auto loading on game start";
-                hoverText.transform.localPosition -= new Vector3(0f, 520f, 0f);
-                GameObject.Destroy(hoverText.GetComponent<BackSelectOverride>());
-                GameObject.Destroy(hoverText.GetComponent<Button>());
-                hoverText.SetActive(false);
+                GameObject hoverTextGo = content.Find("Default").gameObject;
+                hoverTextGo.transform.parent = modsMenu.transform;
+                Text hoverText = hoverTextGo.GetComponentInChildren<Text>();
+                hoverTextGo.transform.localPosition -= new Vector3(0f, 520f, 0f);
+                GameObject.Destroy(hoverTextGo.GetComponent<BackSelectOverride>());
+                GameObject.Destroy(hoverTextGo.GetComponent<Button>());
+                hoverTextGo.SetActive(false);
 
                 ModInformation[] information = UKAPI.AllModInfoClone.Values.ToArray();
                 if (information.Length > 0)
@@ -117,10 +128,20 @@ namespace UMM.HarmonyPatches
                         ModInformation info = information[i];
                         GameObject newInformation = GameObject.Instantiate(template, content);
                         GameObject.Destroy(newInformation.GetComponent<ColorBlindSetter>());
+                        Image infoImage = newInformation.GetComponent<Image>();
+                        infoImage.color = new Color32(0, 0, 0, 150);
+
+                        Text modText = newInformation.transform.Find("Text").GetComponent<Text>();
+                        modText.text = info.modName + " " + info.modVersion;
+                        modText.fontSize = (int)(modText.fontSize/1.5f);
+                        modText.alignment = TextAnchor.UpperCenter;
+                        modText.transform.localPosition = new Vector3(0f, -3f, 0f);
+                        modText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
+                        modText.color = new Color32(255, 255, 255, 255);
 
                         Button newButton = newInformation.AddComponent<Button>();
                         newButton.transition = Selectable.Transition.ColorTint;
-                        newButton.targetGraphic = newInformation.GetComponent<Image>();
+                        newButton.targetGraphic = modText;
                         newButton.targetGraphic.color = info.loaded ? Color.green : Color.red;
                         newButton.onClick = new Button.ButtonClickedEvent();
                         newButton.onClick.AddListener(delegate
@@ -132,67 +153,114 @@ namespace UMM.HarmonyPatches
                         newInformation.transform.Find("Red").gameObject.SetActive(false);
                         newInformation.transform.Find("Green").gameObject.SetActive(false);
                         newInformation.transform.Find("Blue").gameObject.SetActive(false);
-                        newInformation.transform.Find("Image").gameObject.SetActive(false);
                         newInformation.transform.localScale = new Vector3(1.64415f, 1.64415f, 1.64415f);
-                        newInformation.transform.localPosition = new Vector3(0f, -200f * i, 0f);
+                        RectTransform infoRect = newInformation.GetComponent<RectTransform>();
+                        infoRect.sizeDelta = new Vector2(infoRect.sizeDelta.x, infoRect.sizeDelta.y / 1.2f);
+                        newInformation.transform.localPosition = new Vector3(0f, (infoRect.sizeDelta.y + 70f) * -1f * i, 0f);
 
-                        Text modText = newInformation.transform.Find("Text").GetComponent<Text>();
-                        modText.text = info.modName + " " + info.modVersion;
-                        modText.alignment = TextAnchor.UpperLeft;
-                        modText.transform.localPosition = new Vector3(-49.2f, 0f, 0f);
-                        modText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
 
                         Text descriptionText = GameObject.Instantiate(modText.gameObject, modText.transform.parent).GetComponent<Text>();
-                        descriptionText.alignment = TextAnchor.UpperLeft;
-                        descriptionText.rectTransform.offsetMin = new Vector2(-73.58125f, -170f);
-                        descriptionText.rectTransform.offsetMax = new Vector2(73.58125f, -16.4f);
-                        descriptionText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
-                        descriptionText.fontSize = 16;
+                        descriptionText.alignment = TextAnchor.MiddleCenter;
+                        descriptionText.rectTransform.offsetMin = new Vector2(-3.58125f, -170f);
+                        descriptionText.rectTransform.offsetMax = new Vector2(3.58125f, -16.4f);
+                        //descriptionText.transform.localScale = new Vector3(0.54764f, 0.66764f, 0.66764f);
+                        descriptionText.transform.localScale = Vector3.one * 0.56f;
+                        descriptionText.fontSize = 14;
                         descriptionText.text = info.modDescription;
-
-                        GameObject toggleObj = GameObject.Instantiate(__instance.variationMemory.gameObject, newInformation.transform);
-                        toggleObj.transform.localPosition = new Vector3(247f, -9f, 0f);
-                        Toggle toggle = toggleObj.GetComponent<Toggle>();
-                        toggle.isOn = info.loadOnStart;
-                        toggle.onValueChanged = new Toggle.ToggleEvent();
-                        toggle.onValueChanged.AddListener(delegate
+                        descriptionText.transform.localPosition = new Vector3(0f, descriptionText.transform.localPosition.y + 10f, 0);
+                        descriptionText.color = new Color32(255, 255, 255, 255);
+                        
+                        Transform imageTransform = newInformation.transform.Find("Image");
+                        if (info.previewIcon == null)
+                            imageTransform.gameObject.SetActive(false);
+                        else
                         {
-                            info.loadOnStart = !info.loadOnStart;
-                            toggle.isOn = info.loadOnStart;
+                            IEnumerator setImageNextFrame() // So unity waits a frame before destroying a component, hence this badness
+                            {
+                                yield return null;
+                                RawImage img = imageTransform.gameObject.AddComponent<RawImage>();
+                                img.texture = info.previewIcon;
+                                img.raycastTarget = false;
+                                imageTransform.gameObject.SetActive(true);
+                            }
+                            imageTransform.localPosition += new Vector3(-6f, 21f, 0f);
+                            descriptionText.transform.localPosition += new Vector3(4f, 0f, 0f);
+                            __instance.StartCoroutine(setImageNextFrame());
+                            GameObject.Destroy(imageTransform.GetComponent<Image>());
+                        }
+
+                        GameObject loadOnStart = GameObject.Instantiate(__instance.variationMemory.gameObject, newInformation.transform);
+                        loadOnStart.transform.localPosition = new Vector3(247f, -19f, 0f);
+                        Toggle loadOnStartToggle = loadOnStart.GetComponent<Toggle>();
+                        loadOnStartToggle.isOn = info.loadOnStart;
+                        loadOnStartToggle.onValueChanged = new Toggle.ToggleEvent();
+                        loadOnStartToggle.onValueChanged.AddListener(delegate
+                        {
+                            info.loadOnStart = loadOnStartToggle.isOn;
                             UKAPI.SaveFileHandler.SetModData(info.modName, "LoadOnStart", info.loadOnStart.ToString());
                         });
-                        EventTrigger trigger = toggle.gameObject.AddComponent<EventTrigger>();
-                        EventTrigger.Entry hoverEntry = new EventTrigger.Entry();
-                        hoverEntry.eventID = EventTriggerType.PointerEnter;
-                        hoverEntry.callback.AddListener(delegate
+                        EventTrigger loadOnStartTrigger = loadOnStartToggle.gameObject.AddComponent<EventTrigger>();
+                        EventTrigger.Entry loadOnStartHoverEntry = new EventTrigger.Entry();
+                        loadOnStartHoverEntry.eventID = EventTriggerType.PointerEnter;
+                        loadOnStartHoverEntry.callback.AddListener(delegate
                         {
-                            hoverText.SetActive(true);
+                            hoverText.text = "Toggles auto loading on game start";
+                            hoverTextGo.SetActive(true);
                         });
-                        EventTrigger.Entry unHoverEntry = new EventTrigger.Entry();
-                        unHoverEntry.eventID = EventTriggerType.PointerExit;
-                        unHoverEntry.callback.AddListener(delegate
+                        EventTrigger.Entry loadOnStartUnHoverEntry = new EventTrigger.Entry();
+                        loadOnStartUnHoverEntry.eventID = EventTriggerType.PointerExit;
+                        loadOnStartUnHoverEntry.callback.AddListener(delegate
                         {
-                            hoverText.SetActive(false);
+                            hoverTextGo.SetActive(false);
                         });
-                        trigger.triggers.Add(hoverEntry);
-                        trigger.triggers.Add(unHoverEntry);
+                        loadOnStartTrigger.triggers.Add(loadOnStartHoverEntry);
+                        loadOnStartTrigger.triggers.Add(loadOnStartUnHoverEntry);
 
-                        toggleObj.SetActive(true);
+                        /*
+                        GameObject settings = GameObject.Instantiate(__instance.variationMemory.gameObject, newInformation.transform);
+                        settings.transform.localPosition = new Vector3(247f, -39f, 0f);
+                        Toggle settingsToggle = settings.GetComponent<Toggle>();
+                        //settingsToggle.isOn = info.settings;
+                        settingsToggle.onValueChanged = new Toggle.ToggleEvent();
+                        settingsToggle.onValueChanged.AddListener(delegate
+                        {
+
+                        });
+                        EventTrigger settingsTrigger = settingsToggle.gameObject.AddComponent<EventTrigger>();
+                        EventTrigger.Entry settingsHoverEntry = new EventTrigger.Entry();
+                        settingsHoverEntry.eventID = EventTriggerType.PointerEnter;
+                        settingsHoverEntry.callback.AddListener(delegate
+                        {
+                            hoverText.text = "Settings";
+                            hoverTextGo.SetActive(true);
+                        });
+                        EventTrigger.Entry settingsUnHoverEntry = new EventTrigger.Entry();
+                        settingsUnHoverEntry.eventID = EventTriggerType.PointerExit;
+                        settingsUnHoverEntry.callback.AddListener(delegate
+                        {
+                            hoverTextGo.SetActive(false);
+                        });
+                        settingsTrigger.triggers.Add(settingsHoverEntry);
+                        settingsTrigger.triggers.Add(settingsUnHoverEntry);
+                        */
+
+                        loadOnStart.SetActive(true);
+                        //settings.SetActive(true);
                         newInformation.SetActive(true);
                     }
 
-                    cRect.sizeDelta = new Vector2(600f, information.Length * 200); // setting the scrollbar to fit all of the mods
+                    cRect.sizeDelta = new Vector2(600f, information.Length * 170); // setting the scrollbar to fit all of the mods
                 }
                 else
                 {
                     content.gameObject.SetActive(false);
-                    hoverText.SetActive(true);
-                    hoverText.transform.localPosition += new Vector3(0f, 260f, 0f);
-                    Text hText = hoverText.GetComponentInChildren<Text>();
-                    hText.text = "NO MODS FOUND\n" + UltraModManager.modsDirectory;
-                    hText.horizontalOverflow = HorizontalWrapMode.Wrap;
-                    hText.verticalOverflow = VerticalWrapMode.Overflow;
-                    hText.fontSize /= 2;
+                    hoverTextGo.transform.localPosition += new Vector3(0f, 260f, 0f);
+                    hoverText = hoverTextGo.GetComponentInChildren<Text>();
+                    hoverText.text = "NO MODS FOUND IN MOD FOLDER:\n" + UltraModManager.modsDirectory;
+                    hoverText.horizontalOverflow = HorizontalWrapMode.Wrap;
+                    hoverText.verticalOverflow = VerticalWrapMode.Overflow;
+                    hoverText.fontSize /= 2;
+                    hoverTextGo.SetActive(true);
                 }
 
                 __instance.variationMemory.gameObject.SetActive(true);
@@ -221,8 +289,6 @@ namespace UMM.HarmonyPatches
                 restartButton.GetComponentInChildren<Text>(true).text = "RESTART";
                 restartButton.SetActive(true);
                 Halve(restartButton.transform, false);
-
-
             }
 
             // Here we don't care what menu we're patching (main menu or in game one), hence the stuff here is outside the if

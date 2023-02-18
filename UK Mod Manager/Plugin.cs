@@ -9,7 +9,7 @@ namespace UMM.Loader
     public class Plugin : BaseUnityPlugin
     {
         private static bool initialized = false;
-
+        internal static Plugin instance;
         internal static ManualLogSource logger;
 
         private void Start()
@@ -22,6 +22,7 @@ namespace UMM.Loader
                 StartCoroutine(UKAPI.InitializeAPI());
                 StartCoroutine(VersionHandler.CheckVersion());
                 initialized = true;
+                instance = this;
             }
         }
 

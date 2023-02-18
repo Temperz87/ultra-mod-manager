@@ -19,6 +19,7 @@ namespace UMM
     public static class UKAPI
     {
         public static bool triedLoadingBundle { get; private set; } = false;
+        public static bool IsDevBuild { get { return UltraModManager.outdated; } }
         private static AssetBundle commonBundle;
         private static List<string> disableCybergrindReasons = new List<string>();
 
@@ -48,12 +49,24 @@ namespace UMM
         /// </summary>
         internal static IEnumerator InitializeAPI()
         {
+            string[] launchArgs = Environment.GetCommandLineArgs();
+            if (launchArgs != null)
+            {
+                foreach (string str in launchArgs)
+                {
+                    if (str.Contains("disable_mods"))
+                    {
+                        Plugin.logger.LogMessage("Not starting UMM due to launch arg disabling it.");
+                        yield break;
+                    }
+                }
+            }
             if (triedLoadingBundle)
                 yield break;
             SaveFileHandler.LoadData();
             Stopwatch watch = new Stopwatch();
             watch.Start();
-            
+
             string commonAssetBundlePath = Path.Combine(BepInEx.Paths.GameRootPath, "ULTRAKILL_Data\\StreamingAssets\\common");
             Plugin.logger.LogInfo("Trying to load common asset bundle from " + commonAssetBundlePath + "\\");
             AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
@@ -87,10 +100,9 @@ namespace UMM
             Traverse.Create(MapLoader.Instance).Field("loadedBundles").SetValue(bundles);
             MapLoader.Instance.isCommonLoaded = true;
             SceneManager.sceneLoaded += OnSceneLoad;
-            string[] arr = Environment.GetCommandLineArgs(); // This is here to ensure that the common asset bundle is loaded correctly before loading a level
-            if (arr != null)
+            if (launchArgs != null)
             {
-                foreach (string str in arr)
+                foreach (string str in launchArgs)
                 {
                     if (str != null && (str.Contains("sandbox") || str.Contains("uk_construct")))
                     {
@@ -104,8 +116,8 @@ namespace UMM
                 }
             }
 
-            watch.Stop();  
-            Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds/1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
+            watch.Stop();
+            Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds / 1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
         }
 
 
@@ -170,13 +182,23 @@ namespace UMM
         /// <summary>
         /// Enumerated version of the Ultrakill scene types
         /// </summary>
-        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Custom, Intermission, Unknown }
+        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Credits, Custom, Intermission, Secret, PrimeSanctum, Unknown }
 
         /// <summary>
         /// Returns the current level type
         /// </summary>
         public static UKLevelType CurrentLevelType = UKLevelType.Intro;
 
+        /// <summary>
+        /// Returns the currently active ultrakill scene name.
+        /// </summary>
+        public static string CurrentSceneName { get; private set; } = "";
+
+
+        /// <summary>
+        /// Invoked whenever the current level type is changed.
+        /// </summary>
+        /// <param name="uKLevelType">The type of level that was loaded.</param>
         public delegate void OnLevelChangedHandler(UKLevelType uKLevelType);
 
         /// <summary>
@@ -193,11 +215,16 @@ namespace UMM
         private static void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
         {
             string sceneName = scene.name;
+
+            if (scene != SceneManager.GetActiveScene())
+                return;
+
             UKLevelType newScene = GetUKLevelType(sceneName);
 
             if (newScene != CurrentLevelType)
             {
                 CurrentLevelType = newScene;
+                CurrentSceneName = scene.name;
                 OnLevelTypeChanged?.Invoke(newScene);
             }
 
@@ -213,7 +240,10 @@ namespace UMM
         /// <returns></returns>
         public static UKLevelType GetUKLevelType(string sceneName)
         {
-            sceneName = (sceneName.Contains("Level")) ? "Level" : (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
+            sceneName = (sceneName.Contains("P-")) ? "Sanctum" : sceneName;
+            sceneName = (sceneName.Contains("-S")) ? "Secret" : sceneName;
+            sceneName = (sceneName.Contains("Level")) ? "Level" : sceneName;
+            sceneName = (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
 
             switch (sceneName)
             {
@@ -231,18 +261,25 @@ namespace UMM
                     return UKLevelType.Intermission;
                 case "Level":
                     return UKLevelType.Level;
+                case "Secret":
+                    return UKLevelType.Secret;
+                case "Sanctum":
+                    return UKLevelType.PrimeSanctum;
+                case "Credits":
+                    return UKLevelType.Credits;
                 default:
                     return UKLevelType.Unknown;
             }
         }
 
         /// <summary>
-        /// Returns true if the current scene is playable
+        /// Returns true if the current scene is playable.
+        /// This will return false for all secret levels.
         /// </summary>
         /// <returns></returns>
         public static bool InLevel()
         {
-            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Unknown);
+            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Secret || CurrentLevelType == UKLevelType.Unknown);
             return !inNonPlayable;
         }
 
@@ -281,7 +318,7 @@ namespace UMM
 
         /// <summary>
         /// Restarts Ultrakill
-        /// </summary> 
+        /// </summary>
         public static void Restart() // thanks https://gitlab.com/vtolvr-mods/ModLoader/-/blob/release/Launcher/Program.cs
         {
             Application.Quit();
@@ -301,7 +338,7 @@ namespace UMM
             ////strCmdText = "/K \"" + Environment.CurrentDirectory + "\\ULTRAKILL.exe\"";
             //System.Diagnostics.Process.Start("CMD.exe", strCmdText);
 
-            //var psi = new System.Diagnostics.ProcessStartInfo 
+            //var psi = new System.Diagnostics.ProcessStartInfo
             //{
             //    FileName = Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe",
             //    UseShellExecute = true,
@@ -338,19 +375,28 @@ namespace UMM
                     fInfo.Create();
                 }
                 KeyBindHandler.LoadKeyBinds();
+                if (EnsureModData("UMM", "ModProfiles"))
+                    UltraModManager.LoadModProfiles();
+                else
+                {
+                    SetModData("UMM", "ModProfiles", "");
+                    SetModData("UMM", "CurrentModProfile", "Default");
+                }
             }
 
             internal static void DumpFile()
             {
                 Plugin.logger.LogInfo("Dumping keybinds");
                 KeyBindHandler.DumpKeyBinds();
+                Plugin.logger.LogInfo("Dumping mod profiles");
+                UltraModManager.DumpModProfiles();
                 FileInfo fInfo = new FileInfo(path);
                 Plugin.logger.LogInfo("Dumping mod persistent data file to " + path);
                 File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(savedData));
             }
 
             /// <summary>
-            /// Gets presistent mod data from a key and modname 
+            /// Gets presistent mod data from a key and modname
             /// </summary>
             /// <param name="modName">The name of the mod to retrieve data from</param>
             /// <param name="key">The value you want</param>

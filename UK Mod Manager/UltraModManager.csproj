@@ -125,6 +125,7 @@
     <Compile Include="Harmony Patches\Cybergrind Patches.cs" />
     <Compile Include="Harmony Patches\Mod UI Patches.cs" />
     <Compile Include="ModInformation.cs" />
+    <Compile Include="ModProfile.cs" />
     <Compile Include="Plugin.cs" />
     <Compile Include="API\UKAPI.cs" />
     <Compile Include="UltraModManager.cs" />
