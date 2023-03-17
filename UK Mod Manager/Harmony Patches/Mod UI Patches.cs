@@ -66,7 +66,6 @@ namespace UMM.HarmonyPatches
                 moreModsButton.GetComponentInChildren<Image>().color = new Color32(211, 218, 114, 255);
                 moreModsButton.GetComponentInChildren<WebButton>().url = "https://docs.google.com/spreadsheets/d/1x8P3GcdfWraZX1kz3bbHJIiY4hozxe8k1oieOm_fuL0/edit?usp=sharing";
 
-
                 GameObject thunderstoreButton = GameObject.Instantiate(discordButton, discordButton.transform.parent);
                 thunderstoreButton.GetComponent<RectTransform>().anchoredPosition = new Vector2(492f, -461f);
                 thunderstoreButton.GetComponentInChildren<Text>().text = "THUNDER STORE";
@@ -157,7 +156,6 @@ namespace UMM.HarmonyPatches
                         RectTransform infoRect = newInformation.GetComponent<RectTransform>();
                         infoRect.sizeDelta = new Vector2(infoRect.sizeDelta.x, infoRect.sizeDelta.y / 1.2f);
                         newInformation.transform.localPosition = new Vector3(0f, (infoRect.sizeDelta.y + 70f) * -1f * i, 0f);
-
 
                         Text descriptionText = GameObject.Instantiate(modText.gameObject, modText.transform.parent).GetComponent<Text>();
                         descriptionText.alignment = TextAnchor.MiddleCenter;
@@ -309,7 +307,6 @@ namespace UMM.HarmonyPatches
             modOptions.transform.Find("Mouse Wheel Settings").gameObject.SetActive(false);
             modOptions.transform.Find("Text (1)").GetComponent<Text>().text = "-- MODDED --";
 
-
             List<string> binds = UKAPI.KeyBindHandler.moddedKeyBinds.Keys.ToList().Where(x => UKAPI.KeyBindHandler.moddedKeyBinds[x].enabled).ToList(); // CoPilot wrote that Where statement, I am so fucking bamboozled
             int bindIndex;
             for (bindIndex = 0; bindIndex < binds.Count; bindIndex++)
@@ -368,7 +365,6 @@ namespace UMM.HarmonyPatches
                     button.gameObject.GetComponent<Image>().color = new Color32(255, 103, 0, 255);
                 });
                 bindIndex++;
-
 
                 Text keyText = button.gameObject.GetComponentInChildren<Text>();
                 keybind.OnBindingChanged.AddListener(delegate (KeyCode newBind)

@@ -19,7 +19,8 @@ namespace UMM.Loader
                 logger = Logger;
                 logger.LogMessage("UMM initializing!");
                 new Harmony("umm.mainManager").PatchAll();
-                StartCoroutine(UKAPI.InitializeAPI());
+                
+                UKAPI.Initialize();
                 StartCoroutine(VersionHandler.CheckVersion());
                 initialized = true;
                 instance = this;

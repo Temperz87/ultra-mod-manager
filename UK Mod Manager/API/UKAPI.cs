@@ -18,9 +18,7 @@ namespace UMM
 {
     public static class UKAPI
     {
-        public static bool triedLoadingBundle { get; private set; } = false;
         public static bool IsDevBuild { get { return UltraModManager.outdated; } }
-        private static AssetBundle commonBundle;
         private static List<string> disableCybergrindReasons = new List<string>();
 
         /// <summary>
@@ -47,8 +45,10 @@ namespace UMM
         /// <summary>
         /// Initializes the API by loading the save file and common asset bundle
         /// </summary>
-        internal static IEnumerator InitializeAPI()
+        internal static void Initialize()
         {
+            Stopwatch watch = new Stopwatch();
+            Plugin.logger.LogMessage("Beginning UKAPI");
             string[] launchArgs = Environment.GetCommandLineArgs();
             if (launchArgs != null)
             {
@@ -57,49 +57,12 @@ namespace UMM
                     if (str.Contains("disable_mods"))
                     {
                         Plugin.logger.LogMessage("Not starting UMM due to launch arg disabling it.");
-                        yield break;
+                        goto EndInitialization;
                     }
                 }
             }
-            if (triedLoadingBundle)
-                yield break;
             SaveFileHandler.LoadData();
-            Stopwatch watch = new Stopwatch();
-            watch.Start();
-
-            string commonAssetBundlePath = Path.Combine(BepInEx.Paths.GameRootPath, "ULTRAKILL_Data\\StreamingAssets\\common");
-            Plugin.logger.LogInfo("Trying to load common asset bundle from " + commonAssetBundlePath + "\\");
-            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
-            yield return request;
-            int attempts = 1;
-            while (request.assetBundle == null)
-            {
-                yield return new WaitForSeconds(0.2f); // why 0.2? I dunno I just chose it man
-                if (attempts >= 5)
-                {
-                    Plugin.logger.LogInfo("Could not load the common asset bundle, not starting UMM.");
-                    triedLoadingBundle = true;
-                    yield break;
-                }
-                request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
-                yield return request;
-                attempts++;
-            }
-
-            Plugin.logger.LogInfo("Loaded common asset bundle");
-            commonBundle = request.assetBundle;
-            triedLoadingBundle = true;
             UltraModManager.InitializeManager();
-
-            while (MapLoader.Instance == null)
-                yield return null;
-            Dictionary<string, AssetBundle> bundles = Traverse.Create(MapLoader.Instance).Field("loadedBundles").GetValue() as Dictionary<string, AssetBundle>;
-            if (bundles == null)
-                bundles = new Dictionary<string, AssetBundle>();
-            bundles.Add("common", commonBundle);
-            Traverse.Create(MapLoader.Instance).Field("loadedBundles").SetValue(bundles);
-            MapLoader.Instance.isCommonLoaded = true;
-            SceneManager.sceneLoaded += OnSceneLoad;
             if (launchArgs != null)
             {
                 foreach (string str in launchArgs)
@@ -115,9 +78,9 @@ namespace UMM
                     }
                 }
             }
-
+            EndInitialization:
             watch.Stop();
-            Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds / 1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
+            Plugin.logger.LogMessage("UMM initialization completed in " + watch.ElapsedMilliseconds + "ms");
         }
 
 
@@ -147,36 +110,6 @@ namespace UMM
                 disableCybergrindReasons.Remove(reason);
             else
                 Plugin.logger.LogError("Tried to remove cg reason " + reason + " but could not find it!");
-        }
-
-        /// <summary>
-        /// Tries to create a Ultrakill asset load request from ULTRAKILL_Data/StreamingAssets/common, note that this request has to be awaited
-        /// </summary>
-        /// <param name="name">Name of the asset to load, you MUST include the extensions (e.g. prefab)</param>
-        /// <returns>A new asset bundle request for your item</returns>
-        public static AssetBundleRequest LoadCommonAssetAsync(string name)
-        {
-            if (commonBundle == null)
-            {
-                Plugin.logger.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
-                return null;
-            }
-            return commonBundle.LoadAssetAsync(name);
-        }
-
-        /// <summary>
-        /// Tries to load an Ultrakill asset from ULTRAKILL_Data/StreamingAssets/common
-        /// </summary>
-        /// <param name="name">Name of the asset to load, you MUST include the extensions (e.g. prefab)</param>
-        /// <returns>The asset from the bundle as an object if found, otherwise returns null</returns>
-        public static object LoadCommonAsset(string name)
-        {
-            if (commonBundle == null)
-            {
-                Plugin.logger.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
-                return null;
-            }
-            return commonBundle.LoadAsset(name);
         }
 
         /// <summary>
@@ -351,17 +284,17 @@ namespace UMM
         internal static class SaveFileHandler
         {
             private static Dictionary<string, Dictionary<string, string>> savedData = new Dictionary<string, Dictionary<string, string>>();
-            private static string path = "";
+            private static FileInfo SaveFile = null;
 
             internal static void LoadData()
             {
-                path = Assembly.GetExecutingAssembly().Location;
+                string path = Assembly.GetExecutingAssembly().Location;
                 path = path.Substring(0, path.LastIndexOf("\\")) + "\\persistent mod data.json";
                 Plugin.logger.LogInfo("Trying to load persistent mod data.json from " + path);
-                FileInfo fInfo = new FileInfo(path);
-                if (fInfo.Exists)
+                SaveFile = new FileInfo(path);
+                if (SaveFile.Exists)
                 {
-                    using (StreamReader jFile = fInfo.OpenText())
+                    using (StreamReader jFile = SaveFile.OpenText())
                     {
                         savedData = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(jFile.ReadToEnd());
                         if (savedData == null)
@@ -372,7 +305,7 @@ namespace UMM
                 else
                 {
                     Plugin.logger.LogInfo("Couldn't find a save file, making one now");
-                    fInfo.Create();
+                    SaveFile.Create();
                 }
                 KeyBindHandler.LoadKeyBinds();
                 if (EnsureModData("UMM", "ModProfiles"))
@@ -386,13 +319,14 @@ namespace UMM
 
             internal static void DumpFile()
             {
+                if (SaveFile == null)
+                    return;
                 Plugin.logger.LogInfo("Dumping keybinds");
                 KeyBindHandler.DumpKeyBinds();
                 Plugin.logger.LogInfo("Dumping mod profiles");
                 UltraModManager.DumpModProfiles();
-                FileInfo fInfo = new FileInfo(path);
-                Plugin.logger.LogInfo("Dumping mod persistent data file to " + path);
-                File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(savedData));
+                Plugin.logger.LogInfo("Dumping mod persistent data file to " + SaveFile.FullName);
+                File.WriteAllText(SaveFile.FullName, JsonConvert.SerializeObject(savedData));
             }
 
             /// <summary>

@@ -36,6 +36,7 @@ namespace UMM.Loader
 
         private static void CollectAssemblies()
         {
+            Plugin.logger.LogMessage("Collecting Assemblies");
             if (modsDirectory.Exists)
                 foreach (FileInfo info in modsDirectory.GetFiles("*.dll", SearchOption.AllDirectories))
                     LoadFromAssembly(info);
