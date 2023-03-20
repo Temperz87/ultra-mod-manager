@@ -16,6 +16,7 @@ namespace UMM.Loader
         {
             if (!initialized)
             {
+                instance = this;
                 logger = Logger;
                 logger.LogMessage("UMM initializing!");
                 new Harmony("umm.mainManager").PatchAll();
@@ -23,7 +24,6 @@ namespace UMM.Loader
                 UKAPI.Initialize();
                 StartCoroutine(VersionHandler.CheckVersion());
                 initialized = true;
-                instance = this;
             }
         }
 

@@ -167,7 +167,8 @@ namespace UMM.Loader
                 {
                     if (foundMods[dependency.GUID].modVersion >= dependency.MinimumVersion)
                     {
-                        LoadMod(foundMods[dependency.GUID]);
+                        foundMods[dependency.GUID].LoadThisMod();
+                        HarmonyPatches.Inject_ModsButton.ReportModLoaded(foundMods[dependency.GUID]);
                     }
                     else
                     {

@@ -13,6 +13,16 @@ namespace UMM.HarmonyPatches
     [HarmonyPatch(typeof(OptionsMenuToManager), "Start")]
     internal static class Inject_ModsButton
     {
+        private static Dictionary<ModInformation, Button> currentButtons = new Dictionary<ModInformation, Button>();
+
+        public static void ReportModLoaded(ModInformation info)
+        {
+            if (currentButtons.ContainsKey(info) && currentButtons[info] != null)
+            {
+                currentButtons[info].targetGraphic.color = info.loaded ? Color.green : Color.red;
+            }
+        }
+        
         private static void Prefix(OptionsMenuToManager __instance)
         {
             if (__instance.pauseMenu.name == "Main Menu (1)") // check to see that we're patching out the main menu's menu, not like an in game menu one
@@ -119,6 +129,7 @@ namespace UMM.HarmonyPatches
                 hoverTextGo.SetActive(false);
 
                 ModInformation[] information = UKAPI.AllModInfoClone.Values.ToArray();
+                currentButtons = new Dictionary<ModInformation, Button>();
                 if (information.Length > 0)
                 {
                     Array.Sort(information);
@@ -148,7 +159,8 @@ namespace UMM.HarmonyPatches
                             info.Clicked();
                             newButton.targetGraphic.color = info.loaded ? Color.green : Color.red;
                         });
-
+                        currentButtons.Add(info, newButton);
+                        
                         newInformation.transform.Find("Red").gameObject.SetActive(false);
                         newInformation.transform.Find("Green").gameObject.SetActive(false);
                         newInformation.transform.Find("Blue").gameObject.SetActive(false);
