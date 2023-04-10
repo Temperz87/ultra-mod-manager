@@ -9,8 +9,18 @@ namespace UMM
         public string version { get; }
         public string description { get; }
         public bool allowCyberGrindSubmission { get; }
-        public bool unloadingSupported { get; } 
-       
+        public bool unloadingSupported { get; }
+        internal bool usingManifest = false; // Used to see if we should check for a manifest.json
+
+        public UKPlugin(string GUID, bool allowCyberGrindSubmission, bool supportsUnloading)
+        {
+            this.GUID = GUID;
+            this.allowCyberGrindSubmission = allowCyberGrindSubmission;
+            this.unloadingSupported = supportsUnloading;
+            this.usingManifest = true;
+        }
+
+        [Obsolete("With ThunderStore, UMM can now use the manifest.json to get the name, version, and description")]
         public UKPlugin(string GUID, string name, string version, string description, bool allowCyberGrindSubmission, bool supportsUnloading)
         {
             this.GUID = GUID;

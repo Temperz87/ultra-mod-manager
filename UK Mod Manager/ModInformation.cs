@@ -3,6 +3,9 @@ using UMM.Loader;
 using BepInEx;
 using UnityEngine;
 using UnityEngine.UI;
+using Newtonsoft.Json;
+using System.IO;
+using System.Collections.Generic;
 
 namespace UMM
 {
@@ -11,39 +14,69 @@ namespace UMM
         public ModType modType { get; }
         public Type mod { get; }
         public string GUID { get; }
-        public string modName { get; }
-        public string modDescription { get; }
+        public string modName { get; private set; }
+        public string modDescription { get; private set; }
         public Texture2D previewIcon { get; internal set; }
-        public Version modVersion { get; }
+        public Version modVersion { get; private set; }
         public bool supportsUnloading { get; }
         public bool loadOnStart { get; internal set; }
         public bool loaded { get; private set; }
         public Dependency[] dependencies { get; private set; }
 
-        public ModInformation(Type mod, ModType modType)
+        public ModInformation(Type mod, ModType modType, string fileDirectory)
         {
             this.modType = modType;
             this.mod = mod;
 
-            // TODO: Read mod name from a manifest file
             if (modType == ModType.BepInPlugin)
             {
                 BepInPlugin metaData = UltraModManager.GetBepinMetaData(mod);
                 GUID = metaData.GUID;
-                modName = metaData.Name;
-                modVersion = metaData.Version;
-                modDescription = "Mod unloading and descriptions are not supported by BepInEx plugins.";
-                dependencies = UltraModManager.GetBepinDependencies(mod);
+                if (!GetMetadataFromFile(fileDirectory))
+                {
+                    modName = metaData.Name;
+                    modVersion = metaData.Version;
+                    modDescription = "NO DESCRIPTION FOUND";
+                    dependencies = UltraModManager.GetBepinDependencies(mod);
+                }
             }
             else if (modType == ModType.UKMod)
             {
                 UKPlugin metaData = UltraModManager.GetUKMetaData(mod);
                 GUID = metaData.GUID;
-                modName = metaData.name;
-                modDescription = metaData.description;
-                modVersion = Version.Parse(metaData.version);
-                supportsUnloading = metaData.unloadingSupported;
-                dependencies = UltraModManager.GetUKModDependencies(mod);
+                if (!metaData.usingManifest || !GetMetadataFromFile(fileDirectory))
+                {
+                    modName = metaData.name;
+                    modDescription = metaData.description;
+                    modVersion = Version.Parse(metaData.version);
+                    supportsUnloading = metaData.unloadingSupported;
+                    dependencies = UltraModManager.GetUKModDependencies(mod);
+                }
+            }
+        }
+
+        private bool GetMetadataFromFile(string fileDirectory)
+        {
+            FileInfo file = new FileInfo(fileDirectory + "/manifest.json"); // bruh
+            Debug.Log("Checking " + file.FullName);
+            
+            if (!file.Exists)
+                return false;
+            // Read json from file and convert it to string -> string dictionary : thanks copilot :D
+            try
+            {
+                Debug.Log("getting dict");
+                ManifestStruct manifest = JsonConvert.DeserializeObject<ManifestStruct>(File.ReadAllText(file.FullName));
+                Debug.Log("tried deserializing dict");
+                this.modName = manifest.name;
+                this.modDescription = manifest.description;
+                this.modVersion = Version.Parse(manifest.version_number);
+                return true;
+            }
+            catch (Exception)
+            {
+                Debug.Log("Couldn't manifest.json for mod " + this.modName);
+                return false;
             }
         }
 
@@ -89,6 +122,13 @@ namespace UMM
         {
             public string GUID;
             public Version MinimumVersion;
+        }
+
+        private struct ManifestStruct
+        {
+            public string name;
+            public string description;
+            public string version_number;
         }
     }
 }

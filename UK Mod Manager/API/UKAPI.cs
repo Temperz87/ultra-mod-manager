@@ -495,7 +495,7 @@ namespace UMM
                         {
                             keyCode = KeyCode.Mouse6;
                         }
-                    }
+                    }   
                     else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                     {
                         keyCode = KeyCode.LeftShift;

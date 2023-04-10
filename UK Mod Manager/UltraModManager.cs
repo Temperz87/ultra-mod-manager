@@ -75,9 +75,9 @@ namespace UMM.Loader
                 {
                     ModInformation info;
                     if (type.IsSubclassOf(typeof(UKMod)))
-                        info = new ModInformation(type, ModInformation.ModType.UKMod);
+                        info = new ModInformation(type, ModInformation.ModType.UKMod, fInfo.DirectoryName);
                     else if (type.IsSubclassOf(typeof(BaseUnityPlugin)))
-                        info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
+                        info = new ModInformation(type, ModInformation.ModType.BepInPlugin, fInfo.DirectoryName);
                     else
                         continue;
                     FileInfo iconInfo = new FileInfo(Path.Combine(fInfo.DirectoryName + "\\" + "icon.png"));
@@ -160,7 +160,7 @@ namespace UMM.Loader
 
         public static void LoadMod(ModInformation info)
         {
-            if (allLoadedMods.ContainsKey(info.GUID)) 
+            if (allLoadedMods.ContainsKey(info.GUID))
                 return;
             foreach (Dependency dependency in info.dependencies)
             {
@@ -173,15 +173,27 @@ namespace UMM.Loader
                     }
                     else
                     {
-                        info.UnLoadThisMod();
-                        Plugin.logger.LogWarning($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
+                        try
+                        {
+                            info.UnLoadThisMod();
+                        }
+                        finally
+                        {
+                            Plugin.logger.LogWarning($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
+                        }
                         return;
                     }
                 }
                 else
                 {
-                    info.UnLoadThisMod();
-                    Plugin.logger.LogWarning($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
+                    try
+                    {
+                        info.UnLoadThisMod();
+                    }
+                    finally
+                    {
+                        Plugin.logger.LogWarning($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
+                    }
                     return;
                 }
             }
@@ -220,8 +232,17 @@ namespace UMM.Loader
                 Plugin.logger.LogError(e);
                 if (modObject != null)
                 {
-                    if (newMod != null)
-                        newMod.OnModUnload();
+                    if (newMod != null && newMod.metaData.unloadingSupported)
+                    {
+                        try
+                        {
+                            newMod.OnModUnload();
+                        }
+                        catch (Exception)
+                        {
+                            // Lovely it threw an exception twice :P
+                        }
+                    }
                     GameObject.Destroy(modObject); // I don't know if this is a good thing to do, if not please scream at me to remove it
                 }
             }
