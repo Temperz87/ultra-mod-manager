@@ -160,7 +160,8 @@ namespace UMM.Loader
 
         public static void LoadMod(ModInformation info)
         {
-            if (allLoadedMods.ContainsKey(info.GUID)) return;
+            if (allLoadedMods.ContainsKey(info.GUID)) 
+                return;
             foreach (Dependency dependency in info.dependencies)
             {
                 if (foundMods.ContainsKey(dependency.GUID))
