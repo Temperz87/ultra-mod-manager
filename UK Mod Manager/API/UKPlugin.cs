@@ -10,7 +10,7 @@ namespace UMM
         public string description { get; }
         public bool allowCyberGrindSubmission { get; }
         public bool unloadingSupported { get; }
-        internal bool usingManifest = false; // Used to see if we should check for a manifest.json
+        internal bool usingManifest { get; } // Used to see if we should check for a manifest.json
 
         public UKPlugin(string GUID, bool allowCyberGrindSubmission, bool supportsUnloading)
         {

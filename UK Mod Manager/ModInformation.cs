@@ -48,29 +48,27 @@ namespace UMM
                 {
                     modName = metaData.name;
                     modDescription = metaData.description;
-                    modVersion = Version.Parse(metaData.version);
-                    supportsUnloading = metaData.unloadingSupported;
-                    dependencies = UltraModManager.GetUKModDependencies(mod);
+                    if (metaData.version != null)
+                        modVersion = Version.Parse(metaData.version);
                 }
+                supportsUnloading = metaData.unloadingSupported;
+                dependencies = UltraModManager.GetUKModDependencies(mod);
             }
         }
 
         private bool GetMetadataFromFile(string fileDirectory)
         {
-            FileInfo file = new FileInfo(fileDirectory + "/manifest.json"); // bruh
-            Debug.Log("Checking " + file.FullName);
-            
+            FileInfo file = new FileInfo(fileDirectory + "/manifest.json");
             if (!file.Exists)
                 return false;
             // Read json from file and convert it to string -> string dictionary : thanks copilot :D
             try
             {
-                Debug.Log("getting dict");
                 ManifestStruct manifest = JsonConvert.DeserializeObject<ManifestStruct>(File.ReadAllText(file.FullName));
-                Debug.Log("tried deserializing dict");
                 this.modName = manifest.name;
                 this.modDescription = manifest.description;
-                this.modVersion = Version.Parse(manifest.version_number);
+                if (manifest.version_number != null)
+                    this.modVersion = Version.Parse(manifest.version_number);
                 return true;
             }
             catch (Exception)
@@ -97,8 +95,8 @@ namespace UMM
         {
             if (!loaded)
             {
-                loaded = true;
                 UltraModManager.LoadMod(this);
+                loaded = true;
             }
             return loaded;
         }
@@ -110,6 +108,11 @@ namespace UMM
                 loaded = false;
                 UltraModManager.UnloadMod(this);
             }
+        }
+
+        internal void ForceLoadState(bool state)
+        {
+            loaded = state;
         }
 
         public enum ModType

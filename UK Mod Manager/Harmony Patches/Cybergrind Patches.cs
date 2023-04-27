@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace UMM.HarmonyPatches
 {
-    [HarmonyPatch(typeof(FinalCyberRank), "GameOver")]
+    [HarmonyPatch(typeof(FinalCyberRank), nameof(FinalCyberRank.GameOver))]
     internal static class Ensure_NoSubmitBadScore
     {
         private static bool Prefix()
@@ -17,7 +17,7 @@ namespace UMM.HarmonyPatches
         }
     }
 
-    [HarmonyPatch(typeof(SteamController), "SubmitCyberGrindScore")]
+    [HarmonyPatch(typeof(LeaderboardController), nameof(LeaderboardController.SubmitCyberGrindScore))]
     internal static class Ensure_NoSubmitBadScoreRedundant // I am very paranoid
     {
         private static bool Prefix()

@@ -15,7 +15,7 @@ namespace UMM.HarmonyPatches
     {
         private static Dictionary<ModInformation, Button> currentButtons = new Dictionary<ModInformation, Button>();
 
-        public static void ReportModLoaded(ModInformation info)
+        public static void ReportModStateChanged(ModInformation info)
         {
             if (currentButtons.ContainsKey(info) && currentButtons[info] != null)
             {

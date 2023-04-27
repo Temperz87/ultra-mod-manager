@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using UMM.HarmonyPatches;
 using UnityEngine;
 using UnityEngine.Networking;
 using static UMM.ModInformation;
@@ -57,7 +58,8 @@ namespace UMM.Loader
                         loadedMods++;
                 }
             }
-            Plugin.logger.LogInfo("Loaded " + loadedMods + " mods on start");
+            if (loadedMods > 0)
+                Plugin.logger.LogInfo("Loaded " + loadedMods + " mods on start");
         }
 
         public static void LoadFromAssembly(FileInfo fInfo)
@@ -162,14 +164,29 @@ namespace UMM.Loader
         {
             if (allLoadedMods.ContainsKey(info.GUID))
                 return;
-            foreach (Dependency dependency in info.dependencies)
+            if (info.dependencies != null)
             {
-                if (foundMods.ContainsKey(dependency.GUID))
+                foreach (Dependency dependency in info.dependencies)
                 {
-                    if (foundMods[dependency.GUID].modVersion >= dependency.MinimumVersion)
+                    if (foundMods.ContainsKey(dependency.GUID))
                     {
-                        foundMods[dependency.GUID].LoadThisMod();
-                        HarmonyPatches.Inject_ModsButton.ReportModLoaded(foundMods[dependency.GUID]);
+                        if (foundMods[dependency.GUID].modVersion >= dependency.MinimumVersion)
+                        {
+                            foundMods[dependency.GUID].LoadThisMod();
+                            Inject_ModsButton.ReportModStateChanged(foundMods[dependency.GUID]);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                info.UnLoadThisMod();
+                            }
+                            finally
+                            {
+                                Plugin.logger.LogWarning($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
+                            }
+                            return;
+                        }
                     }
                     else
                     {
@@ -179,22 +196,10 @@ namespace UMM.Loader
                         }
                         finally
                         {
-                            Plugin.logger.LogWarning($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
+                            Plugin.logger.LogWarning($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
                         }
                         return;
                     }
-                }
-                else
-                {
-                    try
-                    {
-                        info.UnLoadThisMod();
-                    }
-                    finally
-                    {
-                        Plugin.logger.LogWarning($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
-                    }
-                    return;
                 }
             }
             GameObject modObject = GameObject.Instantiate(new GameObject());
@@ -230,6 +235,10 @@ namespace UMM.Loader
             {
                 Plugin.logger.LogError("Caught exception while trying to load modinformation " + info.modName);
                 Plugin.logger.LogError(e);
+                if (allLoadedMods.ContainsKey(info.GUID))
+                    allLoadedMods.Remove(info.GUID);
+                info.ForceLoadState(false);
+                Inject_ModsButton.ReportModStateChanged(info);
                 if (modObject != null)
                 {
                     if (newMod != null && newMod.metaData.unloadingSupported)
