@@ -4,6 +4,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Reflection;
+using UMM.HarmonyPatches;
 using UnityEngine;
 using UnityEngine.Networking;
 using static UMM.ModInformation;
@@ -57,7 +58,8 @@ namespace UMM.Loader
                         loadedMods++;
                 }
             }
-            Plugin.logger.LogInfo("Loaded " + loadedMods + " mods on start");
+            if (loadedMods > 0)
+                Plugin.logger.LogInfo("Loaded " + loadedMods + " mods on start");
         }
 
         public static void LoadFromAssembly(FileInfo fInfo)
@@ -75,9 +77,9 @@ namespace UMM.Loader
                 {
                     ModInformation info;
                     if (type.IsSubclassOf(typeof(UKMod)))
-                        info = new ModInformation(type, ModInformation.ModType.UKMod);
+                        info = new ModInformation(type, ModInformation.ModType.UKMod, fInfo.DirectoryName);
                     else if (type.IsSubclassOf(typeof(BaseUnityPlugin)))
-                        info = new ModInformation(type, ModInformation.ModType.BepInPlugin);
+                        info = new ModInformation(type, ModInformation.ModType.BepInPlugin, fInfo.DirectoryName);
                     else
                         continue;
                     FileInfo iconInfo = new FileInfo(Path.Combine(fInfo.DirectoryName + "\\" + "icon.png"));
@@ -160,27 +162,44 @@ namespace UMM.Loader
 
         public static void LoadMod(ModInformation info)
         {
-            if (allLoadedMods.ContainsKey(info.GUID)) return;
-            foreach (Dependency dependency in info.dependencies)
+            if (allLoadedMods.ContainsKey(info.GUID))
+                return;
+            if (info.dependencies != null)
             {
-                if (foundMods.ContainsKey(dependency.GUID))
+                foreach (Dependency dependency in info.dependencies)
                 {
-                    if (foundMods[dependency.GUID].modVersion >= dependency.MinimumVersion)
+                    if (foundMods.ContainsKey(dependency.GUID))
                     {
-                        LoadMod(foundMods[dependency.GUID]);
+                        if (foundMods[dependency.GUID].modVersion >= dependency.MinimumVersion)
+                        {
+                            foundMods[dependency.GUID].LoadThisMod();
+                            Inject_ModsButton.ReportModStateChanged(foundMods[dependency.GUID]);
+                        }
+                        else
+                        {
+                            try
+                            {
+                                info.UnLoadThisMod();
+                            }
+                            finally
+                            {
+                                Plugin.logger.LogWarning($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
+                            }
+                            return;
+                        }
                     }
                     else
                     {
-                        info.UnLoadThisMod();
-                        Plugin.logger.LogWarning($"Required dependency ({foundMods[dependency.GUID].modName}, version {foundMods[dependency.GUID].modVersion}) did not meet version requirements of {info.modName} (minimum version {dependency.MinimumVersion})");
+                        try
+                        {
+                            info.UnLoadThisMod();
+                        }
+                        finally
+                        {
+                            Plugin.logger.LogWarning($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
+                        }
                         return;
                     }
-                }
-                else
-                {
-                    info.UnLoadThisMod();
-                    Plugin.logger.LogWarning($"Required dependency ({dependency.GUID}) of {info.modName} not found.");
-                    return;
                 }
             }
             GameObject modObject = GameObject.Instantiate(new GameObject());
@@ -216,10 +235,23 @@ namespace UMM.Loader
             {
                 Plugin.logger.LogError("Caught exception while trying to load modinformation " + info.modName);
                 Plugin.logger.LogError(e);
+                if (allLoadedMods.ContainsKey(info.GUID))
+                    allLoadedMods.Remove(info.GUID);
+                info.ForceLoadState(false);
+                Inject_ModsButton.ReportModStateChanged(info);
                 if (modObject != null)
                 {
-                    if (newMod != null)
-                        newMod.OnModUnload();
+                    if (newMod != null && newMod.metaData.unloadingSupported)
+                    {
+                        try
+                        {
+                            newMod.OnModUnload();
+                        }
+                        catch (Exception)
+                        {
+                            // Lovely it threw an exception twice :P
+                        }
+                    }
                     GameObject.Destroy(modObject); // I don't know if this is a good thing to do, if not please scream at me to remove it
                 }
             }

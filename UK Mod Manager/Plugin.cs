@@ -1,7 +1,7 @@
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using UnityEngine;
+using System;
 
 namespace UMM.Loader
 {
@@ -16,14 +16,23 @@ namespace UMM.Loader
         {
             if (!initialized)
             {
+                instance = this;
                 logger = Logger;
                 logger.LogMessage("UMM initializing!");
-                new Harmony("umm.mainManager").PatchAll();
-                
-                UKAPI.Initialize();
-                StartCoroutine(VersionHandler.CheckVersion());
-                initialized = true;
-                instance = this;
+                try
+                {
+                    new Harmony("umm.mainManager").PatchAll();
+
+                    UKAPI.Initialize();
+                    StartCoroutine(VersionHandler.CheckVersion());
+                    initialized = true;
+                }
+                catch (ArgumentException e)
+                {
+                    logger.LogError("UMM failed to initialize");
+                    logger.LogError(e.Message);
+                    logger.LogError(e.StackTrace);
+                }
             }
         }
 
