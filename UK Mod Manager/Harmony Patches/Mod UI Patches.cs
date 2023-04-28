@@ -25,7 +25,7 @@ namespace UMM.HarmonyPatches
         
         private static void Prefix(OptionsMenuToManager __instance)
         {
-            if (__instance.pauseMenu.name == "Main Menu (1)") // check to see that we're patching out the main menu's menu, not like an in game menu one
+            if (__instance.pauseMenu.name == "Main Menu (1)" && SceneHelper.CurrentScene == "Main Menu") // check to see that we're patching out the main menu's menu, not like an in game menu one, make makes sure its the Main Menu stopping error spam as the game loads
             {
                 // Inject the mods button                
 
