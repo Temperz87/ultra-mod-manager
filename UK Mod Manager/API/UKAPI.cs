@@ -268,7 +268,7 @@ namespace UMM
             //Plugin.logger.LogMessage("Path is \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\UltrakillRestarter.exe\"");
             //string strCmdText;
             //strCmdText = "/K \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe\""/* + System.Diagnostics.Process.GetCurrentProcess().Id.ToString() + "\""*/;
-            ////strCmdText = "/K \"" + Environment.CurrentDirectory + "\\ULTRAKILL.exe\"";
+            ////strCmdText = "/K \"" + Environment.CurrentDirectory + "ULTRAKILL.exe\"";
             //System.Diagnostics.Process.Start("CMD.exe", strCmdText);
 
             //var psi = new System.Diagnostics.ProcessStartInfo
@@ -288,8 +288,10 @@ namespace UMM
 
             internal static void LoadData()
             {
+            	OperatingSystem os = Environment.OSVersion;
+            	PlatformID     pid = os.Platform;
                 string path = Assembly.GetExecutingAssembly().Location;
-                path = path.Substring(0, path.LastIndexOf("\\")) + "\\persistent mod data.json";
+                path = path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)) + Path.DirectorySeparatorChar + "persistent mod data.json";
                 Plugin.logger.LogInfo("Trying to load persistent mod data.json from " + path);
                 SaveFile = new FileInfo(path);
                 if (SaveFile.Exists)
