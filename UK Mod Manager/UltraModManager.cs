@@ -13,7 +13,7 @@ namespace UMM.Loader
 {
     public static class UltraModManager
     {
-        public static DirectoryInfo modsDirectory = new DirectoryInfo(Path.Combine(BepInEx.Paths.BepInExRootPath, "UMM Mods" + Path.DirectorySeparatorChar));
+        public static DirectoryInfo modsDirectory = new DirectoryInfo(Path.Combine(BepInEx.Paths.BepInExRootPath, "UMM Mods"));
         public static Dictionary<string, ModInformation> foundMods = new Dictionary<string, ModInformation>();
         public static Dictionary<string, ModInformation> allLoadedMods = new Dictionary<string, ModInformation>();
         public static bool outdated { get; internal set; } = false;
