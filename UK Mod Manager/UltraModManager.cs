@@ -14,7 +14,7 @@ namespace UMM.Loader
 {
     public static class UltraModManager
     {
-        public static DirectoryInfo modsDirectory = new DirectoryInfo(Path.Combine(BepInEx.Paths.BepInExRootPath, "UMM Mods\\"));
+        public static DirectoryInfo modsDirectory = new DirectoryInfo(Path.Combine(BepInEx.Paths.BepInExRootPath, "UMM Mods"));
         public static Dictionary<string, ModInformation> foundMods = new Dictionary<string, ModInformation>();
         public static Dictionary<string, ModInformation> allLoadedMods = new Dictionary<string, ModInformation>();
         public static bool outdated { get; internal set; } = false;
@@ -92,7 +92,7 @@ namespace UMM.Loader
         /// <exception cref="TypeLoadException"></exception>
         internal static Assembly LoadAssembly(FileInfo fInfo)
         {
-            DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + "\\dependencies");
+            DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + Path.DirectorySeparatorChar + "dependencies");
             if (dInfo.Exists) // this solution is a hack i am well aware
             {
                 foreach (FileInfo info in dInfo.GetFiles("*.dll", SearchOption.AllDirectories))
@@ -160,7 +160,7 @@ namespace UMM.Loader
                 {
                     throw new TypeLoadException(e.Message);
                 }
-                FileInfo iconInfo = new FileInfo(Path.Combine(fInfo.DirectoryName + "\\" + "icon.png"));
+                FileInfo iconInfo = new FileInfo(Path.Combine(fInfo.DirectoryName + Path.DirectorySeparatorChar + "icon.png"));
                 if (iconInfo.Exists)
                     Plugin.instance.StartCoroutine(GetModImage(iconInfo, info));
                 foundMods.Add(info.GUID, info);
