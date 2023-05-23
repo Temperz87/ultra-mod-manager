@@ -21,10 +21,11 @@ namespace UMM
         public bool supportsUnloading { get; }
         public bool loadOnStart { get; internal set; }
         public bool loaded { get; private set; }
-        public Dependency[] dependencies { get; private set; }
+        public List<Dependency> dependencies { get; private set; }
 
         public ModInformation(Type mod, ModType modType, string fileDirectory)
         {
+            Plugin.logger.LogInfo("Creating mod info " + fileDirectory + " " + mod.Name);
             this.modType = modType;
             this.mod = mod;
 
@@ -32,18 +33,21 @@ namespace UMM
             {
                 BepInPlugin metaData = UltraModManager.GetBepinMetaData(mod);
                 GUID = metaData.GUID;
+                dependencies = UltraModManager.GetBepinDependencies(mod);
                 if (!GetMetadataFromFile(fileDirectory))
                 {
                     modName = metaData.Name;
                     modVersion = metaData.Version;
                     modDescription = "NO DESCRIPTION FOUND";
-                    dependencies = UltraModManager.GetBepinDependencies(mod);
                 }
             }
             else if (modType == ModType.UKMod)
             {
                 UKPlugin metaData = UltraModManager.GetUKMetaData(mod);
                 GUID = metaData.GUID;
+                dependencies = UltraModManager.GetUKModDependencies(mod);
+                foreach (Dependency dependency in UltraModManager.GetBepinDependencies(mod))
+                    dependencies.Add(dependency);
                 if (!metaData.usingManifest || !GetMetadataFromFile(fileDirectory))
                 {
                     modName = metaData.name;
@@ -52,7 +56,6 @@ namespace UMM
                         modVersion = Version.Parse(metaData.version);
                 }
                 supportsUnloading = metaData.unloadingSupported;
-                dependencies = UltraModManager.GetUKModDependencies(mod);
             }
         }
 
@@ -73,7 +76,6 @@ namespace UMM
             }
             catch (Exception)
             {
-                Debug.Log("Couldn't manifest.json for mod " + this.modName);
                 return false;
             }
         }

@@ -3,6 +3,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using UMM.HarmonyPatches;
 using UnityEngine;
@@ -19,6 +20,7 @@ namespace UMM.Loader
         public static bool outdated { get; internal set; } = false;
         public static bool devBuild { get; internal set; } = false;
         public static string newLoaderVersion { get; internal set; } = "";
+
         private static bool initialized = false;
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
         private static Dictionary<string, ModProfile> allProfiles = new Dictionary<string, ModProfile>();
@@ -30,19 +32,40 @@ namespace UMM.Loader
             {
                 Plugin.logger.LogMessage("Beginning UltraModManager");
                 initialized = true;
-                CollectAssemblies();
+                LoadMods();
                 LoadOnStart();
             }
         }
 
-        private static void CollectAssemblies()
+        private static void LoadMods()
         {
-            Plugin.logger.LogMessage("Collecting Assemblies");
             if (modsDirectory.Exists)
+            {
+                Plugin.logger.LogMessage("Collecting Assemblies");
+                Dictionary<Assembly, FileInfo> allAssemblies = new Dictionary<Assembly, FileInfo>();
                 foreach (FileInfo info in modsDirectory.GetFiles("*.dll", SearchOption.AllDirectories))
-                    LoadFromAssembly(info);
+                {
+                    try
+                    {
+                        Assembly ass = LoadAssembly(info);
+                        if (ass != null)
+                        {
+                            allAssemblies.Add(ass, info);
+                        }
+                    }
+                    catch (TypeLoadException e)
+                    {
+                        Plugin.logger.LogWarning("Couldn't load " + info.FullName + " possibly due to a missing assembly, will try to reload later:\n" + e.ToString());
+                    }
+                }
+
+                Plugin.logger.LogMessage("Getting mod types ");
+                foreach (Assembly ass in allAssemblies.Keys)
+                    GetTypesFromAssembly(ass, allAssemblies[ass]);
+            }
             else
                 modsDirectory.Create();
+
             Plugin.logger.LogInfo("Found " + foundMods.Count + " mods that can be loaded.");
         }
 
@@ -62,43 +85,90 @@ namespace UMM.Loader
                 Plugin.logger.LogInfo("Loaded " + loadedMods + " mods on start");
         }
 
-        public static void LoadFromAssembly(FileInfo fInfo)
+        /// <summary>
+        /// Tries to load an assembly
+        /// </summary>
+        /// <param name="fInfo"></param>
+        /// <exception cref="TypeLoadException"></exception>
+        internal static Assembly LoadAssembly(FileInfo fInfo)
         {
             DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + "\\dependencies");
             if (dInfo.Exists) // this solution is a hack i am well aware
             {
                 foreach (FileInfo info in dInfo.GetFiles("*.dll", SearchOption.AllDirectories))
-                    Assembly.LoadFile(info.FullName);
+                    Assembly.LoadFrom(info.FullName);
             }
+
+
+            Assembly ass = null;
+            Plugin.logger.LogInfo("Trying to load assembly " + fInfo.FullName);
             try
             {
-                Assembly ass = Assembly.LoadFile(fInfo.FullName);
-                foreach (Type type in ass.GetTypes())
+                ass = Assembly.LoadFrom(fInfo.FullName);
+            }
+            catch (FileNotFoundException e)
+            {
+                Plugin.logger.LogWarning("Couldn't find file " + fInfo.FullName);
+                return null;
+            }
+            catch (FileLoadException e)
+            {
+                throw e;
+            }
+
+            return ass;
+        }
+
+        /// <summary>
+        /// Tries to load all mods from an assembly
+        /// </summary>
+        /// <param name="ass">Assembly containing mod files</param>
+        /// <param name="fInfo">Assembly path</param>
+        /// <exception cref="TypeLoadException"></exception>
+        internal static void GetTypesFromAssembly(Assembly ass, FileInfo fInfo)
+        {
+            Type[] assemblyTypes = null;
+
+            try
+            {
+                assemblyTypes = ass.GetTypes();
+            }
+            catch (ReflectionTypeLoadException e)
+            {
+                Plugin.logger.LogWarning("Caught ReflectionTypeLoadException, so this mod may break");
+                assemblyTypes = e.Types.Where(t => t != null).ToArray();
+            }
+            catch (Exception e)
+            {
+                Plugin.logger.LogWarning("Unhandled exception while loading " + fInfo.FullName + "\n" + e.ToString());
+                return;
+            }
+
+            foreach (Type type in assemblyTypes)
+            {
+                ModInformation info;
+                try
                 {
-                    ModInformation info;
                     if (type.IsSubclassOf(typeof(UKMod)))
                         info = new ModInformation(type, ModInformation.ModType.UKMod, fInfo.DirectoryName);
                     else if (type.IsSubclassOf(typeof(BaseUnityPlugin)))
                         info = new ModInformation(type, ModInformation.ModType.BepInPlugin, fInfo.DirectoryName);
                     else
                         continue;
-                    FileInfo iconInfo = new FileInfo(Path.Combine(fInfo.DirectoryName + "\\" + "icon.png"));
-                    if (iconInfo.Exists)
-                        Plugin.instance.StartCoroutine(GetModImage(iconInfo, info));
-                    Plugin.logger.LogInfo("Adding mod info " + fInfo.FullName + " " + type.Name);
-                    foundMods.Add(info.GUID, info);
-                    object retrievedData = UKAPI.SaveFileHandler.RetrieveModData("LoadOnStart", info.modName);
-                    if (retrievedData != null && bool.Parse(retrievedData.ToString()))
-                        info.loadOnStart = true;
                 }
-            }
-            catch (Exception e)
-            {
-                Plugin.logger.LogError("Caught exception while trying to load assembly " + fInfo.FullName + ": " + e.ToString());
-                return;
+                catch (FileNotFoundException e)
+                {
+                    throw new TypeLoadException(e.Message);
+                }
+                FileInfo iconInfo = new FileInfo(Path.Combine(fInfo.DirectoryName + "\\" + "icon.png"));
+                if (iconInfo.Exists)
+                    Plugin.instance.StartCoroutine(GetModImage(iconInfo, info));
+                foundMods.Add(info.GUID, info);
+                object retrievedData = UKAPI.SaveFileHandler.RetrieveModData("LoadOnStart", info.modName);
+                if (retrievedData != null && bool.Parse(retrievedData.ToString()))
+                    info.loadOnStart = true;
             }
         }
-
         internal static IEnumerator GetModImage(FileInfo imageURL, ModInformation info)
         {
             using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(imageURL.FullName))
@@ -138,18 +208,20 @@ namespace UMM.Loader
             return (UKPlugin)customAttributes[0];
         }
 
-        internal static Dependency[] GetBepinDependencies(Type t)
+        internal static List<Dependency> GetBepinDependencies(Type t)
         {
-            BepInDependency[] customAttributes = (BepInDependency[])t.GetCustomAttributes(typeof(BepInDependency), true);
+            object[] customAttributes = t.GetCustomAttributes(typeof(BepInDependency), true);
             List<Dependency> dependencies = new List<Dependency>();
             foreach (BepInDependency attribute in customAttributes)
             {
                 dependencies.Add(new Dependency() { GUID = attribute.DependencyGUID, MinimumVersion = attribute.MinimumVersion });
             }
-            return dependencies.ToArray();
+            if (dependencies.Count > 0)
+                Plugin.logger.LogInfo("Found " + dependencies.Count + " BepinDependencies");
+            return dependencies;
         }
 
-        internal static Dependency[] GetUKModDependencies(Type t)
+        internal static List<Dependency> GetUKModDependencies(Type t)
         {
             UKDependency[] customAttributes = (UKDependency[])t.GetCustomAttributes(typeof(UKDependency), true);
             List<Dependency> dependencies = new List<Dependency>();
@@ -157,22 +229,29 @@ namespace UMM.Loader
             {
                 dependencies.Add(new Dependency() { GUID = attribute.GUID, MinimumVersion = attribute.MinimumVersion });
             }
-            return dependencies.ToArray();
+            if (dependencies.Count > 0)
+                Plugin.logger.LogInfo("Found " + dependencies.Count + " UKModDependencies");
+            return dependencies;
         }
 
         public static void LoadMod(ModInformation info)
         {
             if (allLoadedMods.ContainsKey(info.GUID))
                 return;
-            if (info.dependencies != null)
+            if (info.dependencies != null && info.dependencies.Count > 0)
             {
+                Plugin.logger.LogInfo("Found dependencies for mod " + info.modName + ", trying to to load them now");
                 foreach (Dependency dependency in info.dependencies)
                 {
                     if (foundMods.ContainsKey(dependency.GUID))
                     {
                         if (foundMods[dependency.GUID].modVersion >= dependency.MinimumVersion)
                         {
-                            foundMods[dependency.GUID].LoadThisMod();
+                            if (!foundMods[dependency.GUID].LoadThisMod())
+                            {
+                                Plugin.logger.LogError("Couldn't load dependency " + dependency.GUID + " for mod " + info.modName);
+                                return;
+                            }
                             Inject_ModsButton.ReportModStateChanged(foundMods[dependency.GUID]);
                         }
                         else

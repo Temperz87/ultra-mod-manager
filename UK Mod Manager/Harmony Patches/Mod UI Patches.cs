@@ -18,11 +18,9 @@ namespace UMM.HarmonyPatches
         public static void ReportModStateChanged(ModInformation info)
         {
             if (currentButtons.ContainsKey(info) && currentButtons[info] != null)
-            {
                 currentButtons[info].targetGraphic.color = info.loaded ? Color.green : Color.red;
-            }
         }
-        
+
         private static void Prefix(OptionsMenuToManager __instance)
         {
             if (__instance.pauseMenu.name == "Main Menu (1)") // check to see that we're patching out the main menu's menu, not like an in game menu one
@@ -143,7 +141,7 @@ namespace UMM.HarmonyPatches
 
                         Text modText = newInformation.transform.Find("Text").GetComponent<Text>();
                         modText.text = info.modName + " " + info.modVersion;
-                        modText.fontSize = (int)(modText.fontSize/1.5f);
+                        modText.fontSize = (int)(modText.fontSize / 1.5f);
                         modText.alignment = TextAnchor.UpperCenter;
                         modText.transform.localPosition = new Vector3(0f, -3f, 0f);
                         modText.transform.localScale = new Vector3(0.66764f, 0.66764f, 0.66764f);
@@ -160,7 +158,7 @@ namespace UMM.HarmonyPatches
                             newButton.targetGraphic.color = info.loaded ? Color.green : Color.red;
                         });
                         currentButtons.Add(info, newButton);
-                        
+
                         newInformation.transform.Find("Red").gameObject.SetActive(false);
                         newInformation.transform.Find("Green").gameObject.SetActive(false);
                         newInformation.transform.Find("Blue").gameObject.SetActive(false);
@@ -179,7 +177,7 @@ namespace UMM.HarmonyPatches
                         descriptionText.text = info.modDescription;
                         descriptionText.transform.localPosition = new Vector3(0f, descriptionText.transform.localPosition.y + 10f, 0);
                         descriptionText.color = new Color32(255, 255, 255, 255);
-                        
+
                         Transform imageTransform = newInformation.transform.Find("Image");
                         if (info.previewIcon == null)
                             imageTransform.gameObject.SetActive(false);
