@@ -243,6 +243,16 @@ namespace UMM
             return KeyBindHandler.moddedKeyBinds.ContainsKey(key);
         }
 
+        /// <summary>
+        /// Checks if a mod is loaded provided its GUID
+        /// </summary>
+        /// <param name="GUID">The GUID of the mod</param>
+        /// <returns></returns>
+        public static bool IsModLoaded(string GUID)
+        {
+            return UltraModManager.allLoadedMods.ContainsKey(GUID);
+        }
+
         [Obsolete("Use AllModInfoClone instead.")]
         public static Dictionary<string, ModInformation> GetAllModInformation() => AllModInfoClone;
 

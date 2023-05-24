@@ -45,21 +45,17 @@ namespace UMM.Loader
                 Dictionary<Assembly, FileInfo> allAssemblies = new Dictionary<Assembly, FileInfo>();
                 foreach (FileInfo info in modsDirectory.GetFiles("*.dll", SearchOption.AllDirectories))
                 {
-                    try
+                    Assembly ass = LoadAssembly(info);
+                    if (ass != null)
                     {
-                        Assembly ass = LoadAssembly(info);
-                        if (ass != null)
-                        {
+                        if (!allAssemblies.ContainsKey(ass))
                             allAssemblies.Add(ass, info);
-                        }
-                    }
-                    catch (TypeLoadException e)
-                    {
-                        Plugin.logger.LogWarning("Couldn't load " + info.FullName + " possibly due to a missing assembly, will try to reload later:\n" + e.ToString());
+                        else
+                            Plugin.logger.LogMessage("Found duplicate assemblies: " + info.FullName + " and " + allAssemblies[ass].FullName);
                     }
                 }
 
-                Plugin.logger.LogMessage("Getting mod types ");
+                Plugin.logger.LogMessage("Getting mod types");
                 foreach (Assembly ass in allAssemblies.Keys)
                     GetTypesFromAssembly(ass, allAssemblies[ass]);
             }
@@ -89,19 +85,15 @@ namespace UMM.Loader
         /// Tries to load an assembly
         /// </summary>
         /// <param name="fInfo"></param>
-        /// <exception cref="TypeLoadException"></exception>
         internal static Assembly LoadAssembly(FileInfo fInfo)
         {
             DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + Path.DirectorySeparatorChar + "dependencies");
             if (dInfo.Exists) // this solution is a hack i am well aware
-            {
                 foreach (FileInfo info in dInfo.GetFiles("*.dll", SearchOption.AllDirectories))
                     Assembly.LoadFrom(info.FullName);
-            }
-
 
             Assembly ass = null;
-            Plugin.logger.LogInfo("Trying to load assembly " + fInfo.FullName);
+            //Plugin.logger.LogInfo("Trying to load assembly " + fInfo.FullName);
             try
             {
                 ass = Assembly.LoadFrom(fInfo.FullName);
@@ -113,7 +105,13 @@ namespace UMM.Loader
             }
             catch (FileLoadException e)
             {
-                throw e;
+                Plugin.logger.LogWarning("Couldn't load file " + fInfo.FullName);
+                return null;
+            }
+            catch (Exception e)
+            {
+                Plugin.logger.LogWarning("Couldn't load file " + fInfo.FullName + " due to unhandled exception: " + e.ToString());
+                return null;
             }
 
             return ass;
@@ -141,6 +139,12 @@ namespace UMM.Loader
             catch (Exception e)
             {
                 Plugin.logger.LogWarning("Unhandled exception while loading " + fInfo.FullName + "\n" + e.ToString());
+                return;
+            }
+
+            if (assemblyTypes == null)
+            {
+                Plugin.logger.LogWarning("Assembly types were null for mod " + fInfo.FullName + ", can't load it");
                 return;
             }
 
