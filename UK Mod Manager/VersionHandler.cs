@@ -8,11 +8,7 @@ namespace UMM.Loader
 {
     public static class VersionHandler
     {
-        public static bool IsUMMOutdated { get; private set; }
-        public static bool IsUMMDevBuild { get; private set; }
-        public static Version UMMNewVersion { get; private set; }
-
-        public const string VERSION = "0.5.1"; // Should this be hardcoded? No it should not be
+        public const string VERSION = "0.5.7"; // Should this be hardcoded? No it should not be
         public static  IEnumerator CheckVersion()
         {
             //Plugin.logger.LogInfo("Trying to get verison.");
@@ -38,22 +34,18 @@ namespace UMM.Loader
                     // Check current version string against the newer one
                     if (VERSION.CompareTo(latestVersion) < 0)
                     {
-
                         Plugin.logger.LogWarning("New UMM version found: " + latestVersion + " while the current version is: " + VERSION + ", consider upgrading to the new version.");
-                        IsUMMOutdated = true;
+                        UltraModManager.outdated = true;
                     }
                     else
                     {
                         Plugin.logger.LogWarning("Latest available UMM build is: " + latestVersion + " while the current version is: " + VERSION + ", be warned that in a dev build mods, or UMM itself, can break.");
-                        IsUMMDevBuild = true;
+                        UltraModManager.devBuild = true;
                     }
-                    UMMNewVersion = Version.Parse(latestVersion);
+                    UltraModManager.newLoaderVersion = latestVersion;
                 }
                 else
-                {
                     Plugin.logger.LogMessage("UMM is up to date!");
-                    UMMNewVersion = Version.Parse(VERSION);
-                }
                 yield break;
             }
         }

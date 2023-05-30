@@ -1,7 +1,7 @@
 using BepInEx;
 using BepInEx.Logging;
 using HarmonyLib;
-using UnityEngine;
+using System;
 
 namespace UMM.Loader
 {
@@ -9,7 +9,7 @@ namespace UMM.Loader
     public class Plugin : BaseUnityPlugin
     {
         private static bool initialized = false;
-
+        internal static Plugin instance;
         internal static ManualLogSource logger;
 
         internal const string UKMOD_DEPRECATION_MESSAGE = "The UKMod system has been deprecated. Learn more: <insert link here>";
@@ -18,12 +18,23 @@ namespace UMM.Loader
         {
             if (!initialized)
             {
+                instance = this;
                 logger = Logger;
                 logger.LogMessage("UMM initializing!");
-                new Harmony("umm.mainManager").PatchAll();
-                StartCoroutine(UKAPI.InitializeAPI());
-                StartCoroutine(VersionHandler.CheckVersion());
-                initialized = true;
+                try
+                {
+                    new Harmony("umm.mainManager").PatchAll();
+
+                    UKAPI.Initialize();
+                    StartCoroutine(VersionHandler.CheckVersion());
+                    initialized = true;
+                }
+                catch (ArgumentException e)
+                {
+                    logger.LogError("UMM failed to initialize");
+                    logger.LogError(e.Message);
+                    logger.LogError(e.StackTrace);
+                }
             }
         }
 

@@ -18,8 +18,7 @@ namespace UMM
 {
     public static class UKAPI
     {
-        public static bool triedLoadingBundle { get; private set; } = false;
-        private static AssetBundle commonBundle;
+        public static bool IsDevBuild { get { return UltraModManager.outdated; } }
         private static List<string> disableCybergrindReasons = new List<string>();
 
         /// <summary>
@@ -48,53 +47,27 @@ namespace UMM
         /// <summary>
         /// Initializes the API by loading the save file and common asset bundle
         /// </summary>
-        internal static IEnumerator InitializeAPI()
+        internal static void Initialize()
         {
-            if (triedLoadingBundle)
-                yield break;
-            SaveFileHandler.LoadData();
             Stopwatch watch = new Stopwatch();
-            watch.Start();
-            
-            string commonAssetBundlePath = Path.Combine(BepInEx.Paths.GameRootPath, "ULTRAKILL_Data\\StreamingAssets\\common");
-            Plugin.logger.LogInfo("Trying to load common asset bundle from " + commonAssetBundlePath + "\\");
-            AssetBundleCreateRequest request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
-            yield return request;
-            int attempts = 1;
-            while (request.assetBundle == null)
+            Plugin.logger.LogMessage("Beginning UKAPI");
+            string[] launchArgs = Environment.GetCommandLineArgs();
+            if (launchArgs != null)
             {
-                yield return new WaitForSeconds(0.2f); // why 0.2? I dunno I just chose it man
-                if (attempts >= 5)
+                foreach (string str in launchArgs)
                 {
-                    Plugin.logger.LogInfo("Could not load the common asset bundle, not starting UMM.");
-                    triedLoadingBundle = true;
-                    yield break;
+                    if (str.Contains("disable_mods"))
+                    {
+                        Plugin.logger.LogMessage("Not starting UMM due to launch arg disabling it.");
+                        goto EndInitialization;
+                    }
                 }
-                request = AssetBundle.LoadFromFileAsync(commonAssetBundlePath);
-                yield return request;
-                attempts++;
             }
-
-            Plugin.logger.LogInfo("Loaded common asset bundle");
-            commonBundle = request.assetBundle;
-            triedLoadingBundle = true;
-#pragma warning disable CS0618 // Type or member is obsolete
+            SaveFileHandler.LoadData();
             UltraModManager.InitializeManager();
-#pragma warning restore CS0618 // Type or member is obsolete
-
-            while (MapLoader.Instance == null)
-                yield return null;
-            Dictionary<string, AssetBundle> bundles = Traverse.Create(MapLoader.Instance).Field("loadedBundles").GetValue() as Dictionary<string, AssetBundle>;
-            if (bundles == null)
-                bundles = new Dictionary<string, AssetBundle>();
-            bundles.Add("common", commonBundle);
-            Traverse.Create(MapLoader.Instance).Field("loadedBundles").SetValue(bundles);
-            MapLoader.Instance.isCommonLoaded = true;
-            SceneManager.sceneLoaded += OnSceneLoad;
-            string[] arr = Environment.GetCommandLineArgs(); // This is here to ensure that the common asset bundle is loaded correctly before loading a level
-            if (arr != null)
+            if (launchArgs != null)
             {
-                foreach (string str in arr)
+                foreach (string str in launchArgs)
                 {
                     if (str != null && (str.Contains("sandbox") || str.Contains("uk_construct")))
                     {
@@ -107,9 +80,9 @@ namespace UMM
                     }
                 }
             }
-
-            watch.Stop();  
-            Plugin.logger.LogInfo("UMM startup completed successfully in " + (watch.ElapsedMilliseconds/1000).ToString("0.00") + " seconds"); // Why does C# have to be different in how it formats floats? Why can't I just do %.2f like C?
+            EndInitialization:
+            watch.Stop();
+            Plugin.logger.LogMessage("UMM initialization completed in " + watch.ElapsedMilliseconds + "ms");
         }
 
 
@@ -142,44 +115,19 @@ namespace UMM
         }
 
         /// <summary>
-        /// Tries to create a Ultrakill asset load request from ULTRAKILL_Data/StreamingAssets/common, note that this request has to be awaited
-        /// </summary>
-        /// <param name="name">Name of the asset to load, you MUST include the extensions (e.g. prefab)</param>
-        /// <returns>A new asset bundle request for your item</returns>
-        public static AssetBundleRequest LoadCommonAssetAsync(string name)
-        {
-            if (commonBundle == null)
-            {
-                Plugin.logger.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
-                return null;
-            }
-            return commonBundle.LoadAssetAsync(name);
-        }
-
-        /// <summary>
-        /// Tries to load an Ultrakill asset from ULTRAKILL_Data/StreamingAssets/common
-        /// </summary>
-        /// <param name="name">Name of the asset to load, you MUST include the extensions (e.g. prefab)</param>
-        /// <returns>The asset from the bundle as an object if found, otherwise returns null</returns>
-        public static object LoadCommonAsset(string name)
-        {
-            if (commonBundle == null)
-            {
-                Plugin.logger.LogError("UMM: Could not load asset " + name + " due to the common asset bundle not being loaded.");
-                return null;
-            }
-            return commonBundle.LoadAsset(name);
-        }
-
-        /// <summary>
         /// Enumerated version of the Ultrakill scene types
         /// </summary>
-        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Custom, Intermission, Unknown }
+        public enum UKLevelType { Intro, MainMenu, Level, Endless, Sandbox, Credits, Custom, Intermission, Secret, PrimeSanctum, Unknown }
 
         /// <summary>
         /// Returns the current level type
         /// </summary>
         public static UKLevelType CurrentLevelType = UKLevelType.Intro;
+
+        /// <summary>
+        /// Returns the currently active ultrakill scene name.
+        /// </summary>
+        public static string CurrentSceneName { get; private set; } = "";
 
 
         /// <summary>
@@ -202,11 +150,16 @@ namespace UMM
         private static void OnSceneLoad(Scene scene, LoadSceneMode loadSceneMode)
         {
             string sceneName = scene.name;
+
+            if (scene != SceneManager.GetActiveScene())
+                return;
+
             UKLevelType newScene = GetUKLevelType(sceneName);
 
             if (newScene != CurrentLevelType)
             {
                 CurrentLevelType = newScene;
+                CurrentSceneName = scene.name;
                 OnLevelTypeChanged?.Invoke(newScene);
             }
 
@@ -222,7 +175,10 @@ namespace UMM
         /// <returns></returns>
         public static UKLevelType GetUKLevelType(string sceneName)
         {
-            sceneName = (sceneName.Contains("Level")) ? "Level" : (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
+            sceneName = (sceneName.Contains("P-")) ? "Sanctum" : sceneName;
+            sceneName = (sceneName.Contains("-S")) ? "Secret" : sceneName;
+            sceneName = (sceneName.Contains("Level")) ? "Level" : sceneName;
+            sceneName = (sceneName.Contains("Intermission")) ? "Intermission" : sceneName;
 
             switch (sceneName)
             {
@@ -240,18 +196,25 @@ namespace UMM
                     return UKLevelType.Intermission;
                 case "Level":
                     return UKLevelType.Level;
+                case "Secret":
+                    return UKLevelType.Secret;
+                case "Sanctum":
+                    return UKLevelType.PrimeSanctum;
+                case "Credits":
+                    return UKLevelType.Credits;
                 default:
                     return UKLevelType.Unknown;
             }
         }
 
         /// <summary>
-        /// Returns true if the current scene is playable
+        /// Returns true if the current scene is playable.
+        /// This will return false for all secret levels.
         /// </summary>
         /// <returns></returns>
         public static bool InLevel()
         {
-            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Unknown);
+            bool inNonPlayable = (CurrentLevelType == UKLevelType.MainMenu || CurrentLevelType == UKLevelType.Intro || CurrentLevelType == UKLevelType.Intermission || CurrentLevelType == UKLevelType.Secret || CurrentLevelType == UKLevelType.Unknown);
             return !inNonPlayable;
         }
 
@@ -282,6 +245,16 @@ namespace UMM
             return KeyBindHandler.moddedKeyBinds.ContainsKey(key);
         }
 
+        /// <summary>
+        /// Checks if a mod is loaded provided its GUID
+        /// </summary>
+        /// <param name="GUID">The GUID of the mod</param>
+        /// <returns></returns>
+        public static bool IsModLoaded(string GUID)
+        {
+            return UltraModManager.allLoadedMods.ContainsKey(GUID);
+        }
+
         [Obsolete("Use AllModInfoClone instead.")]
         public static Dictionary<string, ModInformation> GetAllModInformation() => AllModInfoClone;
 
@@ -290,7 +263,7 @@ namespace UMM
 
         /// <summary>
         /// Restarts Ultrakill
-        /// </summary> 
+        /// </summary>
         public static void Restart() // thanks https://gitlab.com/vtolvr-mods/ModLoader/-/blob/release/Launcher/Program.cs
         {
             Application.Quit();
@@ -307,10 +280,10 @@ namespace UMM
             //Plugin.logger.LogMessage("Path is \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\UltrakillRestarter.exe\"");
             //string strCmdText;
             //strCmdText = "/K \"" + Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe\""/* + System.Diagnostics.Process.GetCurrentProcess().Id.ToString() + "\""*/;
-            ////strCmdText = "/K \"" + Environment.CurrentDirectory + "\\ULTRAKILL.exe\"";
+            ////strCmdText = "/K \"" + Environment.CurrentDirectory + "ULTRAKILL.exe\"";
             //System.Diagnostics.Process.Start("CMD.exe", strCmdText);
 
-            //var psi = new System.Diagnostics.ProcessStartInfo 
+            //var psi = new System.Diagnostics.ProcessStartInfo
             //{
             //    FileName = Environment.CurrentDirectory + "\\BepInEx\\plugins\\UMM\\Ultrakill Restarter.exe",
             //    UseShellExecute = true,
@@ -323,17 +296,19 @@ namespace UMM
         internal static class SaveFileHandler
         {
             private static Dictionary<string, Dictionary<string, string>> savedData = new Dictionary<string, Dictionary<string, string>>();
-            private static string path = "";
+            private static FileInfo SaveFile = null;
 
             internal static void LoadData()
             {
-                path = Assembly.GetExecutingAssembly().Location;
-                path = path.Substring(0, path.LastIndexOf("\\")) + "\\persistent mod data.json";
+            	OperatingSystem os = Environment.OSVersion;
+            	PlatformID     pid = os.Platform;
+                string path = Assembly.GetExecutingAssembly().Location;
+                path = path.Substring(0, path.LastIndexOf(Path.DirectorySeparatorChar)) + Path.DirectorySeparatorChar + "persistent mod data.json";
                 Plugin.logger.LogInfo("Trying to load persistent mod data.json from " + path);
-                FileInfo fInfo = new FileInfo(path);
-                if (fInfo.Exists)
+                SaveFile = new FileInfo(path);
+                if (SaveFile.Exists)
                 {
-                    using (StreamReader jFile = fInfo.OpenText())
+                    using (StreamReader jFile = SaveFile.OpenText())
                     {
                         savedData = JsonConvert.DeserializeObject<Dictionary<string, Dictionary<string, string>>>(jFile.ReadToEnd());
                         if (savedData == null)
@@ -344,22 +319,32 @@ namespace UMM
                 else
                 {
                     Plugin.logger.LogInfo("Couldn't find a save file, making one now");
-                    fInfo.Create();
+                    SaveFile.Create();
                 }
                 KeyBindHandler.LoadKeyBinds();
+                if (EnsureModData("UMM", "ModProfiles"))
+                    UltraModManager.LoadModProfiles();
+                else
+                {
+                    SetModData("UMM", "ModProfiles", "");
+                    SetModData("UMM", "CurrentModProfile", "Default");
+                }
             }
 
             internal static void DumpFile()
             {
+                if (SaveFile == null)
+                    return;
                 Plugin.logger.LogInfo("Dumping keybinds");
                 KeyBindHandler.DumpKeyBinds();
-                FileInfo fInfo = new FileInfo(path);
-                Plugin.logger.LogInfo("Dumping mod persistent data file to " + path);
-                File.WriteAllText(fInfo.FullName, JsonConvert.SerializeObject(savedData));
+                Plugin.logger.LogInfo("Dumping mod profiles");
+                UltraModManager.DumpModProfiles();
+                Plugin.logger.LogInfo("Dumping mod persistent data file to " + SaveFile.FullName);
+                File.WriteAllText(SaveFile.FullName, JsonConvert.SerializeObject(savedData));
             }
 
             /// <summary>
-            /// Gets presistent mod data from a key and modname 
+            /// Gets presistent mod data from a key and modname
             /// </summary>
             /// <param name="modName">The name of the mod to retrieve data from</param>
             /// <param name="key">The value you want</param>
@@ -524,7 +509,7 @@ namespace UMM
                         {
                             keyCode = KeyCode.Mouse6;
                         }
-                    }
+                    }   
                     else if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
                     {
                         keyCode = KeyCode.LeftShift;
