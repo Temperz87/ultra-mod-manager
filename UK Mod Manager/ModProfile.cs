@@ -10,6 +10,7 @@ using UnityEngine.Networking;
 
 namespace UMM.Loader
 {
+    [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
     public class ModProfile
     {
         public string name;
