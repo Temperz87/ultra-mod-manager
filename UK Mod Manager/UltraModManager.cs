@@ -12,19 +12,23 @@ using static UMM.ModInformation;
 
 namespace UMM.Loader
 {
-   [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
     public static class UltraModManager
     {
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         public static DirectoryInfo modsDirectory = new DirectoryInfo(Path.Combine(BepInEx.Paths.BepInExRootPath, "UMM Mods"));
         public static Dictionary<string, ModInformation> foundMods = new Dictionary<string, ModInformation>();
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         public static Dictionary<string, ModInformation> allLoadedMods = new Dictionary<string, ModInformation>();
         public static bool outdated { get; internal set; } = false;
         public static bool devBuild { get; internal set; } = false;
         public static string newLoaderVersion { get; internal set; } = "";
 
         private static bool initialized = false;
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         private static Dictionary<ModInformation, GameObject> modObjects = new Dictionary<ModInformation, GameObject>();
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         private static Dictionary<string, ModProfile> allProfiles = new Dictionary<string, ModProfile>();
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         private static ModProfile currentProfile = null;
 
         internal static void InitializeManager()
@@ -38,6 +42,7 @@ namespace UMM.Loader
             }
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         private static void LoadMods()
         {
             if (modsDirectory.Exists)
@@ -66,6 +71,7 @@ namespace UMM.Loader
             Plugin.logger.LogInfo("Found " + foundMods.Count + " mods that can be loaded.");
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         private static void LoadOnStart()
         {
             int loadedMods = 0;
@@ -86,6 +92,7 @@ namespace UMM.Loader
         /// Tries to load an assembly
         /// </summary>
         /// <param name="fInfo"></param>
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         internal static Assembly LoadAssembly(FileInfo fInfo)
         {
             DirectoryInfo dInfo = new DirectoryInfo(fInfo.DirectoryName + Path.DirectorySeparatorChar + "dependencies");
@@ -124,6 +131,7 @@ namespace UMM.Loader
         /// <param name="ass">Assembly containing mod files</param>
         /// <param name="fInfo">Assembly path</param>
         /// <exception cref="TypeLoadException"></exception>
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         internal static void GetTypesFromAssembly(Assembly ass, FileInfo fInfo)
         {
             Type[] assemblyTypes = null;
@@ -174,6 +182,8 @@ namespace UMM.Loader
                     info.loadOnStart = true;
             }
         }
+
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         internal static IEnumerator GetModImage(FileInfo imageURL, ModInformation info)
         {
             using (UnityWebRequest www = UnityWebRequestTexture.GetTexture(imageURL.FullName))
@@ -193,6 +203,7 @@ namespace UMM.Loader
             yield break;
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         internal static BepInPlugin GetBepinMetaData(Type t)
         {
             object[] customAttributes = t.GetCustomAttributes(typeof(BepInPlugin), true);
@@ -203,6 +214,7 @@ namespace UMM.Loader
             return (BepInPlugin)customAttributes[0];
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         internal static UKPlugin GetUKMetaData(Type t)
         {
             object[] customAttributes = t.GetCustomAttributes(typeof(UKPlugin), true);
@@ -213,6 +225,7 @@ namespace UMM.Loader
             return (UKPlugin)customAttributes[0];
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         internal static List<Dependency> GetBepinDependencies(Type t)
         {
             object[] customAttributes = t.GetCustomAttributes(typeof(BepInDependency), true);
@@ -226,6 +239,7 @@ namespace UMM.Loader
             return dependencies;
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         internal static List<Dependency> GetUKModDependencies(Type t)
         {
             UKDependency[] customAttributes = (UKDependency[])t.GetCustomAttributes(typeof(UKDependency), true);
@@ -239,6 +253,7 @@ namespace UMM.Loader
             return dependencies;
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         public static void LoadMod(ModInformation info)
         {
             if (allLoadedMods.ContainsKey(info.GUID))
@@ -341,6 +356,7 @@ namespace UMM.Loader
             }
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         public static void UnloadMod(ModInformation info)
         {
             if (modObjects.ContainsKey(info) && info.supportsUnloading)
@@ -359,6 +375,7 @@ namespace UMM.Loader
             }
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         public static void LoadModProfiles()
         {
             string modProfiles = UKAPI.SaveFileHandler.RetrieveModData("ModProfiles", "UMM");
@@ -373,6 +390,7 @@ namespace UMM.Loader
                 currentProfile = allProfiles[currentProfileRetrieved];
         }
 
+        [Obsolete(Plugin.UKMOD_DEPRECATION_MESSAGE)]
         public static void DumpModProfiles()
         {
             string modProfiles = "";
