@@ -257,12 +257,12 @@ namespace UMM
             Application.Quit();
 
             // Sanity check, in case we restart on UNIX
-			string restartURL = (Application.platform == RuntimePlatform.WindowsPlayer) ? @"steam://run/1229490" : "https://pbs.twimg.com/profile_images/1671400524082565120/BgbMpge0_400x400.jpg";
-			string restartMessage = (Application.platform == RuntimePlatform.WindowsPlayer) ? "Restarting Ultrakill!" : "Restarting not supported on UNIX.";
+	    string restartURL = (Application.platform == RuntimePlatform.WindowsPlayer) ? @"steam://run/1229490" : "https://pbs.twimg.com/profile_images/1671400524082565120/BgbMpge0_400x400.jpg";
+	    string restartMessage = (Application.platform == RuntimePlatform.WindowsPlayer) ? "Restarting Ultrakill!" : "Restarting not supported on UNIX.";
 
             Plugin.logger.LogMessage(restartMessage);
-       		var psi = new System.Diagnostics.ProcessStartInfo
-       		{
+       	    var psi = new System.Diagnostics.ProcessStartInfo
+       	    {
                 FileName = restartURL,
                 UseShellExecute = true,
                 WindowStyle = System.Diagnostics.ProcessWindowStyle.Minimized
