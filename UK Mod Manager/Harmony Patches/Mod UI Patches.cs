@@ -288,7 +288,6 @@ namespace UMM.HarmonyPatches
                 {
                 	Halve(quitButton, true);
                 }
-
                 GameObject restartButton = GameObject.Instantiate(__instance.pauseMenu.transform.Find("Continue").gameObject, __instance.pauseMenu.transform, true);
                 restartButton.SetActive(false);
                 Button.ButtonClickedEvent restartButtonEvent = restartButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent(); // I have no memory of writing this, when did this get here?
