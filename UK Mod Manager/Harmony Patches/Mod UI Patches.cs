@@ -282,10 +282,12 @@ namespace UMM.HarmonyPatches
                     modsMenu.SetActive(true);
                 });
                 newModsButton.SetActive(true);
-
                 Transform quitButton = __instance.pauseMenu.transform.Find("Quit");
-                Halve(quitButton, true);
-
+                // Only resize QUIT button on Windows
+                if (Application.platform == RuntimePlatform.WindowsPlayer)
+                {
+                	Halve(quitButton, true);
+                }
                 GameObject restartButton = GameObject.Instantiate(__instance.pauseMenu.transform.Find("Continue").gameObject, __instance.pauseMenu.transform, true);
                 restartButton.SetActive(false);
                 Button.ButtonClickedEvent restartButtonEvent = restartButton.GetComponent<Button>().onClick = new Button.ButtonClickedEvent(); // I have no memory of writing this, when did this get here?
@@ -295,7 +297,11 @@ namespace UMM.HarmonyPatches
                 });
                 restartButton.transform.localPosition = new Vector3(0, quitButton.localPosition.y, 0);
                 restartButton.GetComponentInChildren<Text>(true).text = "RESTART";
-                restartButton.SetActive(true);
+                // Only display RESTART button on Windows
+                if (Application.platform == RuntimePlatform.WindowsPlayer)
+                {
+                	restartButton.SetActive(true);
+                }
                 Halve(restartButton.transform, false);
             }
 
